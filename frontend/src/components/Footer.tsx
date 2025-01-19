@@ -10,7 +10,7 @@ export function Footer() {
           <div>
             <div className="flex items-center mb-4">
               <Brain className="h-8 w-8" />
-              <span className="ml-2 text-xl font-semibold">CareerAI</span>
+              <span className="ml-2 text-xl font-semibold">Employify</span>
             </div>
             <p className="text-sm">Empowering careers through AI-driven guidance and opportunities.</p>
           </div>
