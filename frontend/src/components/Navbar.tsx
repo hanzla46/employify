@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Brain } from 'lucide-react';
+import { Brain, Menu, X } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
 interface NavbarProps {
@@ -8,6 +9,8 @@ interface NavbarProps {
 }
 
 export function Navbar({ darkMode, setDarkMode }: NavbarProps) {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
   const navItems = [
     { path: '/', label: 'Home' },
     { path: '/interview', label: 'AI Interview' },
@@ -44,8 +47,43 @@ export function Navbar({ darkMode, setDarkMode }: NavbarProps) {
             ))}
             <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
           </div>
+
+          <div className="md:hidden flex items-center">
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="text-gray-900 dark:text-white focus:outline-none"
+            >
+              {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+            </button>
+          </div>
         </div>
       </div>
+
+      {isMobileMenuOpen && (
+        <div className="md:hidden bg-white dark:bg-gray-800 shadow-md">
+          <div className="container mx-auto px-4 py-2">
+            {navItems.map((item) => (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                    isActive
+                      ? 'text-indigo-600 dark:text-indigo-400'
+                      : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400'
+                  }`
+                }
+                onClick={() => setIsMobileMenuOpen(false)}
+              >
+                {item.label}
+              </NavLink>
+            ))}
+            <div className="mt-2">
+              <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
+            </div>
+          </div>
+        </div>
+      )}
     </nav>
   );
 }
