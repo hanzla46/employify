@@ -30,7 +30,7 @@ export function About() {
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
-            <h1 className="text-3xl font-bold mb-4 dark:text-white">About CareerAI</h1>
+            <h1 className="text-3xl font-bold mb-4 dark:text-white">About Employify</h1>
             <p className="text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
               We're on a mission to revolutionize career development through artificial intelligence,
               making professional growth accessible and personalized for everyone.
@@ -41,7 +41,7 @@ export function About() {
             <div>
               <h2 className="text-2xl font-bold mb-4 dark:text-white">Our Story</h2>
               <p className="text-gray-600 dark:text-gray-300 mb-4">
-                Founded in 2024, CareerAI emerged from a simple observation: traditional career
+                Founded in 2024, Employify emerged from a simple observation: traditional career
                 development methods weren't keeping pace with rapidly evolving industries and job markets.
               </p>
               <p className="text-gray-600 dark:text-gray-300">

@@ -48,7 +48,7 @@ export function Navbar({ darkMode, setDarkMode }: NavbarProps) {
             <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
           </div>
 
-          <div className="md:hidden flex items-center">
+          <div className="md:hidden flex items-center space-x-2">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-900 dark:text-white focus:outline-none"
