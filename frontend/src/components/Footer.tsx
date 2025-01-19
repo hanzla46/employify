@@ -35,14 +35,14 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact</h3>
             <ul className="space-y-2">
-              <li>support@careerai.com</li>
-              <li>1-800-CAREER-AI</li>
+              <li>support@employify.ai</li>
+              <li>1-800-EMPLOYIFY-AI</li>
             </ul>
           </div>
         </div>
         
         <div className="text-center pt-8 border-t border-gray-800">
-          <p>&copy; {new Date().getFullYear()} CareerAI. All rights reserved.</p>
+          <p>&copy; {new Date().getFullYear()} Employify. All rights reserved.</p>
         </div>
       </div>
     </footer>

@@ -23,7 +23,7 @@ export function Navbar({ darkMode, setDarkMode }: NavbarProps) {
         <div className="flex items-center justify-between h-16">
           <NavLink to="/" className="flex items-center space-x-2">
             <Brain className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">CareerAI</span>
+            <span className="text-xl font-bold text-gray-900 dark:text-white">Employify</span>
           </NavLink>
           
           <div className="hidden md:flex items-center space-x-4">
