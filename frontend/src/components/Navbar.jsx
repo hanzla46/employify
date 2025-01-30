@@ -3,12 +3,8 @@ import { NavLink } from 'react-router-dom';
 import { Brain, Menu, X } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
 
-interface NavbarProps {
-  darkMode: boolean;
-  setDarkMode: (darkMode: boolean) => void;
-}
 
-export function Navbar({ darkMode, setDarkMode }: NavbarProps) {
+export function Navbar({ darkMode, setDarkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [

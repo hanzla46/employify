@@ -4,7 +4,7 @@ import 'aos/dist/aos.css';
 import { Brain, BookOpen, Briefcase, MessageSquare, Target, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-function FeatureCard({ icon: Icon, title, description }: { icon: React.ElementType, title: string, description: string }) {
+function FeatureCard({ icon: Icon, title, description }) {
   return (
     <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
       <div className="h-12 w-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center mb-4">
