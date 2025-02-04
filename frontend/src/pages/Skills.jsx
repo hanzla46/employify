@@ -6,7 +6,7 @@ export function Skills() {
     {
       title: 'Frontend Development',
       icon: Globe,
-      skills: ['HTML/CSS', 'JavaScript', 'React', 'TypeScript'],
+      skills: ['HTML/CSS', 'JavaScript', 'React'],
       level: 'Beginner',
       duration: '6 months'
     },
