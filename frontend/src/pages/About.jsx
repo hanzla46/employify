@@ -49,7 +49,7 @@ export function About() {
                 that adapts to each individual's unique career journey, providing personalized
                 support at every step.
               </p>
-              <p>Developed by Hanzla, Hina and Izhar!</p>
+              <p className="text-gray-600 dark:text-gray-300">Developed by Hanzla, Hina and Izhar!</p>
             </div>
             <div>
               <img
