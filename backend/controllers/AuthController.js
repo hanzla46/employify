@@ -11,7 +11,15 @@ const signup = async (req, res) => {
     const userModel = new UserModel({ name, email, password });
     userModel.password = await bcrypt.hash(password, 10);
     await userModel.save();
-    res.status(201).json({ message: "SignedUp Successfully!", success: true });
+
+    const savedUser = await UserModel.findOne({ email });
+    const jwtToken = jwt.sign(
+      { email: savedUser.email, _id: savedUser.id },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+    
+    res.status(201).json({ message: "SignedUp Successfully!", jwtToken: jwtToken, success: true });
   } catch (err) {
     res
       .status(500)
