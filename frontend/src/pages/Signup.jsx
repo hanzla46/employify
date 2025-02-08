@@ -37,13 +37,15 @@ export function Signup() {
       const { success, message, error, jwtToken } = result;
       if (success) {
         handleSuccess(message);
+        localStorage.setItem("token", jwtToken);
+        localStorage.setItem("loggedIn", signupInfo.name);
         setTimeout(() => {
-          navigate("/login");
+          navigate("/");
         }, 3000);
-      } else if(error){
+      } else if (error) {
         const details = error.details[0].message;
         handleError(details);
-      } else if(!success){
+      } else if (!success) {
         handleError(message);
       }
     } catch (error) {
