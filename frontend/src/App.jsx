@@ -11,6 +11,7 @@ import { Pricing } from "./pages/Pricing";
 import { About } from "./pages/About";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup";
+import { Account } from "./pages/Account.jsx";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -35,6 +36,7 @@ function App() {
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
         <Routes>
           <Route path="/" element={<Home />} />
+          <Route path="/account" element={<Account />} />
           <Route path="/home" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />

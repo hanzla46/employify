@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { NavLink } from 'react-router-dom';
 import { Brain, Menu, X } from 'lucide-react';
 import { ThemeToggle } from './ThemeToggle';
@@ -6,6 +6,11 @@ import { ThemeToggle } from './ThemeToggle';
 
 export function Navbar({ darkMode, setDarkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+const [loggedUser, setLoggedUser] = useState();
+useEffect(() => {
+  setLoggedUser(localStorage.getItem("loggedIn"));
+
+}, [])
 
   const navItems = [
     { path: '/', label: 'Home' },
@@ -14,6 +19,7 @@ export function Navbar({ darkMode, setDarkMode }) {
     { path: '/jobs', label: 'Job Portal' },
     { path: '/pricing', label: 'Pricing' },
     { path: '/about', label: 'About' },
+    {path: loggedUser? '/account' : "/signup", label: loggedUser? loggedUser : "Signup"}
   ];
 
   return (
