@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { handleError, handleSuccess } from "../utils";
 import { AuthContext } from "../Context/AuthContext";
+import FancyButton from "../components/Button";
 export function Login() {
   const { login } = useContext(AuthContext);
   const { setUser } = useContext(AuthContext);
@@ -40,13 +41,13 @@ export function Login() {
     }
   };
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-100 p-4">
+    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div>
-        <h2 className="text-2xl font-bold text-gray-800 text-center mb-6">
-          Login{" "}
-        </h2>
+        <h1 className="text-xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 pb-3">
+        Login
+        </h1>
       </div>
-      <form onSubmit={handleLogin}>
+      <form className="w-1/3" onSubmit={handleLogin}>
         <label
           className="text-xl text-gray-500 text-center mt-6"
           htmlFor="email"
@@ -77,15 +78,17 @@ export function Login() {
 
         <button
           type="submit"
-          className="w-full bg-blue-500 text-white p-3 rounded-lg hover:bg-blue-600 transition"
+          className="w-full bg-indigo-500 text-white p-3 rounded-lg hover:bg-indigo-600 transition"
         >
           Login
         </button>
       </form>
 
       <p className="text-center mt-4 text-gray-600">
-        Don't have an account?
-        <Link to={"/signup"}>Signup Here</Link>
+        <span className="pr-4"> Don't have an account? </span>
+        <Link to={"/signup"}>
+          <FancyButton text={"SignUp Here"} />
+        </Link>
       </p>
       <ToastContainer />
     </div>

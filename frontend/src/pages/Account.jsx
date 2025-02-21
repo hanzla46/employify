@@ -4,6 +4,7 @@ import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
 import axios from "axios";
 import { handleSuccess } from "../utils";
+import FancyButton from "../components/Button";
 export function Account() {
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
@@ -36,9 +37,8 @@ export function Account() {
       ) : (
         <Link
           to={"/signup"}
-          className="block text-4xl md:text-6xl font-bold mb-6 pt-10 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400"
         >
-          Signup Here
+          <FancyButton text={"Sign Up"} />
         </Link>
       )}
     </div>

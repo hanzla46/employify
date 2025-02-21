@@ -3,6 +3,8 @@ import AOS from 'aos';
 import 'aos/dist/aos.css';
 import { Brain, BookOpen, Briefcase, MessageSquare, Target, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useContext } from "react";
+import { AuthContext } from "../Context/AuthContext";
 
 function FeatureCard({ icon: Icon, title, description }) {
   return (
@@ -17,6 +19,7 @@ function FeatureCard({ icon: Icon, title, description }) {
 }
 
 export function Home() {
+  const {user} = useContext(AuthContext);
   useEffect(() => {
     AOS.init({
       duration: 1500, // Animation duration in milliseconds
@@ -40,7 +43,7 @@ export function Home() {
                 Master interviews, discover perfect job matches, and accelerate your career growth with personalized AI guidance
               </p>
               <Link  data-aos="fade-up"
-                to="/interview"
+                to={user ? "/interview" : "/signup"}
                 className="bg-indigo-600 dark:bg-indigo-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors inline-flex items-center"
               >
                 Get Started Free

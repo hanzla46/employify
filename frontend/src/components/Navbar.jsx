@@ -4,6 +4,7 @@ import { Brain, Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
+import FancyButton from "./Button";
 export function Navbar({ darkMode, setDarkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   // const [loggedUser, setLoggedUser] = useState();
@@ -18,7 +19,7 @@ export function Navbar({ darkMode, setDarkMode }) {
     { path: "/about", label: "About" },
     {
       path: user ? "/account" : "/signup",
-      label: user ? user.name : "Signup",
+      label: user ? user.name : <FancyButton text={"Sign Up"} />,
     },
   ];
 
