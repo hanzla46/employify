@@ -4,11 +4,14 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-
+  const dev_env = false;
+  const url = dev_env
+    ? "http://localhost:8000"
+    : "https://employify-backend.vercel.app";
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const response = await axios.get("http://localhost:8000/auth/me", {
+        const response = await axios.get(url + "/auth/me", {
           withCredentials: true,
           headers: {
             Accept: "application/json",
@@ -33,11 +36,12 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const res = await axios.post(
-        "http://localhost:8000/auth/login",
+        url + "/auth/login",
         { email, password },
         { withCredentials: true }
       );
       setUser(res.data);
+      console.log(res);
       return { success: true, message: res.message };
     } catch (error) {
       return {
@@ -50,10 +54,11 @@ export const AuthProvider = ({ children }) => {
   const signup = async (name, email, password) => {
     try {
       const res = await axios.post(
-        "http://localhost:8000/auth/signup",
+        url + "/auth/signup",
         { name, email, password },
         { withCredentials: true }
       );
+      console.log(res);
       setUser(res.data);
       return { success: true };
     } catch (error) {
@@ -66,11 +71,7 @@ export const AuthProvider = ({ children }) => {
 
   // Logout function
   const logout = async () => {
-    await axios.post(
-      "http://localhost:8000/auth/logout",
-      {},
-      { withCredentials: true }
-    );
+    await axios.post(url + "/auth/logout", {}, { withCredentials: true });
     setUser(null);
     return { success: true };
   };

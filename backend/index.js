@@ -9,15 +9,24 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// ✅ Proper CORS setup
-app.use(
-  cors({
-    origin: "http://localhost:5173", // Adjust this if needed
-    credentials: true, // Allow cookies and authentication
-  })
-);
+const dev_env = false;
+if(dev_env){
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+      credentials: true, 
+    })
+  );
+}
+else{
+  app.use(
+    cors({
+      origin: "https://employify.vercel.app",
+      credentials: true, 
+    })
+  );
+}
 
-// ✅ Express JSON Parser (no need for bodyParser)
 app.use(express.json());
 app.use(require("cookie-parser")());
 // ✅ Define Routes AFTER Middleware

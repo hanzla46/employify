@@ -31,7 +31,7 @@ const signup = async (req, res) => {
       token,
       email,
       name: savedUser.name,
-      success: true,
+      success: true, 
     });
   } catch (err) {
     res
