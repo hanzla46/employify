@@ -1,17 +1,14 @@
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
-const cookieParser = require("cookie-parser");
-
-
-require("./models/db");
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
+// ✅ Force CORS Headers for All Requests
 app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "https://employify.vercel.app"); // 🔥 Your frontend URL
+  res.header("Access-Control-Allow-Origin", "https://employify.vercel.app"); // ✅ Your frontend URL
   res.header("Access-Control-Allow-Credentials", "true");
   res.header(
     "Access-Control-Allow-Headers",
@@ -20,26 +17,28 @@ app.use((req, res, next) => {
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
 
   if (req.method === "OPTIONS") {
-    return res.status(200).end(); 
+    return res.sendStatus(200); // ✅ Fix preflight error
   }
 
   next();
 });
+
+// ✅ CORS Middleware
 app.use(
   cors({
-    origin: "https://employify.vercel.app", 
+    origin: "https://employify.vercel.app", // ✅ Frontend URL
     credentials: true,
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
 
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-const AuthRouter = require("./routes/AuthRouter");
-const SkillsRouter = require("./routes/SkillsRouter");
-// ✅ Ensure CORS is before the routes
-app.use("/auth", AuthRouter);
-app.use("/skills", SkillsRouter);
+app.use(require("cookie-parser")());
+
+// ✅ Your Routes
+app.use("/auth", require("./routes/AuthRouter"));
+app.use("/skills", require("./routes/SkillsRouter"));
 
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
