@@ -14,8 +14,9 @@ let dev_env = false;
   app.use(
     cors({
       origin: dev_env ? "http://localhost:5173" : "https://employify.vercel.app",
-      methods: ["GET", "POST", "PUT", "DELETE"],
-      credentials: true, 
+      methods: ["GET", "POST"],
+      credentials: true,
+      allowedHeaders: 'Content-Type,Authorization' 
     })
   );
 app.use(express.urlencoded({ extended: true }));

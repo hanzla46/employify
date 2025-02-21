@@ -14,7 +14,10 @@ export const AuthProvider = ({ children }) => {
       try {
         const response = await axios.get(url + "/auth/me", {
           withCredentials: true,
-          
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
         });
         if (response.data.success) {
           setUser(response.data.data);
