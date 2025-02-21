@@ -15,15 +15,11 @@ app.use((req, res, next) => {
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-
   if (req.method === "OPTIONS") {
     return res.sendStatus(200); // ✅ Fix preflight error
   }
-
   next();
 });
-
-// ✅ CORS Middleware
 app.use(
   cors({
     origin: "https://employify.vercel.app", // ✅ Frontend URL
@@ -32,11 +28,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"],
   })
 );
-
 app.use(express.json());
 app.use(require("cookie-parser")());
-
-// ✅ Your Routes
 app.use("/auth", require("./routes/AuthRouter"));
 app.use("/skills", require("./routes/SkillsRouter"));
 
