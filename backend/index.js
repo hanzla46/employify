@@ -15,9 +15,10 @@ let dev_env = false;
 // ✅ Move CORS to the top
 app.use(
   cors({
-    origin: "https://employify.vercel.app/",
-    methods: ["GET", "POST", "PUT", "DELETE"],
-    credentials: true, 
+    origin: "*", 
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
   })
 );
 
