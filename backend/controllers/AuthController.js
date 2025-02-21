@@ -1,6 +1,13 @@
 const UserModel = require("../models/User");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const generateToken = (user) => {
+  return jwt.sign(
+    { email: user.email, _id: user._id },
+    process.env.JWT_SECRET,
+    { expiresIn: "7d" }
+  );
+};
 const signup = async (req, res) => {
   try {
     const { name, email, password } = req.body;
@@ -11,19 +18,25 @@ const signup = async (req, res) => {
     const userModel = new UserModel({ name, email, password });
     userModel.password = await bcrypt.hash(password, 10);
     await userModel.save();
-
     const savedUser = await UserModel.findOne({ email });
-    const jwtToken = jwt.sign(
-      { email: savedUser.email, _id: savedUser.id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-    
-    res.status(201).json({ message: "SignedUp Successfully!", jwtToken: jwtToken, success: true });
+    const token = generateToken(savedUser);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.status(200).json({
+      message: "SignedUp Successfully!",
+      token,
+      email,
+      name: savedUser.name,
+      success: true,
+    });
   } catch (err) {
     res
       .status(500)
-      .json({ message: `Internel Server Error: ` + err, success: false });
+      .json({ message: `Internal Server Error: ` + err, success: false });
   }
 };
 
@@ -42,27 +55,70 @@ const login = async (req, res) => {
         .status(403)
         .json({ message: "Email or Password is wrong!", success: false });
     }
-    const jwtToken = jwt.sign(
-      { email: user.email, _id: user.id },
-      process.env.JWT_SECRET,
-      { expiresIn: "7d" }
-    );
-    res
-      .status(201)
-      .json({
-        message: "LoggedIn Successfully!",
-        jwtToken,
-        email,
-        name: user.name,
-        success: true,
-      });
+    const token = generateToken(user);
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+    res.status(200).json({
+      message: "LoggedIn Successfully!",
+      token,
+      email,
+      name: user.name,
+      success: true,
+    });
   } catch (err) {
     res
       .status(500)
       .json({ message: `Internel Server Error: ` + err, success: false });
   }
 };
+
+const logout = async (req, res) => {
+  res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "strict" });
+  res.status(200).json({ message: "Logged out successfully", success: true });
+};
+
+const getMe = async (req, res) => {
+  try {
+    console.log("reached auth check");
+    const token = req.cookies.jwt;
+    if (!token) {
+      console.log("no token");
+      console.log(token);
+      return res.status(401).json({
+        message: "Not authenticated",
+        success: false,
+      });
+    }
+    console.log(token);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!decoded) {
+      return res.status(401).json({
+        message: "Invalid token",
+        success: false,
+      });
+    }
+    const email = decoded.email;
+    const user = await UserModel.findOne({ email });
+    res.status(200).json({
+      data: { email: user.email, name: user.name, id: decoded._id },
+      success: true,
+    });
+  } catch (err) {
+    console.error("Auth Error:", err.message);
+    res.status(401).json({
+      message: "Authentication failed",
+      error: err.message,
+      success: false,
+    });
+  }
+};
 module.exports = {
   signup,
   login,
+  logout,
+  getMe,
 };

@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { handleError, handleSuccess } from "../utils";
+import { AuthContext } from "../Context/AuthContext";
 export function Login() {
+  const { login } = useContext(AuthContext);
+  const { setUser } = useContext(AuthContext);
   const [loginInfo, setLoginInfo] = useState({
     email: "",
     password: "",
@@ -23,29 +26,14 @@ export function Login() {
       return handleError("All fields are required!");
     }
     try {
-      const url = "http://localhost:8000/auth/login";
-      console.log(url);
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(loginInfo),
-      });
-      const result = await response.json();
-      const { success, message, error, name, jwtToken } = result;
-      if (success) {
-        handleSuccess(message);
-        localStorage.setItem("token", jwtToken);
-        localStorage.setItem("loggedIn", name);
+      const res = await login(email, password);
+      if (res.success) {
+        handleSuccess("Logged in Successfully");
         setTimeout(() => {
           navigate("/");
-        }, 3000);
-      } else if (error) {
-        const details = error.details[0].message;
-        handleError(details);
-      } else if (!success) {
-        handleError(message);
+        }, 2500);
+      } else {
+        handleError(res.message);
       }
     } catch (error) {
       return handleError(error);

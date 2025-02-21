@@ -12,6 +12,7 @@ import { About } from "./pages/About";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup";
 import { Account } from "./pages/Account.jsx";
+import { AuthProvider } from "./Context/AuthContext.jsx";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -31,6 +32,7 @@ function App() {
   }, [darkMode]);
 
   return (
+    <AuthProvider>
     <Router>
       <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
         <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
@@ -49,6 +51,7 @@ function App() {
         <Footer />
       </div>
     </Router>
+    </AuthProvider>
   );
 }
 

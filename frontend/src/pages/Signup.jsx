@@ -1,8 +1,11 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
+import { AuthContext } from "../Context/AuthContext";
 import { handleError, handleSuccess } from "../utils";
 export function Signup() {
+  const { setUser } = useContext(AuthContext);
+  const { signup } = useContext(AuthContext);
   const [signupInfo, setSignupInfo] = useState({
     name: "",
     email: "",
@@ -24,29 +27,14 @@ export function Signup() {
       return handleError("All fields are required!");
     }
     try {
-      const url = "http://localhost:8000/auth/signup";
-      console.log(url);
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(signupInfo),
-      });
-      const result = await response.json();
-      const { success, message, error, jwtToken } = result;
-      if (success) {
-        handleSuccess(message);
-        localStorage.setItem("token", jwtToken);
-        localStorage.setItem("loggedIn", signupInfo.name);
+      const res = await signup(name, email, password);
+      if (res.success) {
+        handleSuccess("SignedUp Successfuly");
         setTimeout(() => {
           navigate("/");
-        }, 3000);
-      } else if (error) {
-        const details = error.details[0].message;
-        handleError(details);
-      } else if (!success) {
-        handleError(message);
+        }, 2500);
+      } else {
+        handleError(res.message);
       }
     } catch (error) {
       return handleError(error);
