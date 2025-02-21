@@ -23,7 +23,7 @@ const signup = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({
@@ -59,7 +59,7 @@ const login = async (req, res) => {
     res.cookie("jwt", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
     res.status(200).json({
@@ -77,7 +77,7 @@ const login = async (req, res) => {
 };
 
 const logout = async (req, res) => {
-  res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "strict" });
+  res.clearCookie("jwt", { httpOnly: true, secure: true, sameSite: "none" });
   res.status(200).json({ message: "Logged out successfully", success: true });
 };
 

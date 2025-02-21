@@ -9,27 +9,19 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-const dev_env = false;
-if(dev_env){
+let dev_env = false;
+
   app.use(
     cors({
-      origin: "http://localhost:5173",
+      origin: dev_env ? "http://localhost:5173" : "https://employify.vercel.app",
       credentials: true, 
     })
   );
-}
-else{
-  app.use(
-    cors({
-      origin: "https://employify.vercel.app",
-      credentials: true, 
-    })
-  );
-}
+app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
 app.use(require("cookie-parser")());
-// ✅ Define Routes AFTER Middleware
+
 app.use("/auth", AuthRouter);
 app.use("/skills", SkillsRouter);
 
