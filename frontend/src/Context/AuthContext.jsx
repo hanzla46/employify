@@ -1,6 +1,7 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
-
+axios.defaults.withCredentials = true; // Force cookies to be sent
+axios.defaults.headers.common["Accept"] = "application/json";
 export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
