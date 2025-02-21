@@ -11,14 +11,20 @@ const PORT = process.env.PORT || 8000;
 
 let dev_env = false;
 
-  app.use(
-    cors({
-      origin: dev_env ? "http://localhost:5173" : "https://employify.vercel.app",
-      methods: ["GET", "POST"],
-      credentials: true,
-      allowedHeaders: 'Content-Type,Authorization' 
-    })
-  );
+  // app.use(
+  //   cors({
+  //     origin: dev_env ? "http://localhost:5173" : "https://employify.vercel.app",
+  //     methods: ["GET", "POST"],
+  //     credentials: true,
+  //     allowedHeaders: 'Content-Type,Authorization' 
+  //   })
+  // );
+  app.use((req, res, next) => {
+    res.header("Access-Control-Allow-Origin", "*");
+    res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
+    res.header("Access-Control-Allow-Headers", "Content-Type, Authorization");
+    next();
+});
 app.use(express.urlencoded({ extended: true }));
 
 app.use(express.json());
