@@ -37,6 +37,4 @@ app.use("/auth", require("./routes/AuthRouter"));
 app.use("/skills", require("./routes/SkillsRouter"));
 
 // ✅ Start Server
-app.listen(PORT, () => {
-  console.log("Server running on port " + PORT);
-});
+module.exports = app;
