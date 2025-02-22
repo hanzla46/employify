@@ -1,11 +1,6 @@
 {
   "rewrites": [
-    { "source": "/api/:path*", "destination": "https://employify-backend.vercel.app/:path*" }
-  ],
-  "redirects": [
-    { "source": "/:path", "destination": "/:path", "statusCode": 200 }
-  ],
-  "routes": [
-    { "src": "/(.*)", "dest": "/index.html" }
+    { "source": "/api/:path*", "destination": "https://employify-backend.vercel.app/:path*" },
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
