@@ -2,7 +2,7 @@ const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
 const cookieParser = require("cookie-parser");
-
+require("./models/db");
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
@@ -37,4 +37,6 @@ app.use("/auth", require("./routes/AuthRouter"));
 app.use("/skills", require("./routes/SkillsRouter"));
 
 // ✅ Start Server
-module.exports = app;
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
