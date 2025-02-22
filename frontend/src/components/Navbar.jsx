@@ -5,10 +5,10 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
 import FancyButton from "./Button";
+
 export function Navbar({ darkMode, setDarkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  // const [loggedUser, setLoggedUser] = useState();
-  const { user, loading } = useContext(AuthContext);
+  const { user } = useContext(AuthContext);
 
   const navItems = [
     { path: "/", label: "Home" },
@@ -24,9 +24,10 @@ export function Navbar({ darkMode, setDarkMode }) {
   ];
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-md fixed w-full z-40">
+    <nav className="bg-white dark:bg-gray-800 shadow-md fixed w-full z-50">
       <div className="container mx-auto px-4">
         <div className="flex items-center justify-between h-16">
+          {/* Logo */}
           <NavLink to="/" className="flex items-center space-x-2">
             <Brain className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
             <span className="text-xl font-bold text-gray-900 dark:text-white">
@@ -34,6 +35,7 @@ export function Navbar({ darkMode, setDarkMode }) {
             </span>
           </NavLink>
 
+          {/* Desktop Navigation */}
           <div className="hidden md:flex items-center space-x-4">
             {navItems.map((item) => (
               <NavLink
@@ -50,46 +52,46 @@ export function Navbar({ darkMode, setDarkMode }) {
                 {item.label}
               </NavLink>
             ))}
-            <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
+            {/* Theme Toggle for Desktop */}
+            <div className="right-6">
+              <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
+            </div>
           </div>
 
-          <div className="md:hidden flex items-center space-x-2">
+          {/* Mobile Menu Button */}
+          <div className="md:hidden flex items-center">
             <button
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="text-gray-900 dark:text-white focus:outline-none"
+              className="text-gray-900 dark:text-white focus:outline-none z-50 relative"
             >
-              {isMobileMenuOpen ? (
-                <X className="h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isMobileMenuOpen ? <X className="fixed right-11 top-5 h-6 w-6" /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
       </div>
 
+      {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden bg-white dark:bg-gray-800 shadow-md">
-          <div className="container mx-auto px-4 py-2">
-            {navItems.map((item) => (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                className={({ isActive }) =>
-                  `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-indigo-600 dark:text-indigo-400"
-                      : "text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
-                  }`
-                }
-                onClick={() => setIsMobileMenuOpen(false)}
-              >
-                {item.label}
-              </NavLink>
-            ))}
-            <div className="mt-2">
-              <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
-            </div>
+        <div className="md:hidden absolute top-16 left-0 w-full bg-white dark:bg-gray-800 shadow-md z-40 flex flex-col items-center space-y-4 py-4 px-4">
+          {navItems.map((item) => (
+            <NavLink
+              key={item.path}
+              to={item.path}
+              className={({ isActive }) =>
+                `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+                  isActive
+                    ? "text-indigo-600 dark:text-indigo-400"
+                    : "text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                }`
+              }
+              onClick={() => setIsMobileMenuOpen(false)}
+            >
+              {item.label}
+            </NavLink>
+          ))}
+          {/* Theme Toggle BELOW the Menu Items */}
+          <div className="w-full flex justify-center mt-4">
+            <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
           </div>
         </div>
       )}

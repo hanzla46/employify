@@ -27,8 +27,8 @@ export function Home() {
   }, []);
 
   return (
-    <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
+    <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
+      <div className="container mx-auto px-4 py-8 w-full">
         {/* Hero Section */}
         <header className="py-16 lg:py-24" data-aos="fade-right">
           <div className="max-w-6xl mx-auto">
@@ -55,7 +55,7 @@ export function Home() {
               <img
                 src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80"
                 alt="AI Interview Platform"
-                className="rounded-2xl shadow-2xl w-full"
+                className="rounded-2xl shadow-2xl max-w-full"
               />
             </div>
           </div>

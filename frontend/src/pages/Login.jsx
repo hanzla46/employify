@@ -43,11 +43,11 @@ export function Login() {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div>
-        <h1 className="text-xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 pb-3">
+      <h1 className="text-4xl md:text-6xl font-bold mb-6 mt-0 md:mt-5 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 pb-3">
         Login
         </h1>
       </div>
-      <form className="w-1/3" onSubmit={handleLogin}>
+      <form className="w-4/5 md:w-1/3" onSubmit={handleLogin}>
         <label
           className="text-xl text-gray-500 text-center mt-6"
           htmlFor="email"
