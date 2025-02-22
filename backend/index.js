@@ -8,8 +8,26 @@ const app = express();
 const PORT = process.env.PORT || 8000;
 
 // ✅ CORS Middleware Fix
-app.use(cors());
-app.options('*', cors());
+app.use(
+  cors({
+    origin: "https://employify.vercel.app", // Only allow frontend origin
+    credentials: true, // Required for cookies
+    methods: "GET,POST,PUT,DELETE,OPTIONS",
+    allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
+  })
+);
+
+// Handle preflight OPTIONS request properly
+app.options("*", (req, res) => {
+  res.header("Access-Control-Allow-Origin", "https://employify.vercel.app");
+  res.header("Access-Control-Allow-Credentials", "true");
+  res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
+  res.header(
+    "Access-Control-Allow-Headers",
+    "Origin, X-Requested-With, Content-Type, Accept, Authorization"
+  );
+  res.sendStatus(200); // Send a 200 OK response
+});
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

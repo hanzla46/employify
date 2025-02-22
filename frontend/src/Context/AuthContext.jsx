@@ -13,7 +13,6 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        axios.defaults.withCredentials = true;
         const response = await axios.get(url + "/auth/me", {
           withCredentials: true,
           headers: {
