@@ -33,7 +33,7 @@ export function Home() {
         <header className="py-16 lg:py-24" data-aos="fade-right">
           <div className="max-w-6xl mx-auto">
             <div className="text-center mb-16">
-              <div className="flex items-center justify-center mb-6"  data-aos="fade-left">
+              <div className="flex items-center justify-center mb-6">
                 <Brain className="h-12 w-12 text-indigo-600 dark:text-indigo-400" />
               </div>
               <h1 className="text-4xl md:text-6xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400">
@@ -42,7 +42,7 @@ export function Home() {
               <p className="text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto">
                 Master interviews, discover perfect job matches, and accelerate your career growth with personalized AI guidance
               </p>
-              <Link  data-aos="fade-up"
+              <Link
                 to={user ? "/interview" : "/signup"}
                 className="bg-indigo-600 dark:bg-indigo-500 text-white px-8 py-3 rounded-full font-semibold hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors inline-flex items-center"
               >
@@ -51,7 +51,7 @@ export function Home() {
               </Link>
             </div>
 
-            <div className="relative" data-aos="fade-down">
+            <div className="relative" data-aos="fade-right">
               <img
                 src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80"
                 alt="AI Interview Platform"
@@ -67,21 +67,21 @@ export function Home() {
             <h2 className="text-3xl font-bold text-center mb-12 dark:text-white">Transform Your Career Journey</h2>
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-6xl mx-auto">
               <Link to="/interview">
-                <FeatureCard data-aos="fade-down"
+                <FeatureCard
                   icon={MessageSquare}
                   title="AI Mock Interviews"
                   description="Practice with our AI interviewer that adapts to your responses and provides real-time feedback"
                 />
               </Link>
               <Link to="/jobs">
-                <FeatureCard data-aos="fade-up"
+                <FeatureCard
                   icon={Briefcase}
                   title="Smart Job Matching"
                   description="Discover opportunities that perfectly align with your skills and career aspirations"
                 />
               </Link>
               <Link to="/skills">
-                <FeatureCard data-aos="fade-down"
+                <FeatureCard
                   icon={BookOpen}
                   title="Personalized Learning"
                   description="Get customized learning paths to acquire the skills needed for your dream role"
@@ -95,15 +95,15 @@ export function Home() {
         <section className="py-20 dark:bg-gray-800/50" data-aos="fade-right">
           <div className="container mx-auto px-4">
             <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto text-center">
-              <div data-aos="fade-up">
+              <div >
                 <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">95%</div>
                 <p className="text-gray-600 dark:text-gray-300">Interview Success Rate</p>
               </div>
-              <div data-aos="fade-down">
+              <div>
                 <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">10k+</div>
                 <p className="text-gray-600 dark:text-gray-300">Career Transitions</p>
               </div>
-              <div data-aos="fade-up">
+              <div>
                 <div className="text-4xl font-bold text-indigo-600 dark:text-indigo-400 mb-2">500+</div>
                 <p className="text-gray-600 dark:text-gray-300">Skills Paths</p>
               </div>
@@ -115,7 +115,7 @@ export function Home() {
         <section className="py-20 bg-indigo-600 dark:bg-indigo-900" data-aos="fade-left">
           <div className="container mx-auto px-4 text-center">
             <h2 className="text-3xl font-bold text-white mb-8">Ready to Accelerate Your Career?</h2>
-            <Link data-aos="fade-right"
+            <Link
               to="/pricing"
               className="bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors inline-flex items-center"
             >
