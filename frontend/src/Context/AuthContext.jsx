@@ -6,7 +6,7 @@ export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  let dev_env = false;
+  let dev_env = true;
   const url = dev_env
     ? "http://localhost:8000"
     : "https://employify-backend.vercel.app";

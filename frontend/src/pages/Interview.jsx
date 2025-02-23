@@ -1,6 +1,33 @@
+import "regenerator-runtime/runtime";
 import { MessageSquare, Video, Mic, Send } from "lucide-react";
+import SpeechRecognition, {
+  useSpeechRecognition,
+} from "react-speech-recognition";
 import ProtectedRoute from "../components/ProtectedRoute";
 export function Interview() {
+  const sendResponse = () => {
+    SpeechRecognition.stopListening();
+    console.log("answer is: ", transcript);
+  };
+
+  const commands = [
+    {
+      command: "not at all",
+      callback: () => sendResponse(),
+    },
+  ];
+
+  const { transcript, browserSupportsSpeechRecognition } = useSpeechRecognition(
+    { commands }
+  );
+  const startListening = () =>
+    SpeechRecognition.startListening({ continuous: true });
+  const stopListening = () => SpeechRecognition.stopListening();
+
+  if (!browserSupportsSpeechRecognition) {
+    return <p>no access</p>;
+  }
+
   return (
     <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -72,12 +99,29 @@ export function Interview() {
                   placeholder="Type your response..."
                   className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
-                <button
-                  aria-label="Send message"
-                  className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500"
-                >
-                  <Send className="h-6 w-6" />
-                </button>
+                <div className="buttons">
+                  <button
+                    aria-label="Send message"
+                    className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500"
+                    onClick={startListening}
+                  >
+                    Start
+                  </button>
+                  <button
+                    aria-label="Send message"
+                    className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500"
+                    onClick={stopListening}
+                  >
+                    Stop
+                  </button>
+                  <button
+                    onClick={sendResponse}
+                    aria-label="Send message"
+                    className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500"
+                  >
+                    <Send className="h-6 w-6" />
+                  </button>
+                </div>
               </div>
             </div>
           </ProtectedRoute>
