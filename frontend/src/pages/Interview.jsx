@@ -108,7 +108,7 @@ export function Interview() {
                   placeholder="Type your response..."
                   className="flex-1 border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                 />
-                <div>{transcript}</div>
+                <div className="w-1/2">{transcript}</div>
                 <div className="buttons">
                   <button
                     onClick={sendResponse}
