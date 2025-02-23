@@ -49,20 +49,19 @@ export function Interview() {
     const blob = await videoResponse.blob();
     const file = new File([blob], "recorded-video.webm", {
       type: "video/webm",
-    });
-    setVideoURL(null);
+    });    
     const formData = new FormData();
     formData.append("question", question);
     formData.append("recorded", transcript);
     formData.append("written", written);
     formData.append("video", file);
+    setVideoURL(null);
     // send the response to the backend
     try{
     const response = await axios.post(url + "/interview/continue", formData, {
       withCredentials: true,
       headers: {
-        Accept: "application/json",
-        "Content-Type": "application/json",
+        Accept: "application/json"
       },
     });
     if (response.data.success) {
