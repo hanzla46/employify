@@ -3,6 +3,7 @@ import { MessageSquare, Video, Mic, Send } from "lucide-react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
+import { useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
 export function Interview() {
   const [isRecording, setIsRecording] = useState(false);
