@@ -25,9 +25,12 @@ export function Interview() {
   const Record = () => {
     if (isRecording) {
       SpeechRecognition.stopListening();
+      setIsRecording(false);
+      return;
     }
     if (!isRecording) {
       SpeechRecognition.startListening({ continuous: true });
+      setIsRecording(true);
     }
   };
 
