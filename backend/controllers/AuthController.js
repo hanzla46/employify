@@ -118,7 +118,7 @@ const getMe = async (req, res) => {
 };
 module.exports = {
   signup,
-  login,
+  login, 
   logout,
   getMe,
 };
