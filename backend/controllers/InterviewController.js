@@ -1,5 +1,3 @@
-const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
 const Interview = require("../models/InterviewModel");
 const Skill = require("../models/Skills");
 const { GeneratePrompt } = require("../models/GptPrompt");
