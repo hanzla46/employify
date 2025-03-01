@@ -8,6 +8,7 @@ import SpeechRecognition, {
 import { useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
 import FancyButton from "../components/Button";
+import {handleSuccess, handleError} from "../utils";
 let dev_env = false;
 const url = dev_env
   ? "http://localhost:8000"
@@ -24,6 +25,7 @@ export function Interview() {
       });
       if (response.data.success) {
         setQuestion(response.data.question);
+        handleSuccess(response.data.message);
       } else {
         handleError("Error: "+ response.data.message);
       }
