@@ -6,21 +6,25 @@ const  {analyzeExpressions} = require("../Utils/FacialAnalysis");
 const startInterview = async (req, res) => {
   try {
     const userId = req.user._id;
+    
     const userSkills = await Skill.findOne({ userId });
+
     const newInterview = new Interview({
       userId,
       status: "ongoing",
       questions: [],
-      facialAnalysis: {},
-      overallScore: null,
-      skills: userSkills ? userSkills.skills : [],
+      overallScore: 0,
+      skills: userSkills?.skills || [],
       aiSummary: "",
     });
+
     await newInterview.save();
+
     res.status(201).json({
       message: "Interview started successfully!",
       interviewId: newInterview._id,
       success: true,
+   
     });
   } catch (error) {
     res.status(500).json({ message: "Internal server error", success: false });
