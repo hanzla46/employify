@@ -35,6 +35,7 @@ app.use(cookieParser());
 // ✅ Routes
 app.use("/auth", require("./routes/AuthRouter"));
 app.use("/skills", require("./routes/SkillsRouter"));
+app.use("/interview", require("./routes/InterviewRouter"));
 
 // ✅ Start Server
 app.listen(PORT, () => {
