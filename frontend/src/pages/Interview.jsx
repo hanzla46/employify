@@ -25,7 +25,7 @@ export function Interview() {
       if (response.data.success) {
         setQuestion(response.data.question);
       } else {
-        console.error("Failed to start interview");
+        handleError("Error: "+ response.data.message);
       }
     } catch (error) {
       console.error("Failed to start interview:", error.message);

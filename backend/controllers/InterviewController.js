@@ -27,7 +27,7 @@ const startInterview = async (req, res) => {
    
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", success: false });
+    res.status(500).json({ message: "Internal server error "+ error, success: false });
   }
 };
 const continueInterview = async (req, res) => {
