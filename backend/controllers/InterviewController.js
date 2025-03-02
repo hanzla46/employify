@@ -96,7 +96,7 @@ const continueInterview = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error", success: false });
+    res.status(500).json({ message: "Internal server error: "+error, success: false });
   }
 };
 module.exports = { startInterview, continueInterview };
