@@ -100,5 +100,5 @@ const continueInterview = async (req, res) => {
 };
 module.exports = {
   startInterview,
-  continueInterview,
+  continueInterview
 };
