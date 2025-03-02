@@ -31,7 +31,7 @@ const startInterview = async (req, res) => {
       questions: [
         {
           question: "Tell me about yourself.",
-          answer: "",
+          answer: "not much",
           category: "General",
           score: null,
           facialAnalysis: [],
