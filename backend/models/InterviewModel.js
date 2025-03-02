@@ -26,7 +26,7 @@ const interviewSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   status: { type: String, default: "" },
   startTime: { type: Date, default: Date.now },
-  questions: [questionSchema],
+  questions: { type: [questionSchema], default: [] },
   skills: [
     {
       name: { type: String, required: true },

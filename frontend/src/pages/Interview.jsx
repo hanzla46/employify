@@ -37,6 +37,7 @@ export function Interview() {
   const [question, setQuestion] = useState(
     "What is Virtual DOM and how does it work in React?"
   );
+  const [category, setCategory] = useState("");
   const [written, setWritten] = useState("");
   const [score, setScore] = useState(0);
   const [isStarted, setIsStarted] = useState(false);
@@ -62,6 +63,7 @@ export function Interview() {
     formData.append("recorded", transcript);
     formData.append("written", written);
     formData.append("video", file);
+    formData.append("category", category);
     setVideoURL(null);
     try {
       const response = await axios.get(url + "/interview/continue", formData, {
@@ -72,6 +74,7 @@ export function Interview() {
       });
       if (response.data.success) {
         setQuestion(response.data.question);
+        setCategory(response.data.category);
         setScore(response.data.score);
         resetTranscript();
         setWritten("");

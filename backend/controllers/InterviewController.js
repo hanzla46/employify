@@ -35,6 +35,8 @@ const startInterview = async (req, res) => {
     res.status(201).json({
       message: "Interview started successfully!",
       interviewId: newInterview._id,
+      question: "What is React DOM",
+      category: "technical",
       success: true,
     });
   } catch (error) {
