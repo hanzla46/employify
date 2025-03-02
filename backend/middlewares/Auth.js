@@ -2,14 +2,16 @@ const jwt = require("jsonwebtoken");
 
 const ensureAuthenticated = (req, res, next) => {
   const token = req.cookies?.token;
-
   if (!token) {
     return res.status(401).json({ message: "Unauthorized: No token provided" });
   }
-
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    if (decoded) {
+      req.user = decoded;
+    } else {
+      return res.status(401).json({ message: "Unauthorized: Token expired" });
+    }
     next();
   } catch (error) {
     if (error.name === "TokenExpiredError") {

@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 8000;
 
-// ✅ CORS Middleware Fix
+// ✅
 app.use(
   cors({
     origin: "https://employify.vercel.app", // Only allow frontend origin
@@ -17,7 +17,6 @@ app.use(
   })
 );
 
-// Handle preflight OPTIONS request properly
 app.options("*", (req, res) => {
   res.header("Access-Control-Allow-Origin", "https://employify.vercel.app");
   res.header("Access-Control-Allow-Credentials", "true");
@@ -26,18 +25,21 @@ app.options("*", (req, res) => {
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept, Authorization"
   );
-  res.sendStatus(200); // Send a 200 OK response
+  res.sendStatus(200);
 });
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
-// ✅ Routes
+app.use((req, res, next) => {
+  console.log(`Request received:: ${req.method} ${req.path}`);
+  next();
+});
+// ✅
 app.use("/auth", require("./routes/AuthRouter"));
 app.use("/skills", require("./routes/SkillsRouter"));
 app.use("/interview", require("./routes/InterviewRouter"));
 
-// ✅ Start Server
+// ✅
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
 });
