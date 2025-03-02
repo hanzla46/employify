@@ -13,7 +13,11 @@ const startInterview = async (req, res) => {
       // Placeholder skills if none exist
       userSkills = {
         skills: [
-          { name: "Problem Solving", level: "Intermediate", experienceYears: 2 },
+          {
+            name: "Problem Solving",
+            level: "Intermediate",
+            experienceYears: 2,
+          },
           { name: "Communication", level: "Advanced", experienceYears: 3 },
           { name: "Teamwork", level: "Beginner", experienceYears: 1 },
           { name: "Leadership", level: "Intermediate", experienceYears: 2 },
@@ -24,7 +28,15 @@ const startInterview = async (req, res) => {
     const newInterview = new Interview({
       userId,
       status: "ongoing",
-      questions: [],
+      questions: [
+        {
+          question: "Tell me about yourself.",
+          answer: "",
+          category: "General",
+          score: null,
+          facialAnalysis: [],
+        },
+      ],
       overallScore: 0,
       skills: userSkills.skills, // Use placeholder if needed
       aiSummary: "",
@@ -35,12 +47,14 @@ const startInterview = async (req, res) => {
     res.status(201).json({
       message: "Interview started successfully!",
       interviewId: newInterview._id,
-      question: "What is React DOM",
-      category: "technical",
+      question: "Tell me about yourself.",
+      category: "General",
       success: true,
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error " + error, success: false });
+    res
+      .status(500)
+      .json({ message: "Internal server error " + error, success: false });
   }
 };
 
@@ -55,7 +69,9 @@ const continueInterview = async (req, res) => {
     }).sort({ createdAt: -1 });
 
     if (!interview) {
-      return res.status(404).json({ message: "No ongoing interview found.", success: false });
+      return res
+        .status(404)
+        .json({ message: "No ongoing interview found.", success: false });
     }
 
     // Placeholder facial analysis (random values)
@@ -104,7 +120,8 @@ const continueInterview = async (req, res) => {
     } = JSON.parse(result);
 
     if (savedInterview.questions.length > 0) {
-      let lastQuestion = savedInterview.questions[savedInterview.questions.length - 1];
+      let lastQuestion =
+        savedInterview.questions[savedInterview.questions.length - 1];
       lastQuestion.score = score;
       lastQuestion.analysis = currentAnalysis;
     }
@@ -119,7 +136,9 @@ const continueInterview = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error: " + error, success: false });
+    res
+      .status(500)
+      .json({ message: "Internal server error: " + error, success: false });
   }
 };
 
