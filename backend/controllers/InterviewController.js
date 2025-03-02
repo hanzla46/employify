@@ -2,11 +2,11 @@ const Interview = require("../models/InterviewModel");
 const Skill = require("../models/Skills");
 const { GeneratePrompt } = require("../models/GptPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const  {analyzeExpressions} = require("../Utils/FacialAnalysis");
+const { analyzeExpressions } = require("../Utils/FacialAnalysis");
 const startInterview = async (req, res) => {
   try {
     const userId = req.user._id;
-    
+
     const userSkills = await Skill.findOne({ userId });
 
     const newInterview = new Interview({
@@ -24,10 +24,11 @@ const startInterview = async (req, res) => {
       message: "Interview started successfully!",
       interviewId: newInterview._id,
       success: true,
-   
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error "+ error, success: false });
+    res
+      .status(500)
+      .json({ message: "Internal server error " + error, success: false });
   }
 };
 const continueInterview = async (req, res) => {
@@ -53,8 +54,8 @@ const continueInterview = async (req, res) => {
       facialAnalysis: [
         {
           timestamp: new Date(),
-          emotions: facialData.emotions,
-          intensity: facialData.intensity,
+          emotions: "happiness",
+          intensity: 4,
         },
       ],
     });
@@ -98,7 +99,4 @@ const continueInterview = async (req, res) => {
     res.status(500).json({ message: "Internal server error", success: false });
   }
 };
-module.exports = {
-  startInterview,
-  continueInterview
-};
+module.exports = { startInterview, continueInterview };
