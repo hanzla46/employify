@@ -2,19 +2,31 @@ const Interview = require("../models/InterviewModel");
 const Skill = require("../models/Skills");
 const { GeneratePrompt } = require("../models/GptPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { analyzeExpressions } = require("../Utils/FacialAnalysis");
+
 const startInterview = async (req, res) => {
   try {
     const userId = req.user._id;
 
-    const userSkills = await Skill.findOne({ userId });
+    let userSkills = await Skill.findOne({ userId });
+
+    if (!userSkills) {
+      // Placeholder skills if none exist
+      userSkills = {
+        skills: [
+          { name: "Problem Solving", level: "Intermediate", experienceYears: 2 },
+          { name: "Communication", level: "Advanced", experienceYears: 3 },
+          { name: "Teamwork", level: "Beginner", experienceYears: 1 },
+          { name: "Leadership", level: "Intermediate", experienceYears: 2 },
+        ],
+      };
+    }
 
     const newInterview = new Interview({
       userId,
       status: "ongoing",
       questions: [],
       overallScore: 0,
-      skills: userSkills?.skills || [],
+      skills: userSkills.skills, // Use placeholder if needed
       aiSummary: "",
     });
 
@@ -26,11 +38,10 @@ const startInterview = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal server error " + error, success: false });
+    res.status(500).json({ message: "Internal server error " + error, success: false });
   }
 };
+
 const continueInterview = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -40,24 +51,31 @@ const continueInterview = async (req, res) => {
       userId,
       status: "ongoing",
     }).sort({ createdAt: -1 });
+
     if (!interview) {
-      return res
-        .status(404)
-        .json({ message: "No ongoing interview found.", success: false });
+      return res.status(404).json({ message: "No ongoing interview found.", success: false });
     }
-    const facialAnalysis = await analyzeExpressions(videoFile);
+
+    // Placeholder facial analysis (random values)
+    const facialAnalysis = {
+      timestamp: new Date(),
+      emotions: {
+        happy: Math.random().toFixed(2),
+        sad: Math.random().toFixed(2),
+        angry: Math.random().toFixed(2),
+        surprised: Math.random().toFixed(2),
+        disgusted: Math.random().toFixed(2),
+        neutral: Math.random().toFixed(2),
+      },
+      intensity: Math.floor(Math.random() * 5) + 1, // Random intensity (1-5)
+    };
+
     interview.questions.push({
       question,
       answer,
       category,
       score: null,
-      facialAnalysis: [
-        {
-          timestamp: new Date(),
-          emotions: "happiness",
-          intensity: 4,
-        },
-      ],
+      facialAnalysis: [facialAnalysis],
     });
 
     await interview.save();
@@ -65,12 +83,14 @@ const continueInterview = async (req, res) => {
       userId,
       status: "ongoing",
     }).sort({ createdAt: -1 });
+
     const prompt = GeneratePrompt(savedInterview);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.0-flash",
       generation_config: { response_mime_type: "application/json" },
     });
+
     const result = await model.generateContent(prompt);
     const {
       aiSummary,
@@ -80,12 +100,13 @@ const continueInterview = async (req, res) => {
       hypothetical_response,
       score,
     } = JSON.parse(result);
+
     if (savedInterview.questions.length > 0) {
-      let lastQuestion =
-        savedInterview.questions[savedInterview.questions.length - 1];
+      let lastQuestion = savedInterview.questions[savedInterview.questions.length - 1];
       lastQuestion.score = score;
       lastQuestion.analysis = currentAnalysis;
     }
+
     savedInterview.save();
     res.status(200).json({
       message: "AI Summary, Score & Analysis updated successfully!",
@@ -96,7 +117,8 @@ const continueInterview = async (req, res) => {
       success: true,
     });
   } catch (error) {
-    res.status(500).json({ message: "Internal server error: "+error, success: false });
+    res.status(500).json({ message: "Internal server error: " + error, success: false });
   }
 };
+
 module.exports = { startInterview, continueInterview };
