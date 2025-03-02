@@ -25,7 +25,7 @@ export function Interview() {
       });
       if (response.data.success) {
         setQuestion(response.data.question);
-        handleSuccess(response.data.message);
+        handleSuccess("started!!!!");
       } else {
         handleError("Error: "+ response.data.message);
       }
