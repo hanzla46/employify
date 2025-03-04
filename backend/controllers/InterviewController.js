@@ -115,6 +115,7 @@ const continueInterview = async (req, res) => {
     });
 
     const result = await model.generateContent(prompt);
+    return res.status(200).json({ result });
     const {
       aiSummary,
       currentAnalysis,
