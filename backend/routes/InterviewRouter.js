@@ -3,7 +3,7 @@ const {
   continueInterview,
 } = require("../controllers/InterviewController");
 const ensureAuthenticated = require("../middlewares/Auth");
-const upload = require("../middlewares/uploadMiddleware");
+const upload = require("../middlewares/uploadMulter");
 const router = require("express").Router();
 router.get("/start", ensureAuthenticated, startInterview);
 router.post(
