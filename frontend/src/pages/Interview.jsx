@@ -23,7 +23,7 @@ export function Interview() {
   );
   const [category, setCategory] = useState("");
   const [written, setWritten] = useState("");
-  const [score, setScore] = useState(0);
+  const [score, setScore] = useState();
   const [isStarted, setIsStarted] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
   const videoRef = useRef(null);
