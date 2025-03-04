@@ -30,6 +30,7 @@ export function Interview() {
   const mediaRecorderRef = useRef(null);
   const [videoRecording, setVideoRecording] = useState(false);
   const [videoURL, setVideoURL] = useState(null);
+  const [summary, setSummary] = useState("");
   const startInterview = async () => {
     try {
       const response = await axios.get(url + "/interview/start", {
@@ -86,6 +87,7 @@ export function Interview() {
         setQuestion(response.data.question);
         setCategory(response.data.category);
         setScore(response.data.score);
+        setSummary(response.data.aiSummary);
         resetTranscript();
         setWritten("");
         setIsRecording(true);
@@ -311,6 +313,7 @@ export function Interview() {
                   Interview Completed
                 </h1>
               )}
+<span className="text-gray-700 dark:text-white">{summary}</span>
             </div>
           </ProtectedRoute>
         </div>
