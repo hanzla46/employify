@@ -283,6 +283,7 @@ export function Interview() {
                     <div className="h-auto w-full border rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
                       {" "}
                       <div
+                      onChange={console.log("transcript", transcript)}
                         className="p-2 text-gray-900 dark:text-white"
                         style={{
                           minHeight: "40px",
