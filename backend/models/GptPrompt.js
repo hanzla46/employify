@@ -81,7 +81,7 @@ const GeneratePrompt = (interview) => {
   }
   \`\`\`
 
-  Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "hypothetical_response", "score") must be strings. Avoid including any introductory or concluding text outside of the JSON object.
+  Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "hypothetical_response", "score", "completed") must be strings. Avoid including any introductory or concluding text outside of the JSON object.
   `;
 };
 
