@@ -190,7 +190,7 @@ export function Interview() {
             AI Mock Interview
           </h1>
           <ProtectedRoute>
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
+            <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
               <div className="flex flex-row justify-between items-center mb-6">
                 <div className="flex items-center mb-6">
                   <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
