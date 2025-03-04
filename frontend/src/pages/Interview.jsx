@@ -8,12 +8,28 @@ import SpeechRecognition, {
 import { useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
 import FancyButton from "../components/Button";
-import {handleSuccess, handleError} from "../utils";
+import { handleSuccess, handleError } from "../utils";
 let dev_env = false;
 const url = dev_env
   ? "http://localhost:8000"
   : "https://employify-backend.vercel.app";
+
 export function Interview() {
+  const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
+    useSpeechRecognition();
+  const [isRecording, setIsRecording] = useState(false);
+  const [question, setQuestion] = useState(
+    "What is Virtual DOM and how does it work in React?"
+  );
+  const [category, setCategory] = useState("");
+  const [written, setWritten] = useState("");
+  const [score, setScore] = useState(0);
+  const [isStarted, setIsStarted] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const videoRef = useRef(null);
+  const mediaRecorderRef = useRef(null);
+  const [videoRecording, setVideoRecording] = useState(false);
+  const [videoURL, setVideoURL] = useState(null);
   const startInterview = async () => {
     try {
       const response = await axios.get(url + "/interview/start", {
@@ -26,22 +42,14 @@ export function Interview() {
       if (response.data.success) {
         setQuestion(response.data.question);
         handleSuccess("started!!!!");
+        setIsStarted(true);
       } else {
-        handleError("Error: "+ response.data.message);
+        handleError("Error: " + response.data.message);
       }
     } catch (error) {
       console.error("Failed to start interview:", error.message);
     }
   };
-  const [isRecording, setIsRecording] = useState(false);
-  const [question, setQuestion] = useState(
-    "What is Virtual DOM and how does it work in React?"
-  );
-  const [category, setCategory] = useState("");
-  const [written, setWritten] = useState("");
-  const [score, setScore] = useState(0);
-  const [isStarted, setIsStarted] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
 
   const sendResponse = async () => {
     if (!transcript && !written) return;
@@ -60,7 +68,7 @@ export function Interview() {
     }
     const formData = new FormData();
     formData.append("question", question);
-    formData.append("recorded", transcript);
+    formData.append("answer", transcript);
     formData.append("written", written);
     formData.append("video", file);
     formData.append("category", category);
@@ -94,8 +102,6 @@ export function Interview() {
   };
 
   //audio
-  const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
-    useSpeechRecognition();
   const Record = async () => {
     if (isRecording) {
       await SpeechRecognition.stopListening();
@@ -112,10 +118,6 @@ export function Interview() {
   }
 
   //video recording
-  const videoRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const [videoRecording, setVideoRecording] = useState(false);
-  const [videoURL, setVideoURL] = useState(null);
   const handleVideoRecord = () => {
     if (videoRecording) {
       stopRecording();
@@ -175,7 +177,7 @@ export function Interview() {
 
   //everything starts from here
   const start = () => {
-    setIsStarted(true);
+    //setIsStarted(true);
     startInterview();
   };
   return (
