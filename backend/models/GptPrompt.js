@@ -58,7 +58,7 @@ const GeneratePrompt = (interview) => {
 
   - **Skills Being Assessed:**  
   ${interview.skills && interview.skills.length > 0 ? 
-    interview.skills.map(skill => `  - ${skill.name || "Unknown Skill"}: ${skill.score || "N/A"}/10`).join("\n") 
+    interview.skills.map(skill => `  - ${skill.name || "Unknown Skill "}, level: ${skill.level || "intermediate"}, Experience Years ${skill.experienceYears}`).join("\n") 
     : "No skills data available."
   }
 
