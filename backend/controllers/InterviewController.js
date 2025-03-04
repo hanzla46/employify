@@ -18,7 +18,7 @@ const startInterview = async (req, res) => {
             level: "Intermediate",
             experienceYears: 2,
           },
-          { name: "NodeJS", level: "Beginer", experienceYears: 1 },
+          { name: "NodeJS", level: "Beginner", experienceYears: 1 },
           { name: "Teamwork", level: "Intermediate", experienceYears: 1 },
           { name: "Cloud Engineering", level: "Intermediate", experienceYears: 2 },
         ],
