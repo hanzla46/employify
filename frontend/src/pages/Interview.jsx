@@ -273,7 +273,7 @@ export function Interview() {
                       className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
                       style={{ resize: "none", overflow: "hidden" }}
                     />
-                    <FancyButton text={"reset"} onClick={resetTranscript()} />
+                    <FancyButton text={"reset"} onClick={() => resetTranscript()} />
                   </div>
                   <div className="flex flex-col w-1/2">
                     {" "}
