@@ -14,13 +14,13 @@ const startInterview = async (req, res) => {
       userSkills = {
         skills: [
           {
-            name: "Problem Solving",
+            name: "ReactJS Development",
             level: "Intermediate",
             experienceYears: 2,
           },
-          { name: "Communication", level: "Advanced", experienceYears: 3 },
-          { name: "Teamwork", level: "Beginner", experienceYears: 1 },
-          { name: "Leadership", level: "Intermediate", experienceYears: 2 },
+          { name: "NodeJS", level: "Beginer", experienceYears: 1 },
+          { name: "Teamwork", level: "Intermediate", experienceYears: 1 },
+          { name: "Cloud Engineering", level: "Intermediate", experienceYears: 2 },
         ],
       };
     }
