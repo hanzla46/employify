@@ -137,9 +137,8 @@ const continueInterview = async (req, res) => {
     savedInterview.save();
     res.status(200).json({
       message: "AI Summary, Score & Analysis updated successfully!",
-      interview,
-      nextQuestion: generated_question,
-      nextCategory: question_category,
+      question: generated_question,
+      category: question_category,
       hypotheticalResponse: hypothetical_response,
       success: true,
     });
