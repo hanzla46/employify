@@ -115,8 +115,9 @@ const continueInterview = async (req, res) => {
     });
 
     const result = await model.generateContent(prompt);
-    return res.status(200).json({ result });
-    results = JSON.parse(result);
+    const content = result.response.candidates[0].content.parts[0].text;
+    const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
+    const parsedResult = JSON.parse(jsonString);
     const {
       aiSummary,
       currentAnalysis,
@@ -124,7 +125,7 @@ const continueInterview = async (req, res) => {
       question_category,
       hypothetical_response,
       score,
-    } = results;
+    } = parsedResult;
 
     if (savedInterview.questions.length > 0) {
       let lastQuestion =
