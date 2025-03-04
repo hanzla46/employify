@@ -41,6 +41,7 @@ export function Interview() {
       });
       if (response.data.success) {
         setQuestion(response.data.question);
+        setCategory(response.data.category);
         handleSuccess("started!!!!");
         setIsStarted(true);
       } else {
