@@ -62,9 +62,6 @@ const GeneratePrompt = (interview) => {
     : "No skills data available."
   }
 
-  - **Score Framework:**  
-  ${JSON.stringify(interview.scoreFramework || { default: "Not defined" }, null, 2)}
-
   - **Current Overall Score:** ${interview.overallScore || "N/A"}
 
   ---
