@@ -115,7 +115,7 @@ const continueInterview = async (req, res) => {
     });
 
     const result = await model.generateContent(prompt);
-    results = JSON.parse(result);
+    results = JSON.parse(result.response.candidates[0].content.parts[0].text);
     return res.status(200).json({ results });
     const {
       aiSummary,
