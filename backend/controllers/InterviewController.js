@@ -61,7 +61,9 @@ const startInterview = async (req, res) => {
 const continueInterview = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { question, answer, category } = req.body;
+    let question = req.formData.question;
+    let answer = req.formData.answer;
+    let category = req.formData.category;
     const videoFile = req.file;
     if (!question || !answer || !category) {
       question = "tell me about yourself";
