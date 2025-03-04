@@ -66,7 +66,7 @@ export function Interview() {
     formData.append("category", category);
     setVideoURL(null);
     try {
-      const response = await axios.get(url + "/interview/continue", formData, {
+      const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
         headers: {
           Accept: "application/json",

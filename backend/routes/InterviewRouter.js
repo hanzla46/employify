@@ -2,5 +2,5 @@ const { startInterview, continueInterview } = require("../controllers/InterviewC
 const ensureAuthenticated= require("../middlewares/Auth");
 const router = require("express").Router();
 router.get("/start", ensureAuthenticated, startInterview);
-router.get("/continue", ensureAuthenticated, continueInterview);
+router.post("/continue", ensureAuthenticated, continueInterview);
 module.exports = router;
