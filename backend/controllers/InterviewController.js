@@ -6,7 +6,10 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const startInterview = async (req, res) => {
   try {
     const userId = req.user._id;
-
+    await Interview.updateMany(
+      { userId, status: "ongoing" },
+      { $set: { status: "completed" } }
+    );
     let userSkills = await Skill.findOne({ userId });
 
     if (!userSkills) {
