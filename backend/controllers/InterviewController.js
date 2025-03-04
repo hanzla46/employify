@@ -64,10 +64,9 @@ const continueInterview = async (req, res) => {
     const { question, answer, category } = req.body;
     const videoFile = req.file;
     if (!question || !answer || !category) {
-      return res.status(400).json({
-        message: "Question, answer, and category are required.",
-        success: false,
-      });
+      question = "tell me about yourself";
+      answer = "not much";
+      category = "General";
     }
     const interview = await Interview.findOne({
       userId,
