@@ -18,9 +18,7 @@ export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isRecording, setIsRecording] = useState(false);
-  const [question, setQuestion] = useState(
-    "What is Virtual DOM and how does it work in React?"
-  );
+  const [question, setQuestion] = useState("");
   const [category, setCategory] = useState("");
   const [written, setWritten] = useState("");
   const [score, setScore] = useState();
