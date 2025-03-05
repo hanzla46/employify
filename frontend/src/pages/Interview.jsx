@@ -219,7 +219,7 @@ export function Interview() {
                   <button
                     disabled={!isStarted || isCompleted}
                     aria-label="Toggle microphone"
-                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 disabled:text-black ${isRecording ? "text-green-600" : "text-red-600"}`}
                     onClick={Record}
                   >
                     <Mic className="h-6 w-6" />
@@ -228,7 +228,7 @@ export function Interview() {
                     disabled={!isStarted || isCompleted}
                     aria-label="Toggle video"
                     onClick={handleVideoRecord}
-                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 disabled:text-black ${videoRecording ? "text-green-600" : "text-red-600"}`}
                   >
                     <Video className="h-6 w-6" />
                   </button>
