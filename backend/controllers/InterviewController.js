@@ -123,6 +123,7 @@ const continueInterview = async (req, res) => {
       question_category,
       hypothetical_response,
       score,
+      completed
     } = parsedResult;
 
     if (savedInterview.questions.length > 0) {
@@ -140,6 +141,7 @@ const continueInterview = async (req, res) => {
       hypotheticalResponse: hypothetical_response,
       result: result,
       success: true,
+      completed: completed,
     });
   } catch (error) {
     res
