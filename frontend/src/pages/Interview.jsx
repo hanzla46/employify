@@ -18,9 +18,7 @@ export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isRecording, setIsRecording] = useState(false);
-  const [question, setQuestion] = useState(
-    "What is Virtual DOM and how does it work in React?"
-  );
+  const [question, setQuestion] = useState("");
   const [category, setCategory] = useState("");
   const [written, setWritten] = useState("");
   const [score, setScore] = useState();
@@ -219,7 +217,7 @@ export function Interview() {
                   <button
                     disabled={!isStarted || isCompleted}
                     aria-label="Toggle microphone"
-                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
                     onClick={Record}
                   >
                     <Mic className="h-6 w-6" />
@@ -228,7 +226,7 @@ export function Interview() {
                     disabled={!isStarted || isCompleted}
                     aria-label="Toggle video"
                     onClick={handleVideoRecord}
-                    className="p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
                   >
                     <Video className="h-6 w-6" />
                   </button>
