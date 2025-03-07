@@ -190,132 +190,153 @@ export function Interview() {
           <h1 className="text-3xl font-bold mb-8 dark:text-white">
             AI Mock Interview
           </h1>
-          <ProtectedRoute>
-            <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-              <div className="flex flex-row justify-between items-center mb-6">
-                <div className="flex items-center mb-6">
-                  <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
-                    <Bot className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                  </div>
-                  <div className="ml-4">
-                    <h2 className="text-xl font-semibold dark:text-white">
-                      Interview Assistant
-                    </h2>
-                    <p className="text-gray-600 dark:text-gray-300">
-                      Ready to help you practice
-                    </p>
-                  </div>
-                </div>
-                <div onClick={start} id="startBtn">
-                  {!isStarted && (
-                    <div onClick={start}>
-                      <FancyButton text="Start Interview" />
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-4 mr-6">
-                  <button
-                    disabled={!isStarted || isCompleted}
-                    aria-label="Toggle microphone"
-                    className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
-                    onClick={Record}
-                  >
-                    <Mic className="h-6 w-6" />
-                  </button>
-                  <button
-                    disabled={!isStarted || isCompleted}
-                    aria-label="Toggle video"
-                    onClick={handleVideoRecord}
-                    className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
-                  >
-                    <Video className="h-6 w-6" />
-                  </button>
-                  <div className="buttons">
-                    <button
-                      disabled={!isStarted || isCompleted}
-                      onClick={sendResponse}
-                      aria-label="Send message"
-                      className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500"
-                    >
-                      <Send className="h-6 w-6" />
-                    </button>
-                  </div>
-                </div>
-              </div>
-              {/* question  + score*/}
-              <div className="mt-6 mb-6 flex flex-row justify-evenly items-center">
-                <div className="w-1/2">
-                  <div className="bg-indigo-100 dark:bg-indigo-900/50 rounded-lg p-4 max-w-[80%]">
-                    <p className="text-gray-800 dark:text-gray-200">
-                      {question}
-                    </p>
-                  </div>
-                </div>
-                <div className="w-1/2">
-                  <span className="text-xl text-gray-700 dark:text-white">
-                    {score}
-                  </span>
-                </div>
-              </div>
-              {/* responses */}
-              {!isCompleted ? (
-                <div className="flex gap-4 mb-6 h-auto">
-                  <div className="flex flex-col w-1/2">
-                    {" "}
-                    <h3 className="text-gray-700 dark:text-white mb-3">
-                      Write (if needed)
-                    </h3>{" "}
-                    <textarea
-                      ref={textareaRef}
-                      onInput={adjustHeight}
-                      onChange={(e) => setWritten(e.target.value)}
-                      value={written}
-                      placeholder="Type something..."
-                      className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                      style={{ resize: "none", overflow: "hidden" }}
-                    />
-                    {/* <FancyButton text={"reset"} onClick={() => resetTranscript()} /> */}
-                  </div>
-                  <div className="flex flex-col w-1/2">
-                    {" "}
-                    <h3 className="text-gray-700 dark:text-white mb-3">
-                      Recorded Response
-                    </h3>{" "}
-                    <div className="h-auto w-full border rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-                      {" "}
-                      <div
-                        className="p-2 text-gray-900 dark:text-white"
-                        style={{
-                          minHeight: "40px",
-                          height: "auto",
-                          wordBreak: "break-word",
-                          overflowWrap: "break-word",
-                        }}
-                      >
-                        {transcript}
-                      </div>
-                      <div>
-                        {videoURL && (
-                          <video
-                            ref={videoRef}
-                            controls
-                            className="w-full h-auto"
-                          />
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
-                  Interview Completed
-                </h1>
-              )}
-              <span className="text-gray-700 dark:text-white">{summary}</span>
-            </div>
-          </ProtectedRoute>
+          {/* <ProtectedRoute> */}
+          <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
+            <Top />
+            {!isCompleted ? (
+              <>
+                <QnS />
+                <Responses />
+              </>
+            ) : (
+              <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
+                Interview Completed
+              </h1>
+            )}
+            <span className="text-gray-700 dark:text-white">{summary}</span>
+          </div>
+          {/* </ProtectedRoute> */}
         </div>
       </div>
     </div>
   );
+}
+
+function Top() {
+  return (
+    <>
+      <div className="flex flex-row justify-between items-center mb-6">
+        <div className="flex items-center mb-6">
+          <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
+            <Bot className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <div className="ml-4">
+            <h2 className="text-xl font-semibold dark:text-white">
+              Interview Assistant
+            </h2>
+            <p className="text-gray-600 dark:text-gray-300">
+              Ready to help you practice
+            </p>
+          </div>
+        </div>
+        <div onClick={start} id="startBtn">
+          {!isStarted && (
+            <div onClick={start}>
+              <FancyButton text="Start Interview" />
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-4 mr-6">
+          <button
+            disabled={!isStarted || isCompleted}
+            aria-label="Toggle microphone"
+            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
+            onClick={Record}
+          >
+            <Mic className="h-6 w-6" />
+          </button>
+          <button
+            disabled={!isStarted || isCompleted}
+            aria-label="Toggle video"
+            onClick={handleVideoRecord}
+            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
+          >
+            <Video className="h-6 w-6" />
+          </button>
+          <div className="buttons">
+            <button
+              disabled={!isStarted || isCompleted}
+              onClick={sendResponse}
+              aria-label="Send message"
+              className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500"
+            >
+              <Send className="h-6 w-6" />
+            </button>
+          </div>
+        </div>
+      </div>
+    </>
+  )
+}
+
+function QnS() {
+  return (
+    <>
+      <div className="mt-6 mb-6 flex flex-row justify-evenly items-center">
+        <div className="w-1/2">
+          <div className="bg-indigo-100 dark:bg-indigo-900/50 rounded-lg p-4 max-w-[80%]">
+            <p className="text-gray-800 dark:text-gray-200">
+              {question}
+            </p>
+          </div>
+        </div>
+        <div className="w-1/2">
+          <span className="text-xl text-gray-700 dark:text-white">
+            {score}
+          </span>
+        </div>
+      </div>
+    </>
+  )
+}
+function Responses() {
+  return (
+    <div className="flex gap-4 mb-6 h-auto">
+      <div className="flex flex-col w-1/2">
+        {" "}
+        <h3 className="text-gray-700 dark:text-white mb-3">
+          Write (if needed)
+        </h3>{" "}
+        <textarea
+          ref={textareaRef}
+          onInput={adjustHeight}
+          onChange={(e) => setWritten(e.target.value)}
+          value={written}
+          placeholder="Type something..."
+          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+          style={{ resize: "none", overflow: "hidden" }}
+        />
+        {/* <FancyButton text={"reset"} onClick={() => resetTranscript()} /> */}
+      </div>
+      <div className="flex flex-col w-1/2">
+        {" "}
+        <h3 className="text-gray-700 dark:text-white mb-3">
+          Recorded Response
+        </h3>{" "}
+        <div className="h-auto w-full border rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+          {" "}
+          <div
+            className="p-2 text-gray-900 dark:text-white"
+            style={{
+              minHeight: "40px",
+              height: "auto",
+              wordBreak: "break-word",
+              overflowWrap: "break-word",
+            }}
+          >
+            {transcript}
+          </div>
+          <div>
+            {videoURL && (
+              <video
+                ref={videoRef}
+                controls
+                className="w-full h-auto"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  )
 }
