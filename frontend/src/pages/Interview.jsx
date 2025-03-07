@@ -184,7 +184,7 @@ export function Interview() {
           </h1>
           {/* <ProtectedRoute> */}
           <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-            <Top start={start} isStarted={isStarted} isCompleted={isCompleted} Record={Record} handleVideoRecord={handleVideoRecord} sendResponse={sendResponse} />
+            <Top start={start} isStarted={isStarted} isCompleted={isCompleted} Record={Record} isRecording={isRecording} handleVideoRecord={handleVideoRecord} sendResponse={sendResponse} />
             {!isCompleted ? (
               <>
                 <QnS question={question} score={score} />
@@ -204,7 +204,7 @@ export function Interview() {
   );
 }
 
-function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendResponse }) {
+function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendResponse, isRecording}) {
   return (
     <>
       <div className="flex flex-row justify-between items-center mb-6">
