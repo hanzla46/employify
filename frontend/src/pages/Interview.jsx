@@ -295,7 +295,7 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
         className="rounded-lg shadow-md w-full"
       /> 
       </div>
-      <div>
+      <div className='flex-row'>
       <div className="flex flex-col w-1/2">
         {" "}
         <h3 className="text-gray-700 dark:text-white mb-3">
