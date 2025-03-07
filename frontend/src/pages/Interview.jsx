@@ -46,6 +46,9 @@ export function Interview() {
         setCategory(response.data.category);
         handleSuccess("started!!!!");
         setIsStarted(true);
+        startRecording();
+        SpeechRecognition.startListening({ continuous: true });
+        setIsRecording(true);
       } else {
         handleError("Error: " + response.data.message);
       }
@@ -71,10 +74,10 @@ export function Interview() {
     formData.append("written", written);
     if (videoFile) {
       formData.append("video", videoFile);
-    }    
+    }
     formData.append("category", category);
     setVideoURL(null);
-    setRecordedChunks([]); 
+    setRecordedChunks([]);
     try {
       const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
@@ -228,7 +231,7 @@ function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendRes
           <button
             disabled={!isStarted || isCompleted}
             aria-label="Toggle microphone"
-            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
+            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600 md:text-green-600" : "text-red-600 md:text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
             onClick={Record}
           >
             <Mic className="h-6 w-6" />
@@ -237,7 +240,7 @@ function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendRes
             disabled={!isStarted || isCompleted}
             aria-label="Toggle video"
             onClick={handleVideoRecord}
-            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600" : "text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
+            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${videoRecording ? "text-green-600 md:text-green-600" : "text-red-600 md:text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
           >
             <Video className="h-6 w-6" />
           </button>
@@ -288,50 +291,50 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
   return (
 
     <div className="flex flex-col-reverse gap-4 mb-6 h-auto">
-     <div className="w-3/5"> 
-      <Webcam
-        audio={true}
-        ref={webcamRef}
-        className="rounded-lg shadow-md w-full"
-      /> 
+      <div className="w-3/5">
+        <Webcam
+          audio={true}
+          ref={webcamRef}
+          className="rounded-lg shadow-md w-full"
+        />
       </div>
       <div className='flex-row'>
-      <div className="flex flex-col w-1/2">
-        {" "}
-        <h3 className="text-gray-700 dark:text-white mb-3">
-          Write (if needed)
-        </h3>{" "}
-        <textarea
-          ref={textareaRef}
-          onInput={adjustHeight}
-          onChange={(e) => setWritten(e.target.value)}
-          value={written}
-          placeholder="Type something..."
-          className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-          style={{ resize: "none", overflow: "hidden" }}
-        />
-        {/* <FancyButton text={"reset"} onClick={() => resetTranscript()} /> */}
-      </div>
-      <div className="flex flex-col w-1/2">
-        {" "}
-        <h3 className="text-gray-700 dark:text-white mb-3">
-          Recorded Response
-        </h3>{" "}
-        <div className="h-auto w-full border rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+        <div className="flex flex-col w-1/2">
           {" "}
-          <div
-            className="p-2 text-gray-900 dark:text-white"
-            style={{
-              minHeight: "40px",
-              height: "auto",
-              wordBreak: "break-word",
-              overflowWrap: "break-word",
-            }}
-          >
-            {transcript}
+          <h3 className="text-gray-700 dark:text-white mb-3">
+            Write (if needed)
+          </h3>{" "}
+          <textarea
+            ref={textareaRef}
+            onInput={adjustHeight}
+            onChange={(e) => setWritten(e.target.value)}
+            value={written}
+            placeholder="Type something..."
+            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
+            style={{ resize: "none", overflow: "hidden" }}
+          />
+          {/* <FancyButton text={"reset"} onClick={() => resetTranscript()} /> */}
+        </div>
+        <div className="flex flex-col w-1/2">
+          {" "}
+          <h3 className="text-gray-700 dark:text-white mb-3">
+            Recorded Response
+          </h3>{" "}
+          <div className="h-auto w-full border rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
+            {" "}
+            <div
+              className="p-2 text-gray-900 dark:text-white"
+              style={{
+                minHeight: "40px",
+                height: "auto",
+                wordBreak: "break-word",
+                overflowWrap: "break-word",
+              }}
+            >
+              {transcript}
+            </div>
           </div>
         </div>
-      </div>
       </div>
     </div>
   )
