@@ -14,7 +14,7 @@ const url = dev_env
   ? "http://localhost:8000"
   : "https://employify-backend.vercel.app";
 
-
+export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isRecording, setIsRecording] = useState(false);
@@ -170,20 +170,11 @@ const url = dev_env
     setVideoRecording(false);
   };
 
-  //text area
-  const textareaRef = useRef(null);
-  const adjustHeight = () => {
-    if (!textareaRef.current) return;
-    textareaRef.current.style.height = "auto";
-    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
-  };
-
   //everything starts from here
   const start = () => {
     //setIsStarted(true);
     startInterview();
   };
-  export function Interview() {
   return (
     <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -193,11 +184,11 @@ const url = dev_env
           </h1>
           {/* <ProtectedRoute> */}
           <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-            <Top />
+            <Top start={start} isStarted={isStarted} isCompleted={isCompleted} Record={Record} handleVideoRecord={handleVideoRecord} sendResponse={sendResponse} />
             {!isCompleted ? (
               <>
-                <QnS />
-                <Responses />
+                <QnS question={question} score={score} />
+                <Responses written={written} setWritten={setWritten} transcript={transcript} videoRef={videoRef} videoURL={videoURL} />
               </>
             ) : (
               <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
@@ -213,7 +204,7 @@ const url = dev_env
   );
 }
 
-function Top() {
+function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendResponse }) {
   return (
     <>
       <div className="flex flex-row justify-between items-center mb-6">
@@ -270,7 +261,7 @@ function Top() {
   )
 }
 
-function QnS() {
+function QnS({ question, score }) {
   return (
     <>
       <div className="mt-6 mb-6 flex flex-row justify-evenly items-center">
@@ -290,7 +281,14 @@ function QnS() {
     </>
   )
 }
-function Responses() {
+function Responses({ written, setWritten, transcript, videoURL, videoRef }) {
+  //text area
+  const textareaRef = useRef(null);
+  const adjustHeight = () => {
+    if (!textareaRef.current) return;
+    textareaRef.current.style.height = "auto";
+    textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+  };
   return (
     <div className="flex gap-4 mb-6 h-auto">
       <div className="flex flex-col w-1/2">
