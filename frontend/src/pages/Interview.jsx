@@ -330,16 +330,6 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
           >
             {transcript}
           </div>
-          <div>
-            {videoURL && (
-              <video
-                ref={videoRef}
-                src={videoURL} 
-                controls
-                className="w-full h-auto"
-              />
-            )}
-          </div>
         </div>
       </div>
       </div>
