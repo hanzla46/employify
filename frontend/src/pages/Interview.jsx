@@ -287,12 +287,15 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
   };
   return (
 
-    <div className="flex gap-4 mb-6 h-auto">
+    <div className="flex flex-col-reverse gap-4 mb-6 h-auto">
+     <div className="w-3/5"> 
       <Webcam
         audio={true}
         ref={webcamRef}
         className="rounded-lg shadow-md w-full"
-      />
+      /> 
+      </div>
+      <div>
       <div className="flex flex-col w-1/2">
         {" "}
         <h3 className="text-gray-700 dark:text-white mb-3">
@@ -338,6 +341,7 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
             )}
           </div>
         </div>
+      </div>
       </div>
     </div>
   )
