@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { handleError, handleSuccess } from "../utils";
 axios.defaults.withCredentials = true; // Force cookies to be sent
 axios.defaults.headers.common["Accept"] = "application/json";
 export const AuthContext = createContext();
@@ -26,7 +27,8 @@ export const AuthProvider = ({ children }) => {
           setUser(null);
         }
       } catch (error) {
-        console.error("Auth check failed69:", error.message);
+        console.error("Auth check failed:", error.message);
+        handleError(res.data.error);
         setUser(null);
       } finally {
         setLoading(false);

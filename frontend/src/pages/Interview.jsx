@@ -1,4 +1,5 @@
 import "regenerator-runtime/runtime";
+import Webcam from "react-webcam";
 import { useEffect, useRef } from "react";
 import axios from "axios";
 import { Bot, Video, Mic, Send } from "lucide-react";
@@ -26,8 +27,10 @@ export function Interview() {
   const [isCompleted, setIsCompleted] = useState(false);
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
+  const webcamRef = useRef(null);
   const [videoRecording, setVideoRecording] = useState(false);
   const [videoURL, setVideoURL] = useState(null);
+  const [recordedChunks, setRecordedChunks] = useState([]);
   const [summary, setSummary] = useState("");
   const startInterview = async () => {
     try {
@@ -57,23 +60,21 @@ export function Interview() {
     SpeechRecognition.stopListening();
     setIsRecording(false);
     stopRecording();
-    let file;
-    if (videoURL) {
-      try {
-        const videoResponse = await fetch(videoURL);
-        const blob = await videoResponse.blob();
-        file = new File([blob], "recorded-video.webm", { type: "video/webm" });
-      } catch (error) {
-        console.error("Error fetching video:", error);
-      }
+    let videoFile = null;
+    if (recordedChunks.length > 0) {
+      const blob = new Blob(recordedChunks, { type: "video/webm" });
+      videoFile = new File([blob], "interview-recording.webm", { type: "video/webm" });
     }
     const formData = new FormData();
     formData.append("question", question);
     formData.append("answer", transcript);
     formData.append("written", written);
-    formData.append("video", file);
+    if (videoFile) {
+      formData.append("video", videoFile);
+    }    
     formData.append("category", category);
     setVideoURL(null);
+    setRecordedChunks([]); 
     try {
       const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
@@ -130,47 +131,40 @@ export function Interview() {
       startRecording();
     }
   };
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-      const mediaRecorder = new MediaRecorder(stream);
-      let chunks = [];
+  const startRecording = () => {
+    setRecordedChunks([]); // Reset previous recordings
+    setVideoURL(null); // Reset video URL
+
+    if (webcamRef.current) {
+      const stream = webcamRef.current.stream;
+      const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
-          chunks.push(event.data);
+          setRecordedChunks((prev) => [...prev, event.data]);
         }
       };
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "video/webm" });
-        setVideoURL(URL.createObjectURL(blob));
-        chunks = [];
+
+      ediaRecorder.onstop = () => {
+        if (recordedChunks.length > 0) {
+          const blob = new Blob(recordedChunks, { type: "video/webm" });
+          const newVideoURL = URL.createObjectURL(blob);
+          setVideoURL(newVideoURL);
+        }
       };
-      mediaRecorder.start();
+
       mediaRecorderRef.current = mediaRecorder;
+      mediaRecorder.start();
       setVideoRecording(true);
-    } catch (error) {
-      console.error("Error accessing media devices:", error);
     }
   };
+
   const stopRecording = () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
-      mediaRecorderRef.current = null;
+      setVideoRecording(false);
     }
-    if (videoRef.current && videoRef.current.srcObject) {
-      const stream = videoRef.current.srcObject;
-      stream.getTracks().forEach((track) => track.stop());
-      videoRef.current.srcObject = null;
-    }
-    setVideoRecording(false);
   };
-
   //everything starts from here
   const start = () => {
     //setIsStarted(true);
@@ -183,13 +177,13 @@ export function Interview() {
           <h1 className="text-3xl font-bold mb-8 dark:text-white">
             AI Mock Interview
           </h1>
-          <ProtectedRoute>
+          {/* <ProtectedRoute> */}
           <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
             <Top start={start} isStarted={isStarted} isCompleted={isCompleted} Record={Record} isRecording={isRecording} handleVideoRecord={handleVideoRecord} sendResponse={sendResponse} />
             {isStarted ? (
               <>
                 <QnS question={question} score={score} />
-                <Responses written={written} setWritten={setWritten} transcript={transcript} videoRef={videoRef} videoURL={videoURL} />
+                <Responses written={written} setWritten={setWritten} transcript={transcript} webcamRef={webcamRef} videoRef={videoRef} videoURL={videoURL} />
               </>
             ) : ('')}
             {isCompleted ? (
@@ -199,7 +193,7 @@ export function Interview() {
             ) : ('')}
             <span className="text-gray-700 dark:text-white">{summary}</span>
           </div>
-          </ProtectedRoute>
+          {/* </ProtectedRoute> */}
         </div>
       </div>
     </div>
@@ -283,7 +277,7 @@ function QnS({ question, score }) {
     </>
   )
 }
-function Responses({ written, setWritten, transcript, videoURL, videoRef }) {
+function Responses({ written, setWritten, transcript, videoURL, videoRef, webcamRef }) {
   //text area
   const textareaRef = useRef(null);
   const adjustHeight = () => {
@@ -292,7 +286,13 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef }) {
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
   return (
+
     <div className="flex gap-4 mb-6 h-auto">
+      <Webcam
+        audio={true}
+        ref={webcamRef}
+        className="rounded-lg shadow-md w-full"
+      />
       <div className="flex flex-col w-1/2">
         {" "}
         <h3 className="text-gray-700 dark:text-white mb-3">
@@ -331,6 +331,7 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef }) {
             {videoURL && (
               <video
                 ref={videoRef}
+                src={videoURL} 
                 controls
                 className="w-full h-auto"
               />
