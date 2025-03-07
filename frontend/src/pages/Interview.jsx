@@ -92,8 +92,9 @@ export function Interview() {
         setIsRecording(true);
         SpeechRecognition.startListening({ continuous: true });
         startRecording();
-        if (response.data.completion) {
+        if (response.data.completion == true || response.data.completion == 'true') {
           setIsCompleted(true);
+          setIsStarted(false);
           return;
         }
       } else {
@@ -185,16 +186,17 @@ export function Interview() {
           {/* <ProtectedRoute> */}
           <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
             <Top start={start} isStarted={isStarted} isCompleted={isCompleted} Record={Record} isRecording={isRecording} handleVideoRecord={handleVideoRecord} sendResponse={sendResponse} />
-            {!isCompleted ? (
+            {isStarted ? (
               <>
                 <QnS question={question} score={score} />
                 <Responses written={written} setWritten={setWritten} transcript={transcript} videoRef={videoRef} videoURL={videoURL} />
               </>
-            ) : (
+            ) : ('')}
+            {isCompleted ? (
               <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
                 Interview Completed
               </h1>
-            )}
+            ) : ('')}
             <span className="text-gray-700 dark:text-white">{summary}</span>
           </div>
           {/* </ProtectedRoute> */}
@@ -204,7 +206,7 @@ export function Interview() {
   );
 }
 
-function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendResponse, isRecording}) {
+function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendResponse, isRecording }) {
   return (
     <>
       <div className="flex flex-row justify-between items-center mb-6">
