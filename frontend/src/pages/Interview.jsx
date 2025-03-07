@@ -14,7 +14,7 @@ const url = dev_env
   ? "http://localhost:8000"
   : "https://employify-backend.vercel.app";
 
-export function Interview() {
+
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isRecording, setIsRecording] = useState(false);
@@ -183,6 +183,7 @@ export function Interview() {
     //setIsStarted(true);
     startInterview();
   };
+  export function Interview() {
   return (
     <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
