@@ -183,7 +183,7 @@ export function Interview() {
           <h1 className="text-3xl font-bold mb-8 dark:text-white">
             AI Mock Interview
           </h1>
-          {/* <ProtectedRoute> */}
+          <ProtectedRoute>
           <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
             <Top start={start} isStarted={isStarted} isCompleted={isCompleted} Record={Record} isRecording={isRecording} handleVideoRecord={handleVideoRecord} sendResponse={sendResponse} />
             {isStarted ? (
@@ -199,7 +199,7 @@ export function Interview() {
             ) : ('')}
             <span className="text-gray-700 dark:text-white">{summary}</span>
           </div>
-          {/* </ProtectedRoute> */}
+          </ProtectedRoute>
         </div>
       </div>
     </div>
