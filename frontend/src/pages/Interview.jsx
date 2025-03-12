@@ -200,15 +200,13 @@ export function Interview() {
               sendResponse={sendResponse}
             />
             {/* {isStarted ? ( */}
-              <div className="flex flex-row justify-between gap-6">
+              <div className="flex flex-row justify-between gap-2">
                 <QnS question={question} score={score} summary={summary} />
+                <VideoComp webcamRef={webcamRef}/>
                 <Responses
                   written={written}
                   setWritten={setWritten}
                   transcript={transcript}
-                  webcamRef={webcamRef}
-                  videoRef={videoRef}
-                  videoURL={videoURL}
                 />
               </div>
             {/* ) : ( */}
@@ -305,17 +303,31 @@ function Top({
 
 function QnS({ question, score, summary }) {
   return (
-    <div className="w-2/5">
-      <div className="mt-1 mb-1 ml-4 flex flex-col border-white dark:border-indigo-600">
-        <div className="g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+    <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+      <div className="m-auto flex flex-col border-white dark:border-indigo-600">
+        <div className="p-4">
           <p className="text-gray-800 dark:text-gray-200">{question ? question : "Question will be shown here"}</p>
         </div>
-        <div className="g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+        <div className="p-4">
           <span className="text-xl text-gray-700 dark:text-white">{score ? score : "0/10"}</span>
         </div>
-        <div className="g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+        <div className="bg-indigo-100 dark:bg-indigo-900/50 p-4">
           <span className="text-gray-800 dark:text-gray-200">{summary ? summary : "Summary will be shown here"}</span>
         </div>
+      </div>
+    </div>
+  );
+}
+function VideoComp ({webcamRef}) {
+  return (
+    <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+      <div className="flex flex-col">
+        <h3 className="text-gray-700 dark:text-white mb-3">Webcam</h3>
+        <Webcam
+          audio={true}
+          ref={webcamRef}
+          className="rounded-lg shadow-md w-full m-auto"
+        />
       </div>
     </div>
   );
@@ -336,14 +348,7 @@ function Responses({
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
   return (
-    <div className="flex flex-col-reverse gap-4 mb-6 h-auto w-2/5">
-      <div>
-        <Webcam
-          audio={true}
-          ref={webcamRef}
-          className="rounded-lg shadow-md w-full"
-        />
-      </div>
+    <div className="flex flex-col gap-4 mb-6 h-auto w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
       <div className="flex-row">
         <div className="flex flex-col">
           {" "}
