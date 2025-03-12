@@ -1,6 +1,6 @@
 import "regenerator-runtime/runtime";
 import Webcam from "react-webcam";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import axios from "axios";
 import { Bot, Video, Mic, Send } from "lucide-react";
 import SpeechRecognition, {
@@ -8,17 +8,15 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import { useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
-import FancyButton from "../components/Button";
 import { handleSuccess, handleError } from "../utils";
-let dev_env = false;
-const url = dev_env
-  ? "http://localhost:8000"
-  : "https://employify-backend.vercel.app";
+import DialogForm from "../components/DialogForm";
+
+const url = "https://employify-backend.vercel.app";
 
 export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
-  const [isRecording, setIsRecording] = useState(false);
+  const [isAudioRecording, setIsAudioRecording] = useState(false);
   const [question, setQuestion] = useState("");
   const [category, setCategory] = useState("");
   const [written, setWritten] = useState("");
@@ -28,27 +26,40 @@ export function Interview() {
   const videoRef = useRef(null);
   const mediaRecorderRef = useRef(null);
   const webcamRef = useRef(null);
-  const [videoRecording, setVideoRecording] = useState(false);
+  const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [videoURL, setVideoURL] = useState(null);
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [summary, setSummary] = useState("");
+  const [interviewData, setInterviewData] = useState({
+    position: "",
+    company: "",
+    industry: "",
+    experience: "",
+  });
+  const [infoBox, setInfoBox] = useState(true);
+  let body = {};
   const startInterview = async () => {
     try {
-      const response = await axios.get(url + "/interview/start", {
-        withCredentials: true,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await axios.get(
+        url + "/interview/start",
+        interviewData,
+        {
+          withCredentials: true,
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
       if (response.data.success) {
         setQuestion(response.data.question);
         setCategory(response.data.category);
         handleSuccess("started!!!!");
         setIsStarted(true);
-        startRecording();
+        startVideoRecording();
         SpeechRecognition.startListening({ continuous: true });
-        setIsRecording(true);
+        setIsAudioRecording(true);
+        setInfoBox(false);
       } else {
         handleError("Error: " + response.data.message);
       }
@@ -61,8 +72,8 @@ export function Interview() {
     if (!transcript && !written) return;
     console.log(transcript);
     SpeechRecognition.stopListening();
-    setIsRecording(false);
-    stopRecording();
+    setIsAudioRecording(false);
+    stopVideoRecording();
     let videoFile = null;
     if (recordedChunks.length > 0) {
       const blob = new Blob(recordedChunks, { type: "video/webm" });
@@ -95,9 +106,9 @@ export function Interview() {
         setSummary(response.data.aiSummary);
         resetTranscript();
         setWritten("");
-        setIsRecording(true);
+        setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
-        startRecording();
+        startVideoRecording();
         if (
           response.data.completion == true ||
           response.data.completion == "true"
@@ -115,15 +126,15 @@ export function Interview() {
   };
 
   //audio
-  const Record = async () => {
-    if (isRecording) {
+  const RecordAudio = async () => {
+    if (isAudioRecording) {
       await SpeechRecognition.stopListening();
-      setIsRecording(false);
+      setIsAudioRecording(false);
       return;
     }
-    if (!isRecording) {
+    if (!isAudioRecording) {
       SpeechRecognition.startListening({ continuous: true });
-      setIsRecording(true);
+      setIsAudioRecording(true);
     }
   };
   if (!browserSupportsSpeechRecognition) {
@@ -132,14 +143,16 @@ export function Interview() {
 
   //video recording
   const handleVideoRecord = () => {
-    if (videoRecording) {
-      stopRecording();
+    if (isVideoRecording) {
+      stopVideoRecording();
+      setIsVideoRecording(false);
     }
-    if (!videoRecording) {
-      startRecording();
+    if (!isVideoRecording) {
+      startVideoRecording();
+      setIsVideoRecording(true);
     }
   };
-  const startRecording = () => {
+  const startVideoRecording = () => {
     setRecordedChunks([]); // Reset previous recordings
     setVideoURL(null); // Reset video URL
 
@@ -155,7 +168,7 @@ export function Interview() {
         }
       };
 
-      ediaRecorder.onstop = () => {
+      mediaRecorder.onstop = () => {
         if (recordedChunks.length > 0) {
           const blob = new Blob(recordedChunks, { type: "video/webm" });
           const newVideoURL = URL.createObjectURL(blob);
@@ -165,14 +178,14 @@ export function Interview() {
 
       mediaRecorderRef.current = mediaRecorder;
       mediaRecorder.start();
-      setVideoRecording(true);
+      setIsVideoRecording(true);
     }
   };
 
-  const stopRecording = () => {
+  const stopVideoRecording = () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
-      setVideoRecording(false);
+      setIsVideoRecording(false);
     }
   };
   //everything starts from here
@@ -187,40 +200,51 @@ export function Interview() {
           <h1 className="text-3xl font-bold mb-3 dark:text-white">
             AI Mock Interview
           </h1>
-          {/* <ProtectedRoute> */}
-          <div className="flex-col bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-            <Top
-              start={start}
-              isStarted={isStarted}
-              isCompleted={isCompleted}
-              Record={Record}
-              videoRecording={videoRecording}
-              isRecording={isRecording}
-              handleVideoRecord={handleVideoRecord}
-              sendResponse={sendResponse}
-            />
-            {/* {isStarted ? ( */}
-              <div className="flex flex-row justify-between gap-2">
-                <QnS question={question} score={score} summary={summary} />
-                <VideoComp webcamRef={webcamRef}/>
-                <Responses
-                  written={written}
-                  setWritten={setWritten}
-                  transcript={transcript}
-                />
-              </div>
-            {/* ) : ( */}
-              {/* "" */}
-            {/* )} */}
-            {isCompleted ? (
-              <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
-                Interview Completed
-              </h1>
-            ) : (
-              ""
-            )}
-          </div>
-          {/* </ProtectedRoute> */}
+          <ProtectedRoute>
+            <div className="relative flex-col bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
+              {infoBox && (
+                <div className="fixed overflow-x-hidden overflow-y-auto inset-0 top-14 left-0 w-full md:w-full h-full flex items-center justify-center z-50">
+                  <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4">
+                    <DialogForm
+                      start={start}
+                      setInterviewData={setInterviewData}
+                      interviewData={interviewData}
+                    />
+                  </div>
+                </div>
+              )}
+              <Top
+                start={start}
+                isStarted={isStarted}
+                isCompleted={isCompleted}
+                RecordAudio={RecordAudio}
+                videoRecording={isVideoRecording}
+                isAudioRecording={isAudioRecording}
+                handleVideoRecord={handleVideoRecord}
+                sendResponse={sendResponse}
+              />
+              {isStarted ? (
+                <div className="flex flex-row justify-between gap-2">
+                  <QnS question={question} score={score} summary={summary} />
+                  <VideoComp webcamRef={webcamRef} />
+                  <Responses
+                    written={written}
+                    setWritten={setWritten}
+                    transcript={transcript}
+                  />
+                </div>
+              ) : (
+                ""
+              )}
+              {isCompleted ? (
+                <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
+                  Interview Completed
+                </h1>
+              ) : (
+                ""
+              )}
+            </div>
+          </ProtectedRoute>
         </div>
       </div>
     </div>
@@ -228,13 +252,12 @@ export function Interview() {
 }
 
 function Top({
-  start,
   isStarted,
   isCompleted,
   handleVideoRecord,
-  Record,
+  RecordAudio,
   sendResponse,
-  isRecording,
+  isAudioRecording,
   videoRecording,
 }) {
   return (
@@ -253,23 +276,16 @@ function Top({
             </p>
           </div>
         </div>
-        <div onClick={start} id="startBtn">
-          {!isStarted && (
-            <div onClick={start}>
-              <FancyButton text="Start Interview" />
-            </div>
-          )}
-        </div>
         <div className="flex items-center gap-4 mr-6">
           <button
             disabled={!isStarted || isCompleted}
             aria-label="Toggle microphone"
             className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${
-              isRecording
+              isAudioRecording
                 ? "text-green-600 md:text-green-600"
                 : "text-red-600 md:text-red-600"
             } ${!isStarted || isCompleted ? "text-black" : ""}`}
-            onClick={Record}
+            onClick={RecordAudio}
           >
             <Mic className="h-6 w-6" />
           </button>
@@ -306,19 +322,25 @@ function QnS({ question, score, summary }) {
     <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
       <div className="m-auto flex flex-col border-white dark:border-indigo-600">
         <div className="p-4">
-          <p className="text-gray-800 dark:text-gray-200">{question ? question : "Question will be shown here"}</p>
+          <p className="text-gray-800 dark:text-gray-200">
+            {question ? question : "Question will be shown here"}
+          </p>
         </div>
         <div className="p-4">
-          <span className="text-xl text-gray-700 dark:text-white">{score ? score : "0/10"}</span>
+          <span className="text-xl text-gray-700 dark:text-white">
+            {score ? score : "0/10"}
+          </span>
         </div>
         <div className="bg-indigo-100 dark:bg-indigo-900/50 p-4">
-          <span className="text-gray-800 dark:text-gray-200">{summary ? summary : "Summary will be shown here"}</span>
+          <span className="text-gray-800 dark:text-gray-200">
+            {summary ? summary : "Summary will be shown here"}
+          </span>
         </div>
       </div>
     </div>
   );
 }
-function VideoComp ({webcamRef}) {
+function VideoComp({ webcamRef }) {
   return (
     <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
       <div className="flex flex-col">
@@ -326,7 +348,7 @@ function VideoComp ({webcamRef}) {
         <Webcam
           audio={true}
           ref={webcamRef}
-          className="rounded-lg shadow-md w-full m-auto"
+          className="rounded-lg shadow-md w-full m-auto transform -scale-x-100"
         />
       </div>
     </div>
