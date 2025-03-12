@@ -66,7 +66,9 @@ export function Interview() {
     let videoFile = null;
     if (recordedChunks.length > 0) {
       const blob = new Blob(recordedChunks, { type: "video/webm" });
-      videoFile = new File([blob], "interview-recording.webm", { type: "video/webm" });
+      videoFile = new File([blob], "interview-recording.webm", {
+        type: "video/webm",
+      });
     }
     const formData = new FormData();
     formData.append("question", question);
@@ -96,7 +98,10 @@ export function Interview() {
         setIsRecording(true);
         SpeechRecognition.startListening({ continuous: true });
         startRecording();
-        if (response.data.completion == true || response.data.completion == 'true') {
+        if (
+          response.data.completion == true ||
+          response.data.completion == "true"
+        ) {
           setIsCompleted(true);
           setIsStarted(false);
           return;
@@ -140,7 +145,9 @@ export function Interview() {
 
     if (webcamRef.current) {
       const stream = webcamRef.current.stream;
-      const mediaRecorder = new MediaRecorder(stream, { mimeType: "video/webm" });
+      const mediaRecorder = new MediaRecorder(stream, {
+        mimeType: "video/webm",
+      });
 
       mediaRecorder.ondataavailable = (event) => {
         if (event.data.size > 0) {
@@ -176,25 +183,44 @@ export function Interview() {
   return (
     <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8 dark:text-white">
+        <div className="w-4/5 mx-auto">
+          <h1 className="text-3xl font-bold mb-3 dark:text-white">
             AI Mock Interview
           </h1>
           {/* <ProtectedRoute> */}
-          <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-            <Top start={start} isStarted={isStarted} isCompleted={isCompleted} Record={Record} videoRecording={videoRecording} isRecording={isRecording} handleVideoRecord={handleVideoRecord} sendResponse={sendResponse} />
-            {isStarted ? (
-              <>
-                <QnS question={question} score={score} />
-                <Responses written={written} setWritten={setWritten} transcript={transcript} webcamRef={webcamRef} videoRef={videoRef} videoURL={videoURL} />
-              </>
-            ) : ('')}
+          <div className="flex-col bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
+            <Top
+              start={start}
+              isStarted={isStarted}
+              isCompleted={isCompleted}
+              Record={Record}
+              videoRecording={videoRecording}
+              isRecording={isRecording}
+              handleVideoRecord={handleVideoRecord}
+              sendResponse={sendResponse}
+            />
+            {/* {isStarted ? ( */}
+              <div className="flex-row w-4/5">
+                <QnS question={question} score={score} summary={summary} />
+                <Responses
+                  written={written}
+                  setWritten={setWritten}
+                  transcript={transcript}
+                  webcamRef={webcamRef}
+                  videoRef={videoRef}
+                  videoURL={videoURL}
+                />
+              </div>
+            {/* ) : ( */}
+              {/* "" */}
+            {/* )} */}
             {isCompleted ? (
               <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
                 Interview Completed
               </h1>
-            ) : ('')}
-            <span className="text-gray-700 dark:text-white">{summary}</span>
+            ) : (
+              ""
+            )}
           </div>
           {/* </ProtectedRoute> */}
         </div>
@@ -203,7 +229,16 @@ export function Interview() {
   );
 }
 
-function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendResponse, isRecording , videoRecording}) {
+function Top({
+  start,
+  isStarted,
+  isCompleted,
+  handleVideoRecord,
+  Record,
+  sendResponse,
+  isRecording,
+  videoRecording,
+}) {
   return (
     <>
       <div className="flex flex-row justify-between items-center mb-6">
@@ -231,7 +266,11 @@ function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendRes
           <button
             disabled={!isStarted || isCompleted}
             aria-label="Toggle microphone"
-            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${isRecording ? "text-green-600 md:text-green-600" : "text-red-600 md:text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
+            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${
+              isRecording
+                ? "text-green-600 md:text-green-600"
+                : "text-red-600 md:text-red-600"
+            } ${!isStarted || isCompleted ? "text-black" : ""}`}
             onClick={Record}
           >
             <Mic className="h-6 w-6" />
@@ -240,7 +279,11 @@ function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendRes
             disabled={!isStarted || isCompleted}
             aria-label="Toggle video"
             onClick={handleVideoRecord}
-            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${videoRecording ? "text-green-600 md:text-green-600" : "text-red-600 md:text-red-600"} ${!isStarted || isCompleted ? "text-black" : ""}`}
+            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${
+              videoRecording
+                ? "text-green-600 md:text-green-600"
+                : "text-red-600 md:text-red-600"
+            } ${!isStarted || isCompleted ? "text-black" : ""}`}
           >
             <Video className="h-6 w-6" />
           </button>
@@ -257,30 +300,34 @@ function Top({ start, isStarted, isCompleted, handleVideoRecord, Record, sendRes
         </div>
       </div>
     </>
-  )
+  );
 }
 
-function QnS({ question, score }) {
+function QnS({ question, score, summary }) {
   return (
     <>
-      <div className="mt-6 mb-6 flex flex-row justify-evenly items-center">
-        <div className="w-1/2">
-          <div className="bg-indigo-100 dark:bg-indigo-900/50 rounded-lg p-4 max-w-[80%]">
-            <p className="text-gray-800 dark:text-gray-200">
-              {question}
-            </p>
-          </div>
+      <div className="mt-1 mb-1 ml-4 flex flex-col border-white dark:border-indigo-600">
+        <div className="w-[90%] g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+          <p className="text-gray-800 dark:text-gray-200">{question ? question : "Question will be shown here"}</p>
         </div>
-        <div className="w-1/2">
-          <span className="text-xl text-gray-700 dark:text-white">
-            {score}
-          </span>
+        <div className="w-[90%] g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+          <span className="text-xl text-gray-700 dark:text-white">{score ? score : "0/10"}</span>
+        </div>
+        <div className="w-[90%] g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+          <span className="text-gray-800 dark:text-gray-200">{summary ? summary : "Summary will be shown here"}</span>
         </div>
       </div>
     </>
-  )
+  );
 }
-function Responses({ written, setWritten, transcript, videoURL, videoRef, webcamRef }) {
+function Responses({
+  written,
+  setWritten,
+  transcript,
+  videoURL,
+  videoRef,
+  webcamRef,
+}) {
   //text area
   const textareaRef = useRef(null);
   const adjustHeight = () => {
@@ -289,17 +336,16 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
   return (
-
     <div className="flex flex-col-reverse gap-4 mb-6 h-auto">
-      <div className="w-3/5">
+      <div className="w-[90%]">
         <Webcam
           audio={true}
           ref={webcamRef}
           className="rounded-lg shadow-md w-full"
         />
       </div>
-      <div className='flex-row'>
-        <div className="flex flex-col w-1/2">
+      <div className="flex-row">
+        <div className="flex flex-col">
           {" "}
           <h3 className="text-gray-700 dark:text-white mb-3">
             Write (if needed)
@@ -315,7 +361,7 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
           />
           {/* <FancyButton text={"reset"} onClick={() => resetTranscript()} /> */}
         </div>
-        <div className="flex flex-col w-1/2">
+        <div className="flex flex-col">
           {" "}
           <h3 className="text-gray-700 dark:text-white mb-3">
             Recorded Response
@@ -337,5 +383,5 @@ function Responses({ written, setWritten, transcript, videoURL, videoRef, webcam
         </div>
       </div>
     </div>
-  )
+  );
 }
