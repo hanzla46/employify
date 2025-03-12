@@ -200,7 +200,7 @@ export function Interview() {
               sendResponse={sendResponse}
             />
             {/* {isStarted ? ( */}
-              <div className="flex-row w-[90%]">
+              <div className="flex flex-row justify-between gap-6">
                 <QnS question={question} score={score} summary={summary} />
                 <Responses
                   written={written}
@@ -305,19 +305,19 @@ function Top({
 
 function QnS({ question, score, summary }) {
   return (
-    <>
-      <div className="mt-1 mb-1 ml-4 flex flex-col border-white dark:border-indigo-600 w-2/5">
-        <div className="w-[90%] g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+    <div className="w-2/5">
+      <div className="mt-1 mb-1 ml-4 flex flex-col border-white dark:border-indigo-600">
+        <div className="g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
           <p className="text-gray-800 dark:text-gray-200">{question ? question : "Question will be shown here"}</p>
         </div>
-        <div className="w-[90%] g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+        <div className="g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
           <span className="text-xl text-gray-700 dark:text-white">{score ? score : "0/10"}</span>
         </div>
-        <div className="w-[90%] g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
+        <div className="g-indigo-100 dark:bg-indigo-900/50 rounded-lg p-2">
           <span className="text-gray-800 dark:text-gray-200">{summary ? summary : "Summary will be shown here"}</span>
         </div>
       </div>
-    </>
+    </div>
   );
 }
 function Responses({
@@ -337,7 +337,7 @@ function Responses({
   };
   return (
     <div className="flex flex-col-reverse gap-4 mb-6 h-auto w-2/5">
-      <div className="w-[90%]">
+      <div>
         <Webcam
           audio={true}
           ref={webcamRef}
