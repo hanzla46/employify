@@ -37,7 +37,6 @@ export function Interview() {
     experience: "",
   });
   const [infoBox, setInfoBox] = useState(true);
-  let body = {};
   const startInterview = async () => {
     try {
       const response = await axios.get(
@@ -181,7 +180,6 @@ export function Interview() {
       setIsVideoRecording(true);
     }
   };
-
   const stopVideoRecording = () => {
     if (mediaRecorderRef.current) {
       mediaRecorderRef.current.stop();
@@ -190,60 +188,65 @@ export function Interview() {
   };
   //everything starts from here
   const start = () => {
-    //setIsStarted(true);
     startInterview();
   };
   return (
     <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
-        <div className="w-4/5 mx-auto">
+        <div className="w-[90%] mx-auto">
           <h1 className="text-3xl font-bold mb-3 dark:text-white">
             AI Mock Interview
           </h1>
-          <ProtectedRoute>
-            <div className="relative flex-col bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-              {infoBox && (
-                <div className="fixed overflow-x-hidden overflow-y-auto inset-0 top-14 left-0 w-full md:w-full h-full flex items-center justify-center z-50">
-                  <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4">
-                    <DialogForm
-                      start={start}
-                      setInterviewData={setInterviewData}
-                      interviewData={interviewData}
-                    />
-                  </div>
+          <ProtectedRoute>     
+          <div className="relative flex flex-col bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
+            <Top
+              start={start}
+              isStarted={isStarted}
+              isCompleted={isCompleted}
+              RecordAudio={RecordAudio}
+              videoRecording={isVideoRecording}
+              isAudioRecording={isAudioRecording}
+              handleVideoRecord={handleVideoRecord}
+              sendResponse={sendResponse}
+            />
+            {infoBox && (
+              <div className="sticky overflow-x-hidden overflow-y-auto -top-5 -left-10 w-96 md:w-full h-full flex justify-center z-20">
+                <div>
+                  <Instructions1 />
                 </div>
-              )}
-              <Top
-                start={start}
-                isStarted={isStarted}
-                isCompleted={isCompleted}
-                RecordAudio={RecordAudio}
-                videoRecording={isVideoRecording}
-                isAudioRecording={isAudioRecording}
-                handleVideoRecord={handleVideoRecord}
-                sendResponse={sendResponse}
-              />
-              {isStarted ? (
-                <div className="flex flex-row justify-between gap-2">
-                  <QnS question={question} score={score} summary={summary} />
-                  <VideoComp webcamRef={webcamRef} />
-                  <Responses
-                    written={written}
-                    setWritten={setWritten}
-                    transcript={transcript}
+                <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4">
+                  <DialogForm
+                    start={start}
+                    setInterviewData={setInterviewData}
+                    interviewData={interviewData}
                   />
                 </div>
-              ) : (
-                ""
-              )}
-              {isCompleted ? (
-                <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
-                  Interview Completed
-                </h1>
-              ) : (
-                ""
-              )}
-            </div>
+                <div>
+                  <Instructions2 />
+                </div>
+              </div>
+            )}
+            {isStarted ? (
+              <div className="flex flex-row justify-between gap-2">
+                <QnS question={question} score={score} summary={summary} />
+                <VideoComp webcamRef={webcamRef} />
+                <Responses
+                  written={written}
+                  setWritten={setWritten}
+                  transcript={transcript}
+                />
+              </div>
+            ) : (
+              ""
+            )}
+            {isCompleted ? (
+              <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
+                Interview Completed
+              </h1>
+            ) : (
+              ""
+            )}
+          </div>
           </ProtectedRoute>
         </div>
       </div>
@@ -317,6 +320,50 @@ function Top({
   );
 }
 
+function Instructions1() {
+  return (
+    <div className="flex flex-col w-[30%] md:w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4 mt-32 mr-5">
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Be Professional & Confident
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Understand the Role
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Use the STAR Method
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Demonstrate Problem-Solving
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Manage Your Time
+      </span>
+      </div>
+  );
+}
+
+function Instructions2(){
+  return (
+    <div className="flex flex-col w-[30%] md:w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4 mt-32 ml-5">
+      <span className="text-2xl text-gray-700 dark:text-white justify-center m-1">
+     Prepare for common questions
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Your background & experience
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Strengths & weaknesses
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Conflict resolution
+      </span>
+      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
+      Leadership & teamwork
+      </span>
+    </div>
+  );
+}
+
 function QnS({ question, score, summary }) {
   return (
     <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
@@ -340,6 +387,7 @@ function QnS({ question, score, summary }) {
     </div>
   );
 }
+
 function VideoComp({ webcamRef }) {
   return (
     <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
@@ -354,15 +402,8 @@ function VideoComp({ webcamRef }) {
     </div>
   );
 }
-function Responses({
-  written,
-  setWritten,
-  transcript,
-  videoURL,
-  videoRef,
-  webcamRef,
-}) {
-  //text area
+
+function Responses({ written, setWritten, transcript, }) {
   const textareaRef = useRef(null);
   const adjustHeight = () => {
     if (!textareaRef.current) return;

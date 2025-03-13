@@ -23,7 +23,7 @@ const options = {
 
 export default function DialogForm({ start, setInterviewData, interviewData }) {
   return (
-    <Card className="p-6 mt-10 space-y-6">
+    <Card className="p-6 mt-10 space-y-6 w-72">
       <CardContent className="space-y-6">
         {/* Text Input */}
         <div className="space-y-1">
