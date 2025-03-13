@@ -411,11 +411,11 @@ function Responses({ written, setWritten, transcript, }) {
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
   return (
-    <div className="flex flex-col gap-4 mb-6 h-auto w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
+    <div className="flex flex-col gap-4 mb-6 h-auto w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-3">
       <div className="flex-row">
-        <div className="flex flex-col">
+        <div className="flex flex-col mb-4">
           {" "}
-          <h3 className="text-gray-700 dark:text-white mb-3">
+          <h3 className="text-gray-700 dark:text-white mb-1">
             Write (if needed)
           </h3>{" "}
           <textarea
@@ -431,7 +431,7 @@ function Responses({ written, setWritten, transcript, }) {
         </div>
         <div className="flex flex-col">
           {" "}
-          <h3 className="text-gray-700 dark:text-white mb-3">
+          <h3 className="text-gray-700 dark:text-white mb-1">
             Recorded Response
           </h3>{" "}
           <div className="h-auto w-full border rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
