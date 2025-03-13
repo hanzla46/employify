@@ -10,6 +10,7 @@ import { Card, CardContent } from "./ui/card";
 import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import FancyButton from "./Button";
+import { handleError } from "../utils";
 
 const options = {
   company: ["Multinational", "Midsized", "Startup"],
@@ -39,6 +40,10 @@ const options = {
 
 export default function DialogForm({ start, setInterviewData, interviewData }) {
   const startIt = () => {
+    if(interviewData.position === "" || interviewData.company === "" || interviewData.industry === "" || interviewData.experience === ""){
+        handleError("Please fill all the fields");
+        return;
+        }
     start();
   }
   return (
