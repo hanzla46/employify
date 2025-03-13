@@ -101,7 +101,7 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
         </div>
 
         <div className="pt-4">
-          <FancyButton text="Start Interview" />
+          <FancyButton onClick={start} text="Start Interview" />
         </div>
       </CardContent>
     </Card>
