@@ -38,7 +38,7 @@ const options = {
 };
 
 export default function DialogForm({ start, setInterviewData, interviewData }) {
-  function startIt() {
+  const startIt = () => {
     start();
   }
   return (
@@ -133,8 +133,8 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
           </Select>
         </div>
 
-        <div className="pt-4">
-          <FancyButton onClick={startIt} text="Start Interview" />
+        <div className="pt-4" onClick={startIt} >
+          <FancyButton text="Start Interview" />
         </div>
       </CardContent>
     </Card>
