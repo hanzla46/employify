@@ -6,8 +6,15 @@ import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
 
 export function Signup() {
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
   const { signup } = useContext(AuthContext);
+  const navigate = useNavigate();
+  if(user){
+      handleSuccess("You are already logged in \n redirecting to account page...");
+      setTimeout(() => {
+        navigate("/account");
+      }, 3500);
+    }
   const [signupInfo, setSignupInfo] = useState({
     name: "",
     email: "",
@@ -131,8 +138,6 @@ export function Signup() {
     
     return nameValid && emailValid && passwordValid && confirmPasswordValid;
   };
-
-  const navigate = useNavigate();
   
   const handleSignup = async (e) => {
     e.preventDefault();

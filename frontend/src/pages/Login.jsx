@@ -7,7 +7,14 @@ import FancyButton from "../components/Button";
 
 export function Login() {
   const { login } = useContext(AuthContext);
-  const { setUser } = useContext(AuthContext);
+  const { user, setUser } = useContext(AuthContext);
+  const navigate = useNavigate();
+  if(user){
+    handleSuccess("You are already logged in \n redirecting to account page...");
+    setTimeout(() => {
+      navigate("/account");
+    }, 3500);
+  }
   const [loginInfo, setLoginInfo] = useState({
     email: "",
     password: "",
@@ -69,8 +76,6 @@ export function Login() {
     
     return emailValid && passwordValid;
   };
-
-  const navigate = useNavigate();
   
   const handleLogin = async (e) => {
     e.preventDefault();
