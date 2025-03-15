@@ -1,22 +1,21 @@
 import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ToastContainer } from "react-toastify";
 import { handleError, handleSuccess } from "../utils";
 import { AuthContext } from "../Context/AuthContext";
 import FancyButton from "../components/Button";
 
 export function Login() {
   const { login } = useContext(AuthContext);
-  const { user, setUser } = useContext(AuthContext);
+  const { user,loading, setUser } = useContext(AuthContext);
   const navigate = useNavigate();
   useEffect(() => {
     if (user) {
-      handleSuccess("Redirecting to account page...");
+      handleSuccess("Already loggedin \n Redirecting to account page...");
       setTimeout(() => {
         navigate("/account");
       }, 3500);
     }
-  });
+  }, []);
   const [loginInfo, setLoginInfo] = useState({
     email: "",
     password: "",
@@ -194,7 +193,6 @@ export function Login() {
           </p>
         </div>
       </div>
-      <ToastContainer />
     </div>
   );
 }

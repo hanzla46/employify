@@ -13,7 +13,8 @@ import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup";
 import { Account } from "./pages/Account.jsx";
 import { AuthProvider } from "./Context/AuthContext.jsx";
-import {SkillsProvider} from "./Context/SkillsContext.jsx"
+import { SkillsProvider } from "./Context/SkillsContext.jsx";
+import { ToastContainer } from "./utils.js";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -33,28 +34,31 @@ function App() {
   }, [darkMode]);
 
   return (
-    <AuthProvider>
-      <SkillsProvider>
-        <Router>
-          <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
-            <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-            <Routes>
-              <Route path="/" element={<Home />} />
-              <Route path="/account" element={<Account />} />
-              <Route path="/home" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/interview" element={<Interview />} />
-              <Route path="/skills" element={<Skills />} />
-              <Route path="/jobs" element={<Jobs />} />
-              <Route path="/pricing" element={<Pricing />} />
-              <Route path="/about" element={<About />} />
-            </Routes>
-            <Footer />
-          </div>
-        </Router>
-      </SkillsProvider>
-    </AuthProvider>
+    <>
+      <ToastContainer />
+      <AuthProvider>
+        <SkillsProvider>
+          <Router>
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+              <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+              <Routes>
+                <Route path="/" element={<Home />} />
+                <Route path="/account" element={<Account />} />
+                <Route path="/home" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/interview" element={<Interview />} />
+                <Route path="/skills" element={<Skills />} />
+                <Route path="/jobs" element={<Jobs />} />
+                <Route path="/pricing" element={<Pricing />} />
+                <Route path="/about" element={<About />} />
+              </Routes>
+              <Footer />
+            </div>
+          </Router>
+        </SkillsProvider>
+      </AuthProvider>
+    </>
   );
 }
 
