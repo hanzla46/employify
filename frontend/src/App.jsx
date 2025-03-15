@@ -15,6 +15,7 @@ import { Account } from "./pages/Account.jsx";
 import { AuthProvider } from "./Context/AuthContext.jsx";
 import { SkillsProvider } from "./Context/SkillsContext.jsx";
 import { ToastContainer } from "./utils.js";
+import { SpeedInsights } from "@vercel/speed-insights/next"
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -58,6 +59,7 @@ function App() {
           </Router>
         </SkillsProvider>
       </AuthProvider>
+      <SpeedInsights />
     </>
   );
 }
