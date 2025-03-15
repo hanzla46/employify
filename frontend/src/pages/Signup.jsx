@@ -159,7 +159,7 @@ export function Signup() {
         handleSuccess("Signed up successfully");
         setTimeout(() => {
           navigate("/");
-        }, 2500);
+        }, 1000);
       } else {
         handleError(res.message);
       }

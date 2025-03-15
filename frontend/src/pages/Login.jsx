@@ -94,7 +94,7 @@ export function Login() {
         handleSuccess("Logged in Successfully");
         setTimeout(() => {
           navigate("/");
-        }, 2500);
+        }, 1000);
       } else {
         handleError(res.message);
       }

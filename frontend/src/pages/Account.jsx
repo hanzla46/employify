@@ -26,7 +26,7 @@ export function Account() {
       const res = await logout();
       if (res.success) {
         handleSuccess("Logged out successfully");
-        setTimeout(() => navigate("/"), 2000);
+        setTimeout(() => navigate("/"), 1000);
       }
     } catch (error) {
       console.error("Logout failed", error);
