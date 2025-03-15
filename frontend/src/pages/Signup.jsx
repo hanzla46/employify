@@ -27,6 +27,15 @@ export function Signup() {
     if (!name || !email || !password) {
       return handleError("All fields are required!");
     }
+    if(password.length < 8){
+      return handleError("Password must be atleast 8 characters long");
+    }
+    if(name.length < 3){
+      return handleError("Name must be atleast 3 characters long");
+    }
+    if(name.length > 20){ 
+      return handleError("Name must be less than 20 characters long");
+    }
     try {
       const res = await signup(name, email, password);
       if (res.success) {

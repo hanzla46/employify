@@ -9,7 +9,11 @@ import FancyButton from "./Button";
 export function Navbar({ darkMode, setDarkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useContext(AuthContext);
-
+  let firstName = "";
+  if (user) {
+    let Name = user.name.split(" ");
+    firstName = Name[0].slice(0,8);
+  }
   const navItems = [
     { path: "/", label: "Home" },
     { path: "/interview", label: "AI Interview" },
@@ -19,7 +23,7 @@ export function Navbar({ darkMode, setDarkMode }) {
     { path: "/about", label: "About" },
     {
       path: user ? "/account" : "/signup",
-      label: user ? user.name : <FancyButton text={"Sign Up"} />,
+      label: user ? firstName : <FancyButton text={"Sign Up"} />,
     },
   ];
 
@@ -49,7 +53,13 @@ export function Navbar({ darkMode, setDarkMode }) {
                   }`
                 }
               >
-             <div className="flex flex-row">   {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label} </div>
+                <div className="flex flex-row">
+                  {" "}
+                  {item.path === "/account" && (
+                    <UserRoundCog className="mr-1" />
+                  )}{" "}
+                  {item.label}{" "}
+                </div>
               </NavLink>
             ))}
             {/* Theme Toggle for Desktop */}
@@ -90,7 +100,13 @@ export function Navbar({ darkMode, setDarkMode }) {
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <div className="flex flex-row">   {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label} </div>
+              <div className="flex flex-row">
+                {" "}
+                {item.path === "/account" && (
+                  <UserRoundCog className="mr-1" />
+                )}{" "}
+                {item.label}{" "}
+              </div>
             </NavLink>
           ))}
           {/* Theme Toggle BELOW the Menu Items */}
