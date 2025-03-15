@@ -58,7 +58,7 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
           <Input
             type="text"
             placeholder="Position or Role"
-            className="pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
+            className="pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 dark:text-white rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             value={interviewData.position}
             onChange={(e) =>
               setInterviewData((prev) => ({
