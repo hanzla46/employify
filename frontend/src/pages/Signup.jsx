@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer } from "react-toastify";
 import { AuthContext } from "../Context/AuthContext";
@@ -9,12 +9,14 @@ export function Signup() {
   const { user, setUser } = useContext(AuthContext);
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
+  useEffect(() => {
   if(user){
-      handleSuccess("You are already logged in \n redirecting to account page...");
+      handleSuccess("Redirecting to account page...");
       setTimeout(() => {
         navigate("/account");
       }, 3500);
     }
+  });
   const [signupInfo, setSignupInfo] = useState({
     name: "",
     email: "",
