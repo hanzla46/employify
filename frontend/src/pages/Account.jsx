@@ -13,7 +13,7 @@ import {
   History,
   Moon,
   Sun,
-  UserRoundCog
+  CircleUserRound
 } from "lucide-react";
 
 export function Account() {
@@ -59,7 +59,7 @@ export function Account() {
               <div className="bg-white dark:bg-gray-800 rounded-lg shadow-md p-6">
                 <div className="flex flex-col items-center pb-6">
                   {userData.avatar === "404" ? (
-                    <UserRoundCog className="w-32 h-32 rounded-full mb-4 border-4 border-primary-500"/>
+                    <CircleUserRound className="w-32 h-32 rounded-full mb-4 p-2 border-4 border-primary-500"/>
                   ) : (
                     <img
                       src={userData.avatar}
