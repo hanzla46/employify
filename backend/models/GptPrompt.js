@@ -38,6 +38,12 @@ const GeneratePrompt = (interview) => {
   ---
 
   **Input Data:**
+  - **Current interview details:**
+    - *Position: * ${interview.position || "N/A"}
+    - *Company: * ${interview.company || "N/A"}
+    - *Experience Level (years) :* ${interview.experience || "N/A"}
+    - *Industry: * ${interview.industry || "N/A"}
+
   - **Previous Questions and Answers:**
   ${interview.questions && interview.questions.length > 0 ? 
     interview.questions
@@ -71,13 +77,14 @@ const GeneratePrompt = (interview) => {
 
   \`\`\`json
   { 
-    "aiSummary": "[A concise summary of your assessment of the candidate's overall performance based on all previous questions, answers, and facial expressions, incorporating both verbal and nonverbal cues.]",
+    "aiSummary": "[A concise summary of your assessment of the candidate's overall performance based on all previous questions, answers, and facial expressions, incorporating both verbal and nonverbal cues. This should include strengths, weaknesses, and any areas of concern. Provide constructive feedback and recommendations for improvement. WRITE it in the way that you are talking directly to the candidate.]",
     "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression results.",
     "generated_question": "[The new follow-up question you have generated.]",
     "question_category": "[Category of the question you generated.]",
     "hypothetical_response": "[A realistic example of how the candidate might answer the new question, considering their communication style, level of experience, and emotional cues.]",
-    "score": "[Updated scores based on the latest question assessment.]"
-    "completed": "[true/false]"
+    "score": "[scores of the latest question assessment.]",
+    "overallScore": "[The updated overall score of the candidate's whole interview.]",
+    "completed": "[true/false] when you have asked 12-15 questions, it should be true, otherwise false."
   }
   \`\`\`
 

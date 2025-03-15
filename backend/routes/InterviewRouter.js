@@ -5,7 +5,7 @@ const {
 const ensureAuthenticated = require("../middlewares/Auth");
 const upload = require("../middlewares/uploadMulter");
 const router = require("express").Router();
-router.get("/start", ensureAuthenticated, startInterview);
+router.post("/start", ensureAuthenticated, startInterview);
 router.post(
   "/continue",
   ensureAuthenticated,

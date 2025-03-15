@@ -4,7 +4,7 @@ const questionSchema = new mongoose.Schema({
   question: { type: String, required: true },
   answer: { type: String, required: true },
   category: { type: String, required: true },
-  score: { type: Number, default: null },
+  score: { type: String, default: "0" },
   analysis: { type: String, default: "" },
   facialAnalysis: [
     {
@@ -26,6 +26,10 @@ const interviewSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   status: { type: String, default: "" },
   startTime: { type: Date, default: Date.now },
+  position: { type: String, required: true },
+  company: { type: String, required: true },
+  experience: { type: String, required: true },
+  industry: { type: String, required: true },
   questions: { type: [questionSchema], default: [] },
   skills: [
     {
@@ -38,7 +42,7 @@ const interviewSchema = new mongoose.Schema({
       experienceYears: { type: Number, required: true },
     },
   ],
-  overallScore: { type: Number, default: 0 },
+  overallScore: { type: String, default: "0" },
   aiSummary: { type: String, default: "" },
 });
 

@@ -42,9 +42,9 @@ export function Interview() {
   
   const startInterview = async () => {
     try {
-      const response = await axios.get(
+      const response = await axios.post(
         url + "/interview/start",
-        interviewData,
+        { interviewData },
         {
           withCredentials: true,
           headers: {
@@ -112,8 +112,8 @@ export function Interview() {
         SpeechRecognition.startListening({ continuous: true });
         startVideoRecording();
         if (
-          response.data.completion == true ||
-          response.data.completion == "true"
+          response.data.completed == true ||
+          response.data.completed == "true"
         ) {
           setIsCompleted(true);
           setIsStarted(false);
