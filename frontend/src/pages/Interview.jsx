@@ -290,7 +290,7 @@ export function Interview() {
                     Interview Completed
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300 text-center max-w-md text-lg">
-                    Congratulations! You've successfully completed your mock interview. Review your performance and feedback above.
+                    Congratulations! You've successfully completed your mock interview. Review your performance and feedback: {summary}
                   </p>
                   <button 
                     onClick={() => {setIsCompleted(false); setInfoBox(true);}}
