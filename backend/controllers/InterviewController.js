@@ -149,7 +149,8 @@ const continueInterview = async (req, res) => {
       success: true,
       completed: completed,
       score:overallScore,
-      result
+      result,
+      prompt,
     });
   } catch (error) {
     res

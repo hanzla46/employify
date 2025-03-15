@@ -443,8 +443,7 @@ function QuestionAndScore({ question, score, summary }) {
           <Info className="h-4 w-4 mr-2" />
           AI Feedback
         </h4>
-        <p className="text-gray-800 dark:text-gray-200">
-          {summary ? summary : "AI feedback on your response will appear here after you answer"}
+        <p className="text-gray-800 dark:text-gray-200" dangerouslySetInnerHTML={{ __html: summary }}>
         </p>
       </div>
     </div>
