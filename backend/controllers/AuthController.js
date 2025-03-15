@@ -89,7 +89,6 @@ const getMe = async (req, res) => {
       console.log("no token");
       console.log(token);
       return res.status(401).json({
-        message: "Not authenticated",
         success: false,
       });
     }

@@ -22,7 +22,7 @@ export const SkillsProvider = ({ children }) => {
         setLoading(false);
       }
     };
-    fetchSkills();
+    // fetchSkills();
   }, []);
   const addSkill = async (skill) => {
     try {
