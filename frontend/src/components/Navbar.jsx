@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
-import { Brain, Menu, X } from "lucide-react";
+import { Brain, Menu, X, UserRoundCog } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
@@ -49,7 +49,7 @@ export function Navbar({ darkMode, setDarkMode }) {
                   }`
                 }
               >
-                {item.label}
+             <div className="flex flex-row">   {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label} </div>
               </NavLink>
             ))}
             {/* Theme Toggle for Desktop */}
@@ -64,7 +64,11 @@ export function Navbar({ darkMode, setDarkMode }) {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-900 dark:text-white focus:outline-none z-50 relative"
             >
-              {isMobileMenuOpen ? <X className="fixed right-11 top-5 h-6 w-6" /> : <Menu className="h-6 w-6" />}
+              {isMobileMenuOpen ? (
+                <X className="fixed right-11 top-5 h-6 w-6" />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -86,7 +90,7 @@ export function Navbar({ darkMode, setDarkMode }) {
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              {item.label}
+              <div className="flex flex-row">   {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label} </div>
             </NavLink>
           ))}
           {/* Theme Toggle BELOW the Menu Items */}
