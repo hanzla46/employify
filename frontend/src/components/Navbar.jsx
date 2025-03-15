@@ -29,7 +29,7 @@ export function Navbar({ darkMode, setDarkMode }) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <NavLink to="/" className="flex items-center space-x-2">
-            <Brain className="h-8 w-8 text-indigo-600 dark:text-indigo-400" />
+            <Brain className="h-8 w-8 text-primary-600 dark:text-primary-400" />
             <span className="text-xl font-bold text-gray-900 dark:text-white">
               Employify
             </span>
@@ -44,8 +44,8 @@ export function Navbar({ darkMode, setDarkMode }) {
                 className={({ isActive }) =>
                   `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                     isActive
-                      ? "text-indigo-600 dark:text-indigo-400"
-                      : "text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                      ? "text-primary-600 dark:text-primary-400"
+                      : "text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
                   }`
                 }
               >
@@ -80,8 +80,8 @@ export function Navbar({ darkMode, setDarkMode }) {
               className={({ isActive }) =>
                 `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
                   isActive
-                    ? "text-indigo-600 dark:text-indigo-400"
-                    : "text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400"
+                    ? "text-primary-600 dark:text-primary-400"
+                    : "text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
                 }`
               }
               onClick={() => setIsMobileMenuOpen(false)}

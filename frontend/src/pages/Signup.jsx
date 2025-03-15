@@ -44,7 +44,7 @@ export function Signup() {
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
       <div>
-      <h1 className="text-4xl md:text-6xl font-bold mb-6 mt-0 md:mt-5 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 pb-3">
+      <h1 className="text-4xl md:text-6xl font-bold mb-6 mt-0 md:mt-5 bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400 pb-3">
         SignUp
         </h1>
       </div>
@@ -93,7 +93,7 @@ export function Signup() {
 
         <button
           type="submit"
-          className="w-full bg-indigo-500 text-white p-3 rounded-lg hover:bg-indigo-600 transition"
+          className="w-full bg-primary-500 text-white p-3 rounded-lg hover:bg-primary-600 transition"
         >
           Sign Up
         </button>

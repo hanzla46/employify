@@ -11,6 +11,7 @@ import { Label } from "./ui/label";
 import { Input } from "./ui/input";
 import FancyButton from "./Button";
 import { handleError } from "../utils";
+import { Briefcase, Building, BookOpen, Clock } from "lucide-react";
 
 const options = {
   company: ["Multinational", "Midsized", "Startup"],
@@ -43,21 +44,21 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
     if(interviewData.position === "" || interviewData.company === "" || interviewData.industry === "" || interviewData.experience === ""){
         handleError("Please fill all the fields");
         return;
-        }
+    }
     start();
   }
+  
   return (
-    <Card className="p-6 mt-10 space-y-6 w-72">
-      <CardContent className="space-y-6">
-        {/* Text Input */}
-        <div className="space-y-1">
-          <Label className="text-sm font-medium text-indigo-600 dark:text-white">
-            Position
-          </Label>
+    <Card className="border-0 shadow-none bg-transparent">
+      <CardContent className="space-y-5 p-0">
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400">
+            <Briefcase size={18} />
+          </div>
           <Input
             type="text"
-            placeholder="Type something..."
-            className="w-full"
+            placeholder="Position or Role"
+            className="pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent"
             value={interviewData.position}
             onChange={(e) =>
               setInterviewData((prev) => ({
@@ -68,22 +69,21 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
           />
         </div>
 
-        {/* Dropdowns */}
-        <div className="space-y-1">
-          <Label className="text-sm font-medium text-indigo-600 dark:text-white">
-            Select Company
-          </Label>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400">
+            <Building size={18} />
+          </div>
           <Select
             onValueChange={(val) =>
               setInterviewData((prev) => ({ ...prev, company: val }))
             }
           >
-            <SelectTrigger className="w-full text-indigo-600 dark:text-white">
-              <SelectValue placeholder="Company" />
+            <SelectTrigger className="pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300">
+              <SelectValue placeholder="Company Type" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800">
               {options.company.map((item) => (
-                <SelectItem className="bg-white" key={item} value={item}>
+                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300">
                   {item}
                 </SelectItem>
               ))}
@@ -91,21 +91,21 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
           </Select>
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-sm font-medium text-indigo-600 dark:text-white">
-            Select Industry
-          </Label>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400">
+            <BookOpen size={18} />
+          </div>
           <Select
             onValueChange={(val) =>
               setInterviewData((prev) => ({ ...prev, industry: val }))
             }
           >
-            <SelectTrigger className="w-full text-indigo-600 dark:text-white">
+            <SelectTrigger className="pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300">
               <SelectValue placeholder="Industry" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800 max-h-60">
               {options.industry.map((item) => (
-                <SelectItem className="bg-white" key={item} value={item}>
+                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300">
                   {item}
                 </SelectItem>
               ))}
@@ -113,10 +113,10 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label className="text-sm font-medium text-indigo-600 dark:text-white">
-            Experience level (Years)
-          </Label>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400">
+            <Clock size={18} />
+          </div>
           <Select
             onValueChange={(val) =>
               setInterviewData((prev) => ({
@@ -125,12 +125,12 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
               }))
             }
           >
-            <SelectTrigger className="w-full text-indigo-600 dark:text-white">
-              <SelectValue placeholder="Experience" />
+            <SelectTrigger className="pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300">
+              <SelectValue placeholder="Experience Level" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800">
               {options.experience.map((item) => (
-                <SelectItem className="bg-white" key={item} value={item}>
+                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300">
                   {item}
                 </SelectItem>
               ))}
@@ -138,8 +138,13 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
           </Select>
         </div>
 
-        <div className="pt-4" onClick={startIt} >
-          <FancyButton text="Start Interview" />
+        <div className="pt-4">
+          <button
+            onClick={startIt}
+            className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center"
+          >
+            Start Interview
+          </button>
         </div>
       </CardContent>
     </Card>

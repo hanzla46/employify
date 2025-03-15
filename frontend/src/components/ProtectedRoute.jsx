@@ -6,7 +6,7 @@ import FancyButton from "./Button";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
 
-  if (loading) return <p className="text-xl font-bold text-indigo-600 dark:text-white">Loading...</p>;
+  if (loading) return <p className="text-xl font-bold text-primary-600 dark:text-white">Loading...</p>;
   return user ? children : <Link to="/signup"> <FancyButton text={"Sign Up"} /> </Link>;
 };
 

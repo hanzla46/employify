@@ -1,3 +1,133 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* globals.css */
+
+:root {
+    /* Default color scheme  */
+    --color-primary-50: #ecfdf5;
+    --color-primary-100: #d1fae5;
+    --color-primary-200: #a7f3d0;
+    --color-primary-300: #6ee7b7;
+    --color-primary-400: #34d399;
+    --color-primary-500: #10b981;
+    --color-primary-600: #059669;
+    --color-primary-700: #047857;
+    --color-primary-800: #065f46;
+    --color-primary-900: #064e3b;
+    --color-primary-950: #022c22;
+  }
+  
+  /* Dark theme variations */
+  .dark {
+    --color-primary-50: #022c22;
+    --color-primary-100:#064e3b;
+    --color-primary-200: #065f46;
+    --color-primary-300: #047857;
+    --color-primary-400:  #059669;
+    --color-primary-500: #10b981;
+    --color-primary-600: #34d399;
+    --color-primary-700: #6ee7b7;
+    --color-primary-800: #a7f3d0;
+    --color-primary-900: #d1fae5;
+    --color-primary-950: #ecfdf5;
+  }
+  
+  /* 
+    To change the color scheme, just replace the values above.
+    Common Tailwind colors you might want to use:
+    
+    EMERALD:
+    --color-primary-50: #ecfdf5;
+    --color-primary-100: #d1fae5;
+    ...
+    
+    AMBER:
+    --color-primary-50: #fffbeb;
+    --color-primary-100: #fef3c7;
+    ...
+    
+    ROSE:
+    --color-primary-50: #fff1f2;
+    --color-primary-100: #ffe4e6;
+    ...
+
+    /* EMERALD 
+--color-primary-50: #ecfdf5;
+--color-primary-100: #d1fae5;
+--color-primary-200: #a7f3d0;
+--color-primary-300: #6ee7b7;
+--color-primary-400: #34d399;
+--color-primary-500: #10b981;
+--color-primary-600: #059669;
+--color-primary-700: #047857;
+--color-primary-800: #065f46;
+--color-primary-900: #064e3b;
+--color-primary-950: #022c22;
+
+/* AMBER 
+--color-primary-50: #fffbeb;
+--color-primary-100: #fef3c7;
+--color-primary-200: #fde68a;
+--color-primary-300: #fcd34d;
+--color-primary-400: #fbbf24;
+--color-primary-500: #f59e0b;
+--color-primary-600: #d97706;
+--color-primary-700: #b45309;
+--color-primary-800: #92400e;
+--color-primary-900: #78350f;
+--color-primary-950: #451a03;
+
+/* ROSE 
+--color-primary-50: #fff1f2;
+--color-primary-100: #ffe4e6;
+--color-primary-200: #fecdd3;
+--color-primary-300: #fda4af;
+--color-primary-400: #fb7185;
+--color-primary-500: #f43f5e;
+--color-primary-600: #e11d48;
+--color-primary-700: #be123c;
+--color-primary-800: #9f1239;
+--color-primary-900: #881337;
+--color-primary-950: #4c0519;
+
+/* SKY 
+--color-primary-50: #f0f9ff;
+--color-primary-100: #e0f2fe;
+--color-primary-200: #bae6fd;
+--color-primary-300: #7dd3fc;
+--color-primary-400: #38bdf8;
+--color-primary-500: #0ea5e9;
+--color-primary-600: #0284c7;
+--color-primary-700: #0369a1;
+--color-primary-800: #075985;
+--color-primary-900: #0c4a6e;
+--color-primary-950: #082f49;
+
+/* PURPLE
+--color-primary-50: #faf5ff;
+--color-primary-100: #f3e8ff;
+--color-primary-200: #e9d5ff;
+--color-primary-300: #d8b4fe;
+--color-primary-400: #c084fc;
+--color-primary-500: #a855f7;
+--color-primary-600: #9333ea;
+--color-primary-700: #7e22ce;
+--color-primary-800: #6b21a8;
+--color-primary-900: #581c87;
+--color-primary-950: #3b0764;
+
+/* TEAL 
+--color-primary-50: #f0fdfa;
+--color-primary-100: #ccfbf1;
+--color-primary-200: #99f6e4;
+--color-primary-300: #5eead4;
+--color-primary-400: #2dd4bf;
+--color-primary-500: #14b8a6;
+--color-primary-600: #0d9488;
+--color-primary-700: #0f766e;
+--color-primary-800: #115e59;
+--color-primary-900: #134e4a;
+--color-primary-950: #042f2e;
+  */

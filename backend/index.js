@@ -10,7 +10,7 @@ const PORT = process.env.PORT || 8000;
 // ✅
 app.use(
   cors({
-    origin: "https://employify.vercel.app", // Only allow frontend origin
+    origin: "http://localhost:5173", // Only allow frontend origin
     credentials: true, // Required for cookies
     methods: "GET,POST,PUT,DELETE,OPTIONS",
     allowedHeaders: "Origin, X-Requested-With, Content-Type, Accept, Authorization",
@@ -18,7 +18,7 @@ app.use(
 );
 
 app.options("*", (req, res) => {
-  res.header("Access-Control-Allow-Origin", "https://employify.vercel.app");
+  res.header("Access-Control-Allow-Origin", "http://localhost:5173");
   res.header("Access-Control-Allow-Credentials", "true");
   res.header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
   res.header(

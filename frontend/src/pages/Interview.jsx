@@ -1,17 +1,19 @@
 import "regenerator-runtime/runtime";
 import Webcam from "react-webcam";
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import axios from "axios";
-import { Bot, Video, Mic, Send } from "lucide-react";
+import { 
+  Bot, Video, Mic, Send, XCircle, CheckCircle, 
+  PauseCircle, Info, Sparkles, AlertCircle, BarChart
+} from "lucide-react";
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import { useState } from "react";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/DialogForm";
 
-const url = "https://employify-backend.vercel.app";
+const url = "http://localhost:8000";
 
 export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
@@ -37,6 +39,7 @@ export function Interview() {
     experience: "",
   });
   const [infoBox, setInfoBox] = useState(true);
+  
   const startInterview = async () => {
     try {
       const response = await axios.get(
@@ -53,7 +56,7 @@ export function Interview() {
       if (response.data.success) {
         setQuestion(response.data.question);
         setCategory(response.data.category);
-        handleSuccess("started!!!!");
+        handleSuccess("Interview started successfully!");
         setIsStarted(true);
         startVideoRecording();
         SpeechRecognition.startListening({ continuous: true });
@@ -191,62 +194,113 @@ export function Interview() {
     startInterview();
   };
   return (
-    <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto px-4 py-8">
-        <div className="w-[90%] mx-auto">
-          <h1 className="text-3xl font-bold mb-3 dark:text-white">
-            AI Mock Interview
-          </h1>
-          <ProtectedRoute>     
-          <div className="relative flex flex-col bg-white dark:bg-gray-700 rounded-lg shadow-lg p-6 mb-8">
-            <Top
-              start={start}
-              isStarted={isStarted}
-              isCompleted={isCompleted}
-              RecordAudio={RecordAudio}
-              videoRecording={isVideoRecording}
-              isAudioRecording={isAudioRecording}
-              handleVideoRecord={handleVideoRecord}
-              sendResponse={sendResponse}
-            />
-            {infoBox && (
-              <div className="sticky overflow-x-hidden overflow-y-auto -top-5 -left-10 w-96 md:w-full h-full flex justify-center z-20">
-                <div>
-                  <Instructions1 />
-                </div>
-                <div className="bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4">
-                  <DialogForm
-                    start={start}
-                    setInterviewData={setInterviewData}
-                    interviewData={interviewData}
-                  />
-                </div>
-                <div>
-                  <Instructions2 />
-                </div>
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-900 dark:via-indigo-950/30 dark:to-gray-900">
+      <div className="container mx-auto px-4 py-16">
+        <div className="w-full max-w-6xl mx-auto">
+          <div className="flex items-center justify-between mb-8">
+            <div className="flex items-center space-x-3">
+              <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-3 rounded-2xl shadow-lg">
+                <Sparkles className="h-7 w-7 text-white" />
               </div>
-            )}
-            {isStarted ? (
-              <div className="flex flex-row justify-between gap-2">
-                <QnS question={question} score={score} summary={summary} />
-                <VideoComp webcamRef={webcamRef} />
-                <Responses
-                  written={written}
-                  setWritten={setWritten}
-                  transcript={transcript}
-                />
+              <div>
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                  AI Mock Interview
+                </h1>
+                <p className="text-gray-600 dark:text-gray-400">Perfect your interview skills with AI feedback</p>
               </div>
-            ) : (
-              ""
-            )}
-            {isCompleted ? (
-              <h1 className="text-3xl text-gray-700 dark:text-white justify-center m-10">
-                Interview Completed
-              </h1>
-            ) : (
-              ""
+            </div>
+            
+            {isStarted && (
+              <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-md border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 font-medium flex items-center">
+                <div className={`w-3 h-3 rounded-full mr-2 ${isAudioRecording ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
+                {isAudioRecording ? "Recording" : "Paused"}
+              </div>
             )}
           </div>
+          
+          <ProtectedRoute>     
+            <div className="relative rounded-3xl overflow-hidden backdrop-blur-sm border border-white/20 dark:border-gray-800 shadow-2xl bg-white/80 dark:bg-gray-900/80">
+              <InterviewHeader 
+                isStarted={isStarted}
+                isCompleted={isCompleted}
+                RecordAudio={RecordAudio}
+                videoRecording={isVideoRecording}
+                isAudioRecording={isAudioRecording}
+                handleVideoRecord={handleVideoRecord}
+                sendResponse={sendResponse}
+              />
+              
+              {infoBox && (
+                <div className="p-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <InstructionsCard 
+                      title="Interview Best Practices" 
+                      icon={<BarChart className="h-5 w-5 text-indigo-500" />}
+                      items={[
+                        "Be Professional & Confident",
+                        "Understand the Role",
+                        "Use the STAR Method",
+                        "Demonstrate Problem-Solving",
+                        "Manage Your Time"
+                      ]} 
+                    />
+                    
+                    <div className="col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden">
+                      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+                        <h3 className="text-xl font-semibold text-white text-center">Interview Setup</h3>
+                      </div>
+                      <div className="p-6">
+                        <DialogForm
+                          start={start}
+                          setInterviewData={setInterviewData}
+                          interviewData={interviewData}
+                        />
+                      </div>
+                    </div>
+                    
+                    <InstructionsCard 
+                      title="Prepare for Common Questions" 
+                      icon={<AlertCircle className="h-5 w-5 text-indigo-500" />}
+                      items={[
+                        "Your background & experience",
+                        "Strengths & weaknesses",
+                        "Conflict resolution",
+                        "Leadership & teamwork",
+                        "Career goals & aspirations"
+                      ]} 
+                    />
+                  </div>
+                </div>
+              )}
+              
+              {isStarted && (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
+                  <QuestionAndScore question={question} score={score} summary={summary} />
+                  <VideoComponent webcamRef={webcamRef} isRecording={isVideoRecording} />
+                  <ResponsesComponent written={written} setWritten={setWritten} transcript={transcript} />
+                </div>
+              )}
+              
+              {isCompleted && (
+                <div className="flex flex-col items-center justify-center py-16 px-6">
+                  <div className="h-20 w-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6">
+                    <CheckCircle className="h-12 w-12 text-green-500" />
+                  </div>
+                  <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent mb-4">
+                    Interview Completed
+                  </h1>
+                  <p className="text-gray-600 dark:text-gray-300 text-center max-w-md text-lg">
+                    Congratulations! You've successfully completed your mock interview. Review your performance and feedback above.
+                  </p>
+                  <button 
+                    onClick={() => {setIsCompleted(false); setInfoBox(true);}}
+                    className="mt-8 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                    Start New Interview
+                  </button>
+                </div>
+              )}
+            </div>
           </ProtectedRoute>
         </div>
       </div>
@@ -254,7 +308,7 @@ export function Interview() {
   );
 }
 
-function Top({
+function InterviewHeader({
   isStarted,
   isCompleted,
   handleVideoRecord,
@@ -264,191 +318,237 @@ function Top({
   videoRecording,
 }) {
   return (
-    <>
-      <div className="flex flex-row justify-between items-center mb-6">
-        <div className="flex items-center mb-6">
-          <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center">
-            <Bot className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+    <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 p-6">
+      <div className="flex flex-col md:flex-row justify-between items-center">
+        <div className="flex items-center mb-4 md:mb-0">
+          <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+            <Bot className="h-8 w-8 text-white" />
           </div>
           <div className="ml-4">
-            <h2 className="text-xl font-semibold dark:text-white">
+            <h2 className="text-2xl font-bold text-white">
               Interview Assistant
             </h2>
-            <p className="text-gray-600 dark:text-gray-300">
-              Ready to help you practice
+            <p className="text-indigo-100">
+              AI-powered practice for your next big opportunity
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-4 mr-6">
-          <button
-            disabled={!isStarted || isCompleted}
-            aria-label="Toggle microphone"
-            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${
-              isAudioRecording
-                ? "text-green-600 md:text-green-600"
-                : "text-red-600 md:text-red-600"
-            } ${!isStarted || isCompleted ? "text-black" : ""}`}
-            onClick={RecordAudio}
-          >
-            <Mic className="h-6 w-6" />
-          </button>
-          <button
-            disabled={!isStarted || isCompleted}
-            aria-label="Toggle video"
-            onClick={handleVideoRecord}
-            className={`p-2 text-gray-600 dark:text-gray-300 hover:text-indigo-600 dark:hover:text-indigo-400 disabled:opacity-35 ${
-              videoRecording
-                ? "text-green-600 md:text-green-600"
-                : "text-red-600 md:text-red-600"
-            } ${!isStarted || isCompleted ? "text-black" : ""}`}
-          >
-            <Video className="h-6 w-6" />
-          </button>
-          <div className="buttons">
+        
+        {isStarted && !isCompleted && (
+          <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
             <button
-              disabled={!isStarted || isCompleted}
+              aria-label="Toggle microphone"
+              className={`p-3 rounded-full transition-all duration-300 shadow-md ${
+                isAudioRecording
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-red-500 text-white hover:bg-red-600"
+              }`}
+              onClick={RecordAudio}
+            >
+              <Mic className="h-5 w-5" />
+            </button>
+            
+            <button
+              aria-label="Toggle video"
+              onClick={handleVideoRecord}
+              className={`p-3 rounded-full transition-all duration-300 shadow-md ${
+                videoRecording
+                  ? "bg-green-500 text-white hover:bg-green-600"
+                  : "bg-red-500 text-white hover:bg-red-600"
+              }`}
+            >
+              <Video className="h-5 w-5" />
+            </button>
+            
+            <button
               onClick={sendResponse}
               aria-label="Send message"
-              className="p-2 text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-500"
+              className="p-3 bg-white text-indigo-600 rounded-full hover:bg-indigo-50 transition-all duration-300 shadow-md"
             >
-              <Send className="h-6 w-6" />
+              <Send className="h-5 w-5" />
             </button>
           </div>
-        </div>
-      </div>
-    </>
-  );
-}
-
-function Instructions1() {
-  return (
-    <div className="flex flex-col w-[30%] md:w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4 mt-32 mr-5">
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Be Professional & Confident
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Understand the Role
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Use the STAR Method
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Demonstrate Problem-Solving
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Manage Your Time
-      </span>
-      </div>
-  );
-}
-
-function Instructions2(){
-  return (
-    <div className="flex flex-col w-[30%] md:w-full bg-white dark:bg-gray-700 rounded-lg shadow-lg p-4 mt-32 ml-5">
-      <span className="text-2xl text-gray-700 dark:text-white justify-center m-1">
-     Prepare for common questions
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Your background & experience
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Strengths & weaknesses
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Conflict resolution
-      </span>
-      <span className="text-xl text-gray-700 dark:text-white justify-center m-1">
-      Leadership & teamwork
-      </span>
-    </div>
-  );
-}
-
-function QnS({ question, score, summary }) {
-  return (
-    <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
-      <div className="m-auto flex flex-col border-white dark:border-indigo-600">
-        <div className="p-4">
-          <p className="text-gray-800 dark:text-gray-200">
-            {question ? question : "Question will be shown here"}
-          </p>
-        </div>
-        <div className="p-4">
-          <span className="text-xl text-gray-700 dark:text-white">
-            {score ? score : "0/10"}
-          </span>
-        </div>
-        <div className="bg-indigo-100 dark:bg-indigo-900/50 p-4">
-          <span className="text-gray-800 dark:text-gray-200">
-            {summary ? summary : "Summary will be shown here"}
-          </span>
-        </div>
+        )}
       </div>
     </div>
   );
 }
 
-function VideoComp({ webcamRef }) {
+function InstructionsCard({ title, items, icon }) {
   return (
-    <div className="w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-4">
-      <div className="flex flex-col">
-        <h3 className="text-gray-700 dark:text-white mb-3">Webcam</h3>
+    <div className="col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+        <div className="flex items-center justify-center">
+          {icon}
+          <h3 className="text-xl font-semibold text-white ml-2">{title}</h3>
+        </div>
+      </div>
+      <div className="p-6">
+        <ul className="space-y-4">
+          {items.map((item, index) => (
+            <li key={index} className="flex items-center">
+              <div className="h-2 w-2 rounded-full bg-indigo-500 mr-3"></div>
+              <span className="text-gray-700 dark:text-gray-200">{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function QuestionAndScore({ question, score, summary }) {
+  const scoreValue = score ? parseInt(score) : 0;
+  
+  const getScoreColor = (score) => {
+    if (score >= 8) return "text-green-500";
+    if (score >= 6) return "text-yellow-500";
+    return "text-red-500";
+  };
+  
+  const getScoreBg = (score) => {
+    if (score >= 8) return "bg-green-100 dark:bg-green-900/30";
+    if (score >= 6) return "bg-yellow-100 dark:bg-yellow-900/30";
+    return "bg-red-100 dark:bg-red-900/30";
+  };
+  
+  return (
+    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+        <h3 className="text-lg font-medium text-white flex items-center">
+          <Sparkles className="h-5 w-5 mr-2" />
+          Current Question
+        </h3>
+      </div>
+      
+      <div className="p-5 flex-grow bg-gradient-to-br from-white to-indigo-50/50 dark:from-gray-800 dark:to-indigo-950/10">
+        <p className="text-gray-800 dark:text-gray-200 text-lg font-medium">
+          {question ? question : "Your interview question will appear here"}
+        </p>
+      </div>
+      
+      {score && (
+        <div className="p-4 border-t border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between bg-white dark:bg-gray-800">
+          <span className="text-gray-600 dark:text-gray-300 font-medium">Response Score</span>
+          <div className={`flex items-center justify-center h-10 w-10 rounded-full ${getScoreBg(scoreValue)}`}>
+            <span className={`text-xl font-bold ${getScoreColor(scoreValue)}`}>
+              {score}
+            </span>
+          </div>
+        </div>
+      )}
+      
+      <div className="bg-indigo-50 dark:bg-indigo-900/20 p-5 border-t border-indigo-100 dark:border-indigo-900/50">
+        <h4 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-3 flex items-center">
+          <Info className="h-4 w-4 mr-2" />
+          AI Feedback
+        </h4>
+        <p className="text-gray-800 dark:text-gray-200">
+          {summary ? summary : "AI feedback on your response will appear here after you answer"}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function VideoComponent({ webcamRef, isRecording }) {
+  return (
+    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex items-center justify-between">
+        <h3 className="text-lg font-medium text-white flex items-center">
+          <Video className="h-5 w-5 mr-2" />
+          Your Camera
+        </h3>
+        {isRecording && (
+          <div className="flex items-center px-3 py-1 bg-black/30 rounded-full">
+            <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse mr-2"></div>
+            <span className="text-xs text-white">Recording</span>
+          </div>
+        )}
+      </div>
+      
+      <div className="relative flex-grow bg-gray-900 flex items-center justify-center">
         <Webcam
           audio={true}
           ref={webcamRef}
-          className="rounded-lg shadow-md w-full m-auto transform -scale-x-100"
+          className="w-full h-full object-cover transform -scale-x-100"
+          mirrored={true}
         />
+        
+        {!isRecording && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+            <div className="p-6 bg-black/60 rounded-full">
+              <PauseCircle className="h-16 w-16 text-white/90" />
+            </div>
+          </div>
+        )}
+      </div>
+      
+      <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 text-center border-t border-indigo-100 dark:border-indigo-900/50">
+        <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
+          <Info className="h-4 w-4 mr-2 text-indigo-500" />
+          Make sure you're well lit and centered in frame
+        </p>
       </div>
     </div>
   );
 }
 
-function Responses({ written, setWritten, transcript, }) {
+function ResponsesComponent({ written, setWritten, transcript }) {
   const textareaRef = useRef(null);
+  
   const adjustHeight = () => {
     if (!textareaRef.current) return;
     textareaRef.current.style.height = "auto";
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
+  
   return (
-    <div className="flex flex-col gap-4 mb-6 h-auto w-[30%] border border-gray-300 dark:border-gray-600 rounded-lg p-3">
-      <div className="flex-row">
-        <div className="flex flex-col mb-4">
-          {" "}
-          <h3 className="text-gray-700 dark:text-white mb-1">
-            Write (if needed)
-          </h3>{" "}
+    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
+      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+        <h3 className="text-lg font-medium text-white flex items-center">
+          <Mic className="h-5 w-5 mr-2" />
+          Your Response
+        </h3>
+      </div>
+      
+      <div className="p-5 flex-grow flex flex-col gap-5 bg-gradient-to-br from-white to-indigo-50/50 dark:from-gray-800 dark:to-indigo-950/10">
+        <div className="flex-1">
+          <h4 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-3 flex items-center">
+            <Mic className="h-4 w-4 mr-2" />
+            Recorded Speech
+          </h4>
+          <div className="min-h-24 p-4 border border-indigo-100 dark:border-indigo-900/50 rounded-xl bg-white dark:bg-gray-800 shadow-inner">
+            <p className="text-gray-800 dark:text-gray-200" style={{ wordBreak: "break-word" }}>
+              {transcript || "Your spoken words will appear here as you speak..."}
+            </p>
+          </div>
+        </div>
+        
+        <div className="flex-1">
+          <div className="flex items-center justify-between mb-3">
+            <h4 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 flex items-center">
+              <Send className="h-4 w-4 mr-2" />
+              Written Response (Optional)
+            </h4>
+          </div>
           <textarea
             ref={textareaRef}
             onInput={adjustHeight}
             onChange={(e) => setWritten(e.target.value)}
             value={written}
-            placeholder="Type something..."
-            className="w-full border border-gray-300 dark:border-gray-600 rounded-lg px-4 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-            style={{ resize: "none", overflow: "hidden" }}
+            placeholder="Type your response here if needed..."
+            className="w-full min-h-24 p-4 border border-indigo-100 dark:border-indigo-900/50 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none shadow-inner"
+            style={{ resize: "none", overflowY: "hidden" }}
           />
-          {/* <FancyButton text={"reset"} onClick={() => resetTranscript()} /> */}
         </div>
-        <div className="flex flex-col">
-          {" "}
-          <h3 className="text-gray-700 dark:text-white mb-1">
-            Recorded Response
-          </h3>{" "}
-          <div className="h-auto w-full border rounded-lg border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700">
-            {" "}
-            <div
-              className="p-2 text-gray-900 dark:text-white"
-              style={{
-                minHeight: "40px",
-                height: "auto",
-                wordBreak: "break-word",
-                overflowWrap: "break-word",
-              }}
-            >
-              {transcript}
-            </div>
-          </div>
-        </div>
+      </div>
+      
+      <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 text-center border-t border-indigo-100 dark:border-indigo-900/50">
+        <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
+          <Info className="h-4 w-4 mr-2 text-indigo-500" />
+          Click the send button when you're ready to submit your answer
+        </p>
       </div>
     </div>
   );

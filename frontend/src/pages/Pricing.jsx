@@ -56,7 +56,7 @@ export function Pricing() {
               <div
                 key={index}
                 className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden ${
-                  index === 1 ? 'ring-2 ring-indigo-600 dark:ring-indigo-400' : ''
+                  index === 1 ? 'ring-2 ring-primary-600 dark:ring-primary-400' : ''
                 }`}
               >
                 <div className="p-6">
@@ -81,8 +81,8 @@ export function Pricing() {
                   <button
                     className={`w-full px-4 py-2 rounded-lg font-medium transition-colors ${
                       index === 1
-                        ? 'bg-indigo-600 dark:bg-indigo-500 text-white hover:bg-indigo-700 dark:hover:bg-indigo-600'
-                        : 'bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 border border-indigo-600 dark:border-indigo-400 hover:bg-indigo-50 dark:hover:bg-gray-700'
+                        ? 'bg-primary-600 dark:bg-primary-500 text-white hover:bg-primary-700 dark:hover:bg-primary-600'
+                        : 'bg-white dark:bg-gray-800 text-primary-600 dark:text-primary-400 border border-primary-600 dark:border-primary-400 hover:bg-primary-50 dark:hover:bg-gray-700'
                     }`}
                   >
                     {index === 2 ? 'Contact Sales' : 'Get Started'}

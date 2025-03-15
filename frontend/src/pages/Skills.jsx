@@ -43,8 +43,8 @@ export function Skills() {
                 >
                   <div className="p-6">
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
-                        <path.icon className="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                      <div className="w-12 h-12 bg-primary-100 dark:bg-indigo-900/50 rounded-lg flex items-center justify-center">
+                        <path.icon className="h-6 w-6 text-primary-600 dark:text-primary-400" />
                       </div>
                       <div className="ml-4">
                         <h2 className="text-xl font-semibold dark:text-white">
@@ -65,7 +65,7 @@ export function Skills() {
                           {path.skills.map((skill, skillIndex) => (
                             <span
                               key={skillIndex}
-                              className="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 rounded-full text-sm"
+                              className="px-3 py-1 bg-primary-100 dark:bg-indigo-900/50 text-primary-600 dark:text-primary-400 rounded-full text-sm"
                             >
                               {skill}
                             </span>
@@ -85,7 +85,7 @@ export function Skills() {
                   </div>
 
                   <div className="p-6 bg-gray-50 dark:bg-gray-700/50">
-                    <button className="w-full bg-indigo-600 dark:bg-indigo-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 dark:hover:bg-indigo-600 transition-colors">
+                    <button className="w-full bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors">
                       Start Learning
                     </button>
                   </div>

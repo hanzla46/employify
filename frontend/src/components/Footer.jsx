@@ -18,17 +18,17 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">Features</h3>
             <ul className="space-y-2">
-              <li><Link to="/interview" className="hover:text-indigo-400">AI Interview</Link></li>
-              <li><Link to="/skills" className="hover:text-indigo-400">Skills Roadmap</Link></li>
-              <li><Link to="/jobs" className="hover:text-indigo-400">Job Portal</Link></li>
+              <li><Link to="/interview" className="hover:text-primary-400">AI Interview</Link></li>
+              <li><Link to="/skills" className="hover:text-primary-400">Skills Roadmap</Link></li>
+              <li><Link to="/jobs" className="hover:text-primary-400">Job Portal</Link></li>
             </ul>
           </div>
           
           <div>
             <h3 className="text-lg font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
-              <li><Link to="/about" className="hover:text-indigo-400">About Us</Link></li>
-              <li><Link to="/pricing" className="hover:text-indigo-400">Pricing</Link></li>
+              <li><Link to="/about" className="hover:text-primary-400">About Us</Link></li>
+              <li><Link to="/pricing" className="hover:text-primary-400">Pricing</Link></li>
             </ul>
           </div>
           
