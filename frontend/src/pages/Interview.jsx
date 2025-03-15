@@ -13,7 +13,7 @@ import ProtectedRoute from "../components/ProtectedRoute";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/DialogForm";
 
-const url = "http://localhost:8000";
+const url = process.env.REACT_APP_API_URL;
 
 export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
