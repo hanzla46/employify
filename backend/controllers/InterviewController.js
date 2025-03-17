@@ -6,7 +6,7 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const startInterview = async (req, res) => {
   try {
     const userId = req.user._id;
-    const {position, company, industry, experience} = req.body.interviewData;
+    const { position, company, industry, experience } = req.body.interviewData;
     await Interview.updateMany(
       { userId, status: "ongoing" },
       { $set: { status: "completed" } }
@@ -148,7 +148,7 @@ const continueInterview = async (req, res) => {
       result: result,
       success: true,
       completed: completed,
-      score:overallScore,
+      score: score,
       result,
       prompt,
     });

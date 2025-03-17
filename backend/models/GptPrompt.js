@@ -28,8 +28,8 @@ const GeneratePrompt = (interview) => {
       * The question should be open-ended to encourage thoughtful, detailed responses.
       * The question should be respectful and professional in tone.
       * The questions you can ask from the candidate can be from the same category as the previous questions or from a different category. Categories are: 1 General/Personal Questions, 2 Technical/Role-Specific Questions, 3 Behavioral Questions, 4 Problem-Solving/Analytical Questions, 5 Situational/Case Study Questions, 6 Questions About Work Experience, 7 Company-Specific/Industry Knowledge Questions, 8 Cultural Fit Questions, 9 Questions the Candidate Asks the Interviewer.
-      * You can ask maximum 12-15 questions in an interview. So, you can ask a maximum of 15 questions in total.
-      * You can ask a maximum of 3 questions from the same category.
+      * You can ask maximum 6-7 questions in an interview. So, you can ask a maximum of 7 questions in total.
+      * You can ask a maximum of 2 questions from the same category.
 
   **5. Realistic Hypothetical Response Generation:**
   *   Based on the candidate's previous answers, the facial expression analysis, and your overall assessment, generate a plausible and realistic hypothetical response to the new question.
@@ -82,8 +82,8 @@ const GeneratePrompt = (interview) => {
     "generated_question": "[The new follow-up question you have generated.]",
     "question_category": "[Category of the question you generated.]",
     "hypothetical_response": "[A realistic example of how the candidate might answer the new question, considering their communication style, level of experience, and emotional cues.]",
-    "score": "[scores of the latest question assessment.]",
-    "overallScore": "[The updated overall score of the candidate's whole interview.]",
+    "score": "[scores of the latest question assessment. out of 10]",
+    "overallScore": "[The updated overall score of the candidate's whole interview. out of 100]",
     "completed": "[true/false] when you have asked 12-15 questions, it should be true, otherwise false."
   }
   \`\`\`
