@@ -204,7 +204,7 @@ export function Interview() {
               </div>
               <div>
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  AI Mock Interview
+                  AI MOCK Interview
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">Perfect your interview skills with AI feedback</p>
               </div>
