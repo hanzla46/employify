@@ -145,7 +145,6 @@ const continueInterview = async (req, res) => {
       question: generated_question,
       category: question_category,
       hypotheticalResponse: hypothetical_response,
-      result: result,
       success: true,
       completed: completed,
       score: score,
