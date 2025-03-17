@@ -83,7 +83,7 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
             </SelectTrigger>
             <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800">
               {options.company.map((item) => (
-                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300">
+                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600">
                   {item}
                 </SelectItem>
               ))}
@@ -105,7 +105,7 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
             </SelectTrigger>
             <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800 max-h-60">
               {options.industry.map((item) => (
-                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300">
+                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600">
                   {item}
                 </SelectItem>
               ))}
@@ -130,7 +130,7 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
             </SelectTrigger>
             <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800">
               {options.experience.map((item) => (
-                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300">
+                <SelectItem key={item} value={item} className="text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600">
                   {item}
                 </SelectItem>
               ))}
