@@ -12,7 +12,7 @@ import {
   Github,
   Linkedin,
   Twitter,
-  CircleUserRound
+  CircleUserRound,
 } from "lucide-react";
 import { motion } from "framer-motion";
 
@@ -147,8 +147,11 @@ export function About() {
             className="flex flex-wrap justify-center gap-4 mt-8"
           >
             <a
-              href="#team"
-              className="bg-white dark:bg-gray-800 text-[var(--color-primary-900)] dark:text-[var(--color-primary-500)] px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+              onClick={() => {
+                setActiveTab("team");
+                document.getElementById("sections").scrollIntoView();
+              }}
+              className="bg-white dark:bg-gray-800 text-[var(--color-primary-900)] dark:text-[var(--color-primary-500)] px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2 cursor-pointer"
             >
               Meet our team <ChevronRight size={16} />
             </a>
@@ -183,7 +186,7 @@ export function About() {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
+        <div id="sections" className="max-w-6xl mx-auto">
           {/* Tabs Navigation */}
           <div className="flex overflow-x-auto mb-8 pb-2 scrollbar-hide">
             <div className="flex gap-2 mx-auto border border-gray-200 dark:border-gray-700 rounded-full p-1 bg-white dark:bg-gray-800 shadow-sm">
@@ -335,7 +338,7 @@ export function About() {
                 transition={{ duration: 0.3 }}
                 id="team"
               >
-                <h2 className="text-3xl font-bold mb-8 text-center dark:text-white">
+                <h2 id="team" className="text-3xl font-bold mb-8 text-center dark:text-white">
                   Meet Our Team
                 </h2>
                 <div className="grid md:grid-cols-3 gap-8">
@@ -349,7 +352,7 @@ export function About() {
                     >
                       <div className="relative">
                         {member.image === "placeholder" ? (
-                          <CircleUserRound className="w-full h-64 object-cover dark:text-white"/>
+                          <CircleUserRound className="w-full h-64 object-cover dark:text-white" />
                         ) : (
                           <img
                             src={member.image}

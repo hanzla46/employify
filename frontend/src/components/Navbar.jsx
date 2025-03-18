@@ -47,7 +47,7 @@ export function Navbar({ darkMode, setDarkMode }) {
                 to={item.path}
                 className={({ isActive }) =>
                   `relative px-4 py-2 rounded-lg text-lg font-bold transition-all duration-300 ease-in-out 
-                  ${isActive ? "text-[var(--color-primary-600)]" : "text-gray-700 dark:text-gray-300 hover:text-[var(--color-primary-700)]"} ${item.path === "/account" ? "bg-blue-500 text-white rounded-3xl" : ""} ${item.path === "/account" || item.path === "/signup" ? "mr-14" : ""}`
+                  ${isActive ? "text-[var(--color-primary-600)]" : "text-gray-700 dark:text-gray-300 hover:text-[var(--color-primary-700)]"} ${item.path === "/account" ? "bg-[var(--color-primary-700)] dark:bg-[var(--color-primary-400)] text-white hover:text-black dark:hover:text-black rounded-3xl" : ""} ${item.path === "/account" || item.path === "/signup" ? "mr-14" : ""}`
                 }
               >
                 <div className="flex flex-row items-center">
