@@ -7,12 +7,12 @@ import { AuthContext } from "../Context/AuthContext";
 
 function FeatureCard({ icon: Icon, title, description, color = "indigo" }) {
   return (
-    <div className="bg-white dark:bg-gray-800/40 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-4px] border border-gray-100 dark:border-gray-700 backdrop-blur-sm">
+    <div className="bg-white dark:bg-gray-800/40 p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-4px] border border-gray-100 dark:border-gray-700 backdrop-blur-sm h-auto">
       <div className={`h-14 w-14 bg-${color}-100 dark:bg-${color}-900/30 rounded-xl flex items-center justify-center mb-6`}>
         <Icon className={`h-7 w-7 text-${color}-600 dark:text-${color}-400`} />
       </div>
       <h3 className="text-xl font-bold mb-3 dark:text-white">{title}</h3>
-      <p className="text-gray-600 dark:text-gray-300 leading-relaxed">{description}</p>
+      <p className="text-gray-600 dark:text-gray-300 leading-relaxed mt-auto">{description}</p>
     </div>
   );
 }
@@ -81,7 +81,7 @@ export function Home() {
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
                   to={user ? "/interview" : "/signup"}
-                  className="bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-500 dark:to-purple-500 text-white px-8 py-4 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-indigo-500/25 inline-flex items-center justify-center text-lg"
+                  className="bg-gradient-to-r from-[var(--color-primary-700)] to-purple-600 dark:from-[var(--color-primary-300)] dark:to-purple-500 text-white px-8 py-4 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-indigo-500/25 inline-flex items-center justify-center text-lg"
                 >
                   Get Started Free
                   <ArrowRight className="ml-2 h-5 w-5" />
