@@ -12,7 +12,6 @@ import SpeechRecognition, {
 import ProtectedRoute from "../components/ProtectedRoute";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/DialogForm";
-import { HashLink } from "react-router-hash-link";
 
 const url = import.meta.env.VITE_API_URL;
 
