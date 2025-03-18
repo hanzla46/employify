@@ -203,13 +203,13 @@ export function Interview() {
       <div className="container mx-auto px-4 py-16">
         <div className="w-full max-w-6xl mx-auto">
           <div className="flex items-center justify-between mb-8">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 mt-6">
               <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-3 rounded-2xl shadow-lg">
                 <Sparkles className="h-7 w-7 text-white" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
-                  AI MOCK Interview
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--color-primary-700)] to-purple-400 bg-clip-text text-transparent">
+                  AI Mock Interview
                 </h1>
                 <p className="text-gray-600 dark:text-gray-400">Perfect your interview skills with AI feedback</p>
               </div>

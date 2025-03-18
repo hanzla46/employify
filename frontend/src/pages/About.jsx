@@ -124,7 +124,7 @@ export function About() {
             initial={{ y: -20 }}
             animate={{ y: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="text-5xl font-bold mb-6 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-400 dark:to-purple-400 inline-block text-transparent bg-clip-text"
+            className="text-5xl font-bold mb-6 bg-gradient-to-r from-[var(--color-primary-700)] to-purple-600 dark:from-[var(--color-primary-600)] dark:to-purple-400 inline-block text-transparent bg-clip-text"
           >
             About Employify
           </motion.h1>
@@ -148,13 +148,13 @@ export function About() {
           >
             <a
               href="#team"
-              className="bg-white dark:bg-gray-800 text-indigo-600 dark:text-indigo-400 px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+              className="bg-white dark:bg-gray-800 text-[var(--color-primary-900)] dark:text-[var(--color-primary-500)] px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all flex items-center gap-2"
             >
               Meet our team <ChevronRight size={16} />
             </a>
             <a
               href="#contact"
-              className="bg-indigo-600 dark:bg-indigo-500 text-white px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all"
+              className="bg-[var(--color-primary-700)] dark:bg-[var(--color-primary-500)] text-white px-6 py-3 rounded-full font-medium shadow-md hover:shadow-lg transition-all"
             >
               Get in touch
             </a>
@@ -191,7 +191,7 @@ export function About() {
                 onClick={() => setActiveTab("story")}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                   activeTab === "story"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-[var(--color-primary-500)] text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
@@ -201,7 +201,7 @@ export function About() {
                 onClick={() => setActiveTab("values")}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                   activeTab === "values"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-[var(--color-primary-500)] text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
@@ -211,7 +211,7 @@ export function About() {
                 onClick={() => setActiveTab("team")}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                   activeTab === "team"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-[var(--color-primary-500)] text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
@@ -221,7 +221,7 @@ export function About() {
                 onClick={() => setActiveTab("journey")}
                 className={`px-5 py-2 rounded-full text-sm font-medium transition-all ${
                   activeTab === "journey"
-                    ? "bg-indigo-600 text-white"
+                    ? "bg-[var(--color-primary-500)] text-white"
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700"
                 }`}
               >
@@ -451,7 +451,7 @@ export function About() {
 
           {/* Join Our Team Section */}
           <div className="relative mb-16 overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-800 dark:to-purple-800 opacity-95 rounded-2xl"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-indigo-600 to-[var(--color-primary-700)] dark:from-indigo-800 dark:to-[var(--color-primary-500)] opacity-95 rounded-2xl"></div>
             <div className="relative p-10 text-center text-white">
               <h2 className="text-3xl font-bold mb-6">Join Our Team</h2>
               <p className="text-indigo-100 max-w-2xl mx-auto mb-8 text-lg">
@@ -460,7 +460,7 @@ export function About() {
                 building the future of work.
               </p>
               <div className="flex flex-wrap justify-center gap-4">
-                <button className="bg-white text-indigo-600 px-8 py-3 rounded-full font-medium hover:bg-indigo-50 transition-colors">
+                <button className="bg-white text-[var(--color-primary-700)] px-8 py-3 rounded-full font-medium hover:bg-indigo-50 transition-colors">
                   View Open Positions
                 </button>
                 <button className="bg-transparent border-2 border-white text-white px-8 py-3 rounded-full font-medium hover:bg-white/10 transition-colors">
@@ -495,7 +495,7 @@ export function About() {
                         Our Location
                       </p>
                       <p className="text-gray-600 dark:text-gray-300">
-                        123 Innovation Drive, Tech Park, CA 94103
+                        Arid Institute of Sciences MandiBahauddin
                       </p>
                     </div>
                   </div>

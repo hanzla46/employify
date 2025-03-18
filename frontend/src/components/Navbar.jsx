@@ -33,7 +33,7 @@ export function Navbar({ darkMode, setDarkMode }) {
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <NavLink to="/" className={`flex items-center space-x-2 ml-1 md:ml-5`}>
-            <Brain className="h-8 w-8 text-blue-500 animate-pulse" />
+            <Brain className="h-8 w-8 text-[var(--color-primary-700)] animate-pulse" />
             <span className="text-xl font-bold text-gray-900 dark:text-white tracking-wide">
               Employify
             </span>
@@ -46,8 +46,8 @@ export function Navbar({ darkMode, setDarkMode }) {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out 
-                  ${isActive ? "text-blue-500" : "text-gray-700 dark:text-gray-300 hover:text-blue-500"} ${item.path === "/account" ? "bg-blue-500 text-white rounded-3xl" : ""} ${item.path === "/account" || item.path === "/signup" ? "mr-14" : ""}`
+                  `relative px-4 py-2 rounded-lg text-lg font-bold transition-all duration-300 ease-in-out 
+                  ${isActive ? "text-[var(--color-primary-600)]" : "text-gray-700 dark:text-gray-300 hover:text-[var(--color-primary-700)]"} ${item.path === "/account" ? "bg-blue-500 text-white rounded-3xl" : ""} ${item.path === "/account" || item.path === "/signup" ? "mr-14" : ""}`
                 }
               >
                 <div className="flex flex-row items-center">
