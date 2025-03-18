@@ -3,6 +3,17 @@
 @tailwind utilities;
 
 /* globals.css */
+@font-face {
+  font-family: "MyCustomFont";
+  src: url("./assets/fonts/my-font.woff2") format("woff2"),
+       url("./assets/fonts/my-font.woff") format("woff"),
+       url("./assets/Dalbine-Italic.ttf") format("truetype");
+  font-weight: normal;
+  font-style: normal;
+}
+body {
+  font-family: "MyCustomFont", sans-serif;
+}
 
 :root {
     /* Default color scheme  */

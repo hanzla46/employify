@@ -180,18 +180,18 @@ export function Signup() {
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-4/5 md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6">
-        <h1 className="text-4xl md:text-5xl font-bold mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400">
+      <div className="w-4/5 md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 mt-14">
+        <h1 className="text-2xl md:text-3xl font-bold mb-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400">
           Create Account
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-center mb-8">
+        <p className="text-gray-500 dark:text-gray-400 text-center mb-3">
           Join our community today
         </p>
 
-        <form className="space-y-4" onSubmit={handleSignup}>
+        <form className="space-y-3" onSubmit={handleSignup}>
           <div>
             <label
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5"
               htmlFor="name"
             >
               Full Name
@@ -210,7 +210,7 @@ export function Signup() {
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition bg-white dark:bg-gray-700 dark:text-white`}
             />
             {errors.name && touched.name && (
-              <p className="mt-1 text-sm text-red-500">{errors.name}</p>
+              <p className="mt-0.5 text-sm text-red-500">{errors.name}</p>
             )}
           </div>
 

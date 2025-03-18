@@ -75,7 +75,7 @@ export function Home() {
               <h1 className="text-5xl md:text-7xl font-black mb-8 bg-clip-text text-transparent bg-gradient-to-r from-indigo-600 via-primary-600 to-purple-600 dark:from-indigo-400 dark:via-primary-400 dark:to-purple-400 leading-tight">
                 Your AI-Powered<br />Career Coach
               </h1>
-              <p className="text-xl md:text-xl text-gray-600 dark:text-gray-300 mb-10 max-w-3xl mx-auto font-light">
+              <p className="text-xl md:text-xl text-gray-800 dark:text-gray-300 mb-10 max-w-3xl mx-auto font-light">
                 Master interviews, discover perfect job matches, and accelerate your career growth with personalized AI guidance
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">

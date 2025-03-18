@@ -28,44 +28,35 @@ export function Navbar({ darkMode, setDarkMode }) {
   ];
 
   return (
-    <nav className="bg-white dark:bg-gray-800 shadow-md fixed w-full z-50">
-      <div className="container mx-auto px-4">
+    <nav className="fixed w-full z-50 bg-opacity-80 backdrop-blur-lg shadow-lg border-b border-gray-300 dark:border-gray-700 transition-all">
+      <div className="container mr-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <NavLink to="/" className="flex items-center space-x-2">
-            <Brain className="h-8 w-8 text-primary-600 dark:text-primary-400" />
-            <span className="text-xl font-bold text-gray-900 dark:text-white">
+          <NavLink to="/" className={`flex items-center space-x-2 ml-1 md:ml-5`}>
+            <Brain className="h-8 w-8 text-blue-500 animate-pulse" />
+            <span className="text-xl font-bold text-gray-900 dark:text-white tracking-wide">
               Employify
             </span>
           </NavLink>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-4">
+          <div className="hidden md:flex items-center space-x-6">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                    isActive
-                      ? "text-primary-600 dark:text-primary-400"
-                      : "text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-                  }`
+                  `relative px-4 py-2 rounded-lg text-sm font-semibold transition-all duration-300 ease-in-out 
+                  ${isActive ? "text-blue-500" : "text-gray-700 dark:text-gray-300 hover:text-blue-500"} ${item.path === "/account" ? "bg-blue-500 text-white rounded-3xl" : ""} ${item.path === "/account" || item.path === "/signup" ? "mr-14" : ""}`
                 }
               >
-                <div className="flex flex-row">
-                  {" "}
-                  {item.path === "/account" && (
-                    <UserRoundCog className="mr-1" />
-                  )}{" "}
-                  {item.label}{" "}
+                <div className="flex flex-row items-center">
+                  {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label}
                 </div>
               </NavLink>
             ))}
-            {/* Theme Toggle for Desktop */}
-            <div className="right-6">
-              <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
-            </div>
+            {/* Theme Toggle */}
+            <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
           </div>
 
           {/* Mobile Menu Button */}
@@ -74,11 +65,7 @@ export function Navbar({ darkMode, setDarkMode }) {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-900 dark:text-white focus:outline-none z-50 relative"
             >
-              {isMobileMenuOpen ? (
-                <X className="fixed right-11 top-5 h-6 w-6" />
-              ) : (
-                <Menu className="h-6 w-6" />
-              )}
+              {isMobileMenuOpen ? <X className={`h-6 w-6 mr-9 mt-5`} /> : <Menu className="h-6 w-6" />}
             </button>
           </div>
         </div>
@@ -92,27 +79,18 @@ export function Navbar({ darkMode, setDarkMode }) {
               key={item.path}
               to={item.path}
               className={({ isActive }) =>
-                `block px-3 py-2 rounded-md text-sm font-medium transition-colors ${
-                  isActive
-                    ? "text-primary-600 dark:text-primary-400"
-                    : "text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400"
-                }`
+                `block px-3 py-2 rounded-md text-sm font-medium transition-colors 
+                ${isActive ? "text-blue-500" : "text-gray-700 dark:text-gray-300 hover:text-blue-500"}`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
-              <div className="flex flex-row">
-                {" "}
-                {item.path === "/account" && (
-                  <UserRoundCog className="mr-1" />
-                )}{" "}
-                {item.label}{" "}
+              <div className="flex flex-row items-center">
+                {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label}
               </div>
             </NavLink>
           ))}
-          {/* Theme Toggle BELOW the Menu Items */}
-          <div className="w-full flex justify-center mt-4">
-            <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
-          </div>
+          {/* Theme Toggle */}
+          <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
         </div>
       )}
     </nav>

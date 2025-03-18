@@ -12,6 +12,7 @@ import SpeechRecognition, {
 import ProtectedRoute from "../components/ProtectedRoute";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/DialogForm";
+import { HashLink } from "react-router-hash-link";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -62,6 +63,10 @@ export function Interview() {
         SpeechRecognition.startListening({ continuous: true });
         setIsAudioRecording(true);
         setInfoBox(false);
+        const section = document.getElementById("top");
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+        }
       } else {
         handleError("Error: " + response.data.message);
       }
@@ -219,7 +224,7 @@ export function Interview() {
           </div>
           
           <ProtectedRoute>     
-            <div className="relative rounded-3xl overflow-hidden backdrop-blur-sm border border-white/20 dark:border-gray-800 shadow-2xl bg-white/80 dark:bg-gray-900/80">
+            <div id="top" className="relative rounded-3xl overflow-hidden backdrop-blur-sm border border-white/20 dark:border-gray-800 shadow-2xl bg-white/80 dark:bg-gray-900/80">
               <InterviewHeader 
                 isStarted={isStarted}
                 isCompleted={isCompleted}

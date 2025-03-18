@@ -15,6 +15,7 @@ import { Account } from "./pages/Account.jsx";
 import { AuthProvider } from "./Context/AuthContext.jsx";
 import { SkillsProvider } from "./Context/SkillsContext.jsx";
 import { ToastContainer } from "./utils.js";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -41,6 +42,7 @@ function App() {
           <Router>
             <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
               <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+              <ScrollToTop />
               <Routes>
                 <Route path="/" element={<Home />} />
                 <Route path="/account" element={<Account />} />
