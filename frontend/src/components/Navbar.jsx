@@ -12,7 +12,7 @@ export function Navbar({ darkMode, setDarkMode }) {
   let firstName = "";
   if (user) {
     let Name = user.name.split(" ");
-    firstName = Name[0].slice(0,8);
+    firstName = Name[0].slice(0, 8);
   }
   const navItems = [
     { path: "/", label: "Home" },
@@ -32,7 +32,10 @@ export function Navbar({ darkMode, setDarkMode }) {
       <div className="container mr-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <NavLink to="/" className={`flex items-center space-x-2 ml-1 md:ml-5`}>
+          <NavLink
+            to="/"
+            className={`flex items-center space-x-2 ml-1 md:ml-5`}
+          >
             <Brain className="h-8 w-8 text-[var(--color-primary-700)] animate-pulse" />
             <span className="text-xl font-bold text-gray-900 dark:text-white tracking-wide">
               Employify
@@ -46,12 +49,33 @@ export function Navbar({ darkMode, setDarkMode }) {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `relative px-4 py-2 rounded-lg text-lg font-bold transition-all duration-300 ease-in-out 
-                  ${isActive ? "text-[var(--color-primary-600)]" : "text-gray-700 dark:text-gray-300 hover:text-[var(--color-primary-700)]"} ${item.path === "/account" ? "bg-[var(--color-primary-700)] dark:bg-[var(--color-primary-400)] text-white hover:text-black dark:hover:text-black rounded-3xl" : ""} ${item.path === "/account" || item.path === "/signup" ? "mr-14" : ""}`
+                  `relative px-4 py-2 rounded-lg text-lg font-bold transition-all duration-300 ease-in-out
+                  ${
+                    isActive
+                      ? "hover:text-[var(--color-primary-300)] text-[var(--color-primary-600)] underline"
+                      : "hover:text-white text-gray-700 dark:text-gray-300"
+                  } ${
+                    item.path === "/account"
+                      ? "bg-[var(--color-primary-700)] dark:bg-[var(--color-primary-400)] text-white hover:text-black dark:hover:text-black rounded-3xl"
+                      : ""
+                  } ${
+                    item.path === "/account" || item.path === "/signup"
+                      ? "mr-11"
+                      : ""
+                  }`
                 }
               >
-                <div className="flex flex-row items-center">
-                  {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label}
+                <div
+                  className={`flex flex-row items-center} ${
+                    item.path !== "/account"
+                      ? "hover:text-[var(--color-primary-300)]"
+                      : ""
+                  }`}
+                >
+                  {item.path === "/account" && (
+                    <UserRoundCog className="mr-1" />
+                  )}{" "}
+                  {item.label}
                 </div>
               </NavLink>
             ))}
@@ -65,7 +89,11 @@ export function Navbar({ darkMode, setDarkMode }) {
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
               className="text-gray-900 dark:text-white focus:outline-none z-50 relative"
             >
-              {isMobileMenuOpen ? <X className={`h-6 w-6 mr-9 mt-5`} /> : <Menu className="h-6 w-6" />}
+              {isMobileMenuOpen ? (
+                <X className={`h-6 w-6 mr-9 mt-5`} />
+              ) : (
+                <Menu className="h-6 w-6" />
+              )}
             </button>
           </div>
         </div>
@@ -80,12 +108,17 @@ export function Navbar({ darkMode, setDarkMode }) {
               to={item.path}
               className={({ isActive }) =>
                 `block px-3 py-2 rounded-md text-sm font-medium transition-colors 
-                ${isActive ? "text-blue-500" : "text-gray-700 dark:text-gray-300 hover:text-blue-500"}`
+                ${
+                  isActive
+                    ? "text-blue-500"
+                    : "text-gray-700 dark:text-gray-300 hover:text-blue-500"
+                }`
               }
               onClick={() => setIsMobileMenuOpen(false)}
             >
               <div className="flex flex-row items-center">
-                {item.path === "/account" && <UserRoundCog className="mr-1" />} {item.label}
+                {item.path === "/account" && <UserRoundCog className="mr-1" />}{" "}
+                {item.label}
               </div>
             </NavLink>
           ))}

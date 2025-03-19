@@ -2,9 +2,18 @@ import "regenerator-runtime/runtime";
 import Webcam from "react-webcam";
 import { useRef, useState } from "react";
 import axios from "axios";
-import { 
-  Bot, Video, Mic, Send, XCircle, CheckCircle, 
-  PauseCircle, Info, Sparkles, AlertCircle, BarChart
+import {
+  Bot,
+  Video,
+  Mic,
+  Send,
+  XCircle,
+  CheckCircle,
+  PauseCircle,
+  Info,
+  Sparkles,
+  AlertCircle,
+  BarChart,
 } from "lucide-react";
 import SpeechRecognition, {
   useSpeechRecognition,
@@ -39,7 +48,7 @@ export function Interview() {
     experience: "",
   });
   const [infoBox, setInfoBox] = useState(true);
-  
+
   const startInterview = async () => {
     try {
       const response = await axios.post(
@@ -75,7 +84,10 @@ export function Interview() {
   };
 
   const sendResponse = async () => {
-    if (!transcript && !written) return;
+    if (!transcript && !written) {
+      handleError("Response can't be empty");
+      return;
+    }
     console.log(transcript);
     SpeechRecognition.stopListening();
     setIsAudioRecording(false);
@@ -210,21 +222,32 @@ export function Interview() {
                 <h1 className="text-3xl font-bold bg-gradient-to-r from-[var(--color-primary-700)] to-purple-400 bg-clip-text text-transparent">
                   AI Mock Interview
                 </h1>
-                <p className="text-gray-600 dark:text-gray-400">Perfect your interview skills with AI feedback</p>
+                <p className="text-gray-600 dark:text-gray-400">
+                  Perfect your interview skills with AI feedback
+                </p>
               </div>
             </div>
-            
+
             {isStarted && (
               <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-md border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 font-medium flex items-center">
-                <div className={`w-3 h-3 rounded-full mr-2 ${isAudioRecording ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-                {isAudioRecording ? "Recording" : "Paused"}
+                <div
+                  className={`w-3 h-3 rounded-full mr-2 ${
+                    isAudioRecording
+                      ? "bg-green-500 animate-pulse"
+                      : "bg-red-500"
+                  }`}
+                ></div>
+                {isAudioRecording || isVideoRecording ? "Recording" : "Paused"}
               </div>
             )}
           </div>
-          
-          <ProtectedRoute>     
-            <div id="top" className="relative rounded-3xl overflow-hidden backdrop-blur-sm border border-white/20 dark:border-gray-800 shadow-2xl bg-white/80 dark:bg-gray-900/80">
-              <InterviewHeader 
+
+          <ProtectedRoute>
+            <div
+              id="top"
+              className="relative rounded-3xl overflow-hidden backdrop-blur-sm border p-0 border-white/20 dark:border-gray-800 shadow-2xl bg-white/80 dark:bg-gray-900/80"
+            >
+              <InterviewHeader
                 isStarted={isStarted}
                 isCompleted={isCompleted}
                 RecordAudio={RecordAudio}
@@ -233,25 +256,27 @@ export function Interview() {
                 handleVideoRecord={handleVideoRecord}
                 sendResponse={sendResponse}
               />
-              
+
               {infoBox && (
                 <div className="p-8">
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-                    <InstructionsCard 
-                      title="Interview Best Practices" 
+                    <InstructionsCard
+                      title="Interview Best Practices"
                       icon={<BarChart className="h-5 w-5 text-indigo-500" />}
                       items={[
                         "Be Professional & Confident",
                         "Understand the Role",
                         "Use the STAR Method",
                         "Demonstrate Problem-Solving",
-                        "Manage Your Time"
-                      ]} 
+                        "Manage Your Time",
+                      ]}
                     />
-                    
+
                     <div className="col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden">
                       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
-                        <h3 className="text-xl font-semibold text-white text-center">Interview Setup</h3>
+                        <h3 className="text-xl font-semibold text-white text-center">
+                          Interview Setup
+                        </h3>
                       </div>
                       <div className="p-6">
                         <DialogForm
@@ -261,30 +286,42 @@ export function Interview() {
                         />
                       </div>
                     </div>
-                    
-                    <InstructionsCard 
-                      title="Prepare for Common Questions" 
+
+                    <InstructionsCard
+                      title="Prepare for Common Questions"
                       icon={<AlertCircle className="h-5 w-5 text-indigo-500" />}
                       items={[
                         "Your background & experience",
                         "Strengths & weaknesses",
                         "Conflict resolution",
                         "Leadership & teamwork",
-                        "Career goals & aspirations"
-                      ]} 
+                        "Career goals & aspirations",
+                      ]}
                     />
                   </div>
                 </div>
               )}
-              
+
               {isStarted && (
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
-                  <QuestionAndScore question={question} score={score} summary={summary} />
-                  <VideoComponent webcamRef={webcamRef} isRecording={isVideoRecording} />
-                  <ResponsesComponent written={written} setWritten={setWritten} transcript={transcript} />
+                  <QuestionAndScore
+                    question={question}
+                    score={score}
+                    summary={summary}
+                  />
+                  <VideoComponent
+                    webcamRef={webcamRef}
+                    isRecording={isVideoRecording}
+                  />
+                  <ResponsesComponent
+                    written={written}
+                    setWritten={setWritten}
+                    transcript={transcript}
+                    resetTranscript={resetTranscript}
+                  />
                 </div>
               )}
-              
+
               {isCompleted && (
                 <div className="flex flex-col items-center justify-center py-16 px-6">
                   <div className="h-20 w-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6">
@@ -294,10 +331,14 @@ export function Interview() {
                     Interview Completed
                   </h1>
                   <p className="text-gray-600 dark:text-gray-300 text-center max-w-md text-lg">
-                    Congratulations! You've successfully completed your mock interview. Review your performance and feedback: {summary}
+                    Congratulations! You've successfully completed your mock
+                    interview. Review your performance and feedback: {summary}
                   </p>
-                  <button 
-                    onClick={() => {setIsCompleted(false); setInfoBox(true);}}
+                  <button
+                    onClick={() => {
+                      setIsCompleted(false);
+                      setInfoBox(true);
+                    }}
                     className="mt-8 px-6 py-3 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-1"
                   >
                     Start New Interview
@@ -322,10 +363,10 @@ function InterviewHeader({
   videoRecording,
 }) {
   return (
-    <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 p-6">
+    <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 p-3">
       <div className="flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center mb-4 md:mb-0">
-          <div className="w-14 h-14 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
+          <div className="w-10 h-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
             <Bot className="h-8 w-8 text-white" />
           </div>
           <div className="ml-4">
@@ -337,7 +378,7 @@ function InterviewHeader({
             </p>
           </div>
         </div>
-        
+
         {isStarted && !isCompleted && (
           <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
             <button
@@ -351,7 +392,7 @@ function InterviewHeader({
             >
               <Mic className="h-5 w-5" />
             </button>
-            
+
             <button
               aria-label="Toggle video"
               onClick={handleVideoRecord}
@@ -363,7 +404,7 @@ function InterviewHeader({
             >
               <Video className="h-5 w-5" />
             </button>
-            
+
             <button
               onClick={sendResponse}
               aria-label="Send message"
@@ -403,19 +444,19 @@ function InstructionsCard({ title, items, icon }) {
 
 function QuestionAndScore({ question, score, summary }) {
   const scoreValue = score ? parseInt(score) : 0;
-  
+
   const getScoreColor = (score) => {
     if (score >= 8) return "text-green-500";
     if (score >= 6) return "text-yellow-500";
     return "text-red-500";
   };
-  
+
   const getScoreBg = (score) => {
     if (score >= 8) return "bg-green-100 dark:bg-green-900/30";
     if (score >= 6) return "bg-yellow-100 dark:bg-yellow-900/30";
     return "bg-red-100 dark:bg-red-900/30";
   };
-  
+
   return (
     <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
@@ -424,31 +465,39 @@ function QuestionAndScore({ question, score, summary }) {
           Current Question
         </h3>
       </div>
-      
+
       <div className="p-5 flex-grow bg-gradient-to-br from-white to-indigo-50/50 dark:from-gray-800 dark:to-indigo-950/10">
         <p className="text-gray-800 dark:text-gray-200 text-lg font-medium">
           {question ? question : "Your interview question will appear here"}
         </p>
       </div>
-      
+
       {score && (
         <div className="p-4 border-t border-indigo-100 dark:border-indigo-900/50 flex items-center justify-between bg-white dark:bg-gray-800">
-          <span className="text-gray-600 dark:text-gray-300 font-medium">Response Score</span>
-          <div className={`flex items-center justify-center h-10 w-10 rounded-full ${getScoreBg(scoreValue)}`}>
+          <span className="text-gray-600 dark:text-gray-300 font-medium">
+            Response Score
+          </span>
+          <div
+            className={`flex items-center justify-center h-10 w-10 rounded-full ${getScoreBg(
+              scoreValue
+            )}`}
+          >
             <span className={`text-xl font-bold ${getScoreColor(scoreValue)}`}>
               {score}
             </span>
           </div>
         </div>
       )}
-      
+
       <div className="bg-indigo-50 dark:bg-indigo-900/20 p-5 border-t border-indigo-100 dark:border-indigo-900/50">
         <h4 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-3 flex items-center">
           <Info className="h-4 w-4 mr-2" />
           AI Feedback
         </h4>
-        <p className="text-gray-800 dark:text-gray-200" dangerouslySetInnerHTML={{ __html: summary }}>
-        </p>
+        <p
+          className="text-gray-800 dark:text-gray-200"
+          dangerouslySetInnerHTML={{ __html: summary }}
+        ></p>
       </div>
     </div>
   );
@@ -469,7 +518,7 @@ function VideoComponent({ webcamRef, isRecording }) {
           </div>
         )}
       </div>
-      
+
       <div className="relative flex-grow bg-gray-900 flex items-center justify-center">
         <Webcam
           audio={true}
@@ -477,7 +526,7 @@ function VideoComponent({ webcamRef, isRecording }) {
           className="w-full h-full object-cover transform -scale-x-100"
           mirrored={true}
         />
-        
+
         {!isRecording && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="p-6 bg-black/60 rounded-full">
@@ -486,7 +535,7 @@ function VideoComponent({ webcamRef, isRecording }) {
           </div>
         )}
       </div>
-      
+
       <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 text-center border-t border-indigo-100 dark:border-indigo-900/50">
         <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
           <Info className="h-4 w-4 mr-2 text-indigo-500" />
@@ -497,15 +546,20 @@ function VideoComponent({ webcamRef, isRecording }) {
   );
 }
 
-function ResponsesComponent({ written, setWritten, transcript }) {
+function ResponsesComponent({
+  written,
+  setWritten,
+  transcript,
+  resetTranscript,
+}) {
   const textareaRef = useRef(null);
-  
+
   const adjustHeight = () => {
     if (!textareaRef.current) return;
     textareaRef.current.style.height = "auto";
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
-  
+
   return (
     <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
@@ -514,20 +568,31 @@ function ResponsesComponent({ written, setWritten, transcript }) {
           Your Response
         </h3>
       </div>
-      
-      <div className="p-5 flex-grow flex flex-col gap-5 bg-gradient-to-br from-white to-indigo-50/50 dark:from-gray-800 dark:to-indigo-950/10">
+
+      <div className="p-5 flex-grow flex flex-col gap-1 bg-gradient-to-br from-white to-indigo-50/50 dark:from-gray-800 dark:to-indigo-950/10">
         <div className="flex-1">
           <h4 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-3 flex items-center">
             <Mic className="h-4 w-4 mr-2" />
             Recorded Speech
           </h4>
           <div className="min-h-24 p-4 border border-indigo-100 dark:border-indigo-900/50 rounded-xl bg-white dark:bg-gray-800 shadow-inner">
-            <p className="text-gray-800 dark:text-gray-200" style={{ wordBreak: "break-word" }}>
-              {transcript || "Your spoken words will appear here as you speak..."}
+            <p
+              className="text-gray-800 dark:text-gray-200"
+              style={{ wordBreak: "break-word" }}
+            >
+              {transcript ||
+                "Your spoken words will appear here as you speak..."}
             </p>
           </div>
         </div>
-        
+        <div className="flex items-center justify-center mt-0 mb-1">
+          <button
+            className="w-[50%] text-center rounded-xl bg-[var(--color-primary-500)]"
+            onClick={() => resetTranscript()}
+          >
+            Reset
+          </button>
+        </div>
         <div className="flex-1">
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-medium text-indigo-700 dark:text-indigo-400 flex items-center">
@@ -546,7 +611,7 @@ function ResponsesComponent({ written, setWritten, transcript }) {
           />
         </div>
       </div>
-      
+
       <div className="p-4 bg-indigo-50 dark:bg-indigo-900/20 text-center border-t border-indigo-100 dark:border-indigo-900/50">
         <p className="text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center">
           <Info className="h-4 w-4 mr-2 text-indigo-500" />
