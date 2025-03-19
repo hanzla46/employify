@@ -38,6 +38,7 @@ app.use((req, res, next) => {
 app.use("/auth", require("./routes/AuthRouter"));
 app.use("/skills", require("./routes/SkillsRouter"));
 app.use("/interview", require("./routes/InterviewRouter"));
+app.use("/profile", require("./routes/ProfileRouter"));
 
 // ✅
 app.listen(PORT, () => {
