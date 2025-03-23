@@ -11,10 +11,10 @@ export const SkillsProvider = ({ children }) => {
   const url = import.meta.env.VITE_API_URL;
   console.log(url);
   useEffect(() => {
-    const fetchSkills = async () => {
+    const checkProfile = async () => {
       try {
-        const response = await axios.get(url + "/profile");
-        setProfile(response.data.data);
+        const response = await axios.get(url + "/profile/check");
+        if (response.data.success)  setHasProfile(true);
       } catch (error) {
         console.error("Failed to fetch skills:", error.message);
         handleError(error.message);

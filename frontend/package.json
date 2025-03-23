@@ -25,6 +25,7 @@
     "react-router-dom": "^6.29.0",
     "react-speech-recognition": "^3.10.0",
     "react-webcam": "^7.2.0",
+    "reactflow": "^11.11.4",
     "regenerator-runtime": "^0.14.1",
     "sonner": "^2.0.1"
   },

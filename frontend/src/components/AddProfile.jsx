@@ -25,7 +25,6 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
     {
       id: 1,
       name: "",
-      description: "",
     },
   ]);
 
@@ -57,7 +56,6 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
       const newProject = {
         id: projects.length + 1,
         name: "",
-        description: "",
       };
       setProjects([...projects, newProject]);
     }
@@ -415,26 +413,6 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
               required
             />
           </div>
-        </div>
-
-        <div>
-          <label
-            htmlFor={`project-description-${project.id}`}
-            className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-          >
-            Project Description
-          </label>
-          <textarea
-            id={`project-description-${project.id}`}
-            value={project.description}
-            onChange={(e) =>
-              handleChange("project", project.id, "description", e.target.value)
-            }
-            rows="3"
-            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-            placeholder="Describe the project, your contribution, and any achievements"
-            required
-          ></textarea>
         </div>
       </div>
     ));
