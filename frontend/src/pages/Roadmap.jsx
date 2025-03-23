@@ -1,10 +1,10 @@
 import React, { useContext, useState } from "react";
 import { BookOpen, Code, Database, Cloud, Globe, Terminal } from "lucide-react";
 import ProtectedRoute from "../components/ProtectedRoute";
-import SkillsForm from "../components/GatherSkills.Skills";
+import SkillsForm from "../components/AddProfile";
 import { SkillsContext } from "../Context/SkillsContext";
-export function Skills() {
-  const { hasUploadedSkills, setHasUploadedSkills, setSkills } =
+export function Roadmap() {
+  const { hasProfile, setHasProfile, setRoadmap, profile, setProfile} =
     useContext(SkillsContext);
   const skillPaths = [
     {
@@ -29,7 +29,7 @@ export function Skills() {
       duration: "12 months",
     },
   ];
-
+ 
   return (
     <div className="min-h-screen pt-16 bg-gray-50 dark:bg-gray-900">
       <div className="container mx-auto px-4 py-8">
@@ -38,8 +38,8 @@ export function Skills() {
             Skills Roadmap
           </h1>
           <ProtectedRoute>
-            {!hasUploadedSkills ? (
-              <SkillsForm setSkills={setSkills} setHasUploadedSkills={setHasUploadedSkills} />
+            {!hasProfile ? (
+              <SkillsForm setProfile={setProfile} setHasProfile={setHasProfile} />
             ) : (
               <UsersSkills skillPaths={skillPaths} />
             )}

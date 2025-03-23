@@ -17,7 +17,7 @@ export function Navbar({ darkMode, setDarkMode }) {
   const navItems = [
     { path: "/", label: "Home" },
     { path: "/interview", label: "AI Interview" },
-    { path: "/skills", label: "Skills Roadmap" },
+    { path: "/roadmap", label: "Skills Roadmap" },
     { path: "/jobs", label: "Job Portal" },
     { path: "/pricing", label: "Pricing" },
     { path: "/about", label: "About" },

@@ -157,7 +157,7 @@ export function Home() {
                   color="purple"
                 />
               </Link>
-              <Link to="/skills" className="transition-all duration-300 hover:scale-105">
+              <Link to="/roadmap" className="transition-all duration-300 hover:scale-105">
                 <FeatureCard
                   icon={BookOpen}
                   title="Personalized Learning"

@@ -5,7 +5,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { Home } from "./pages/Home";
 import { Interview } from "./pages/Interview";
-import { Skills } from "./pages/Skills";
+import { Roadmap} from "./pages/Roadmap";
 import { Jobs } from "./pages/Jobs";
 import { Pricing } from "./pages/Pricing";
 import { About } from "./pages/About";
@@ -50,7 +50,7 @@ function App() {
                 <Route path="/login" element={<Login />} />
                 <Route path="/signup" element={<Signup />} />
                 <Route path="/interview" element={<Interview />} />
-                <Route path="/skills" element={<Skills />} />
+                <Route path="/roadmap" element={<Roadmap />} />
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/about" element={<About />} />
