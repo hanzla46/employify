@@ -7,12 +7,10 @@ import {
   SelectValue,
 } from "./ui/select";
 import { Card, CardContent } from "./ui/card";
-import { Label } from "./ui/label";
 import { Input } from "./ui/input";
-import FancyButton from "./Button";
 import { handleError } from "../utils";
 import { Briefcase, Building, BookOpen, Clock } from "lucide-react";
-
+import { Spinner } from "../lib/Spinner";
 const options = {
   company: ["Multinational", "Midsized", "Startup"],
   industry: [
@@ -40,12 +38,15 @@ const options = {
 };
 
 export default function DialogForm({ start, setInterviewData, interviewData }) {
+  const [loading, setLoading] = useState(false);
   const startIt = () => {
     if(interviewData.position === "" || interviewData.company === "" || interviewData.industry === "" || interviewData.experience === ""){
         handleError("Please fill all the fields");
         return;
     }
+    setLoading(true);
     start();
+    setLoading(false);
   }
   
   return (
@@ -143,6 +144,11 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
             onClick={startIt}
             className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center"
           >
+            {loading ? (
+              <Spinner />
+            )
+            : ("")
+          }
             Start Interview
           </button>
         </div>

@@ -21,6 +21,7 @@ import SpeechRecognition, {
 import ProtectedRoute from "../components/ProtectedRoute";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/DialogForm";
+import { Spinner } from "../lib/Spinner";
 
 const url = import.meta.env.VITE_API_URL;
 
@@ -48,7 +49,7 @@ export function Interview() {
     experience: "",
   });
   const [infoBox, setInfoBox] = useState(true);
-
+  const [loading, setLoading] = useState(false);
   const startInterview = async () => {
     try {
       const response = await axios.post(
@@ -88,7 +89,7 @@ export function Interview() {
       handleError("Response can't be empty");
       return;
     }
-    console.log(transcript);
+    setLoading(true);
     SpeechRecognition.stopListening();
     setIsAudioRecording(false);
     stopVideoRecording();
@@ -141,6 +142,7 @@ export function Interview() {
     } catch (error) {
       console.log("error" + error);
     }
+    setLoading(false);
   };
 
   //audio
@@ -255,6 +257,7 @@ export function Interview() {
                 isAudioRecording={isAudioRecording}
                 handleVideoRecord={handleVideoRecord}
                 sendResponse={sendResponse}
+                loading={loading}
               />
 
               {infoBox && (
@@ -361,6 +364,7 @@ function InterviewHeader({
   sendResponse,
   isAudioRecording,
   videoRecording,
+  loading,
 }) {
   return (
     <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 p-3">
@@ -405,13 +409,17 @@ function InterviewHeader({
               <Video className="h-5 w-5" />
             </button>
 
-            <button
-              onClick={sendResponse}
-              aria-label="Send message"
-              className="p-3 bg-white text-indigo-600 rounded-full hover:bg-indigo-50 transition-all duration-300 shadow-md"
-            >
-              <Send className="h-5 w-5" />
-            </button>
+            {loading ? (
+              <Spinner />
+            ) : (
+              <button
+                onClick={sendResponse}
+                aria-label="Send message"
+                className="p-3 bg-white text-indigo-600 rounded-full hover:bg-indigo-50 transition-all duration-300 shadow-md"
+              >
+                <Send className="h-5 w-5" />
+              </button>
+            )}
           </div>
         )}
       </div>
