@@ -70,7 +70,10 @@ const continueInterview = async (req, res) => {
   try {
     const userId = req.user._id;
     const { question, answer, category } = req.body;
-    const videoFile = req.file;
+    const videoFile = req.file; // Use req.file to get the uploaded video file
+    if (videoFile) {
+      console.log("Video file uploaded:", videoFile.originalname);
+    }
     const interview = await Interview.findOne({
       userId,
       status: "ongoing",

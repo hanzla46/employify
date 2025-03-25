@@ -100,7 +100,7 @@ export function Home() {
               <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/10 to-purple-500/10 backdrop-blur-sm pointer-events-none"></div>
               
               <img
-                src="https://images.unsplash.com/photo-1553877522-43269d4ea984?auto=format&fit=crop&q=80"
+                src="https://burst.shopifycdn.com/photos/person-using-laptop.jpg?exif=0&iptc=0"
                 alt="AI Interview Platform"
                 className="rounded-3xl w-full transform transition-transform hover:scale-105 duration-700"
               />
@@ -329,7 +329,7 @@ export function Home() {
                     Dedicated Support
                   </li>
                 </ul>
-                <Link to="/contact" className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-center">
+                <Link to="/about#contact" className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-white px-6 py-3 rounded-xl font-semibold hover:bg-gray-200 dark:hover:bg-gray-600 transition-all text-center">
                   Contact Sales
                 </Link>
               </div>

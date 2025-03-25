@@ -94,9 +94,8 @@ export function Interview() {
     setIsAudioRecording(false);
     stopVideoRecording();
     let videoFile = null;
-    if (recordedChunks.length > 0) {
-      const blob = new Blob(recordedChunks, { type: "video/webm" });
-      videoFile = new File([blob], "interview-recording.webm", {
+    if (videoBlob) {
+      videoFile = new File([videoBlob], "interview-recording.webm", {
         type: "video/webm",
       });
     }
@@ -172,50 +171,96 @@ export function Interview() {
       setIsVideoRecording(true);
     }
   };
-  const startVideoRecording = () => {
-    setRecordedChunks([]); // Reset previous recordings
-    setVideoURL(null); // Reset video URL
+  // const startVideoRecording = () => {
+  //   setRecordedChunks([]); // Reset previous recordings
+  //   setVideoURL(null); // Reset video URL
 
-    if (webcamRef.current) {
-      const stream = webcamRef.current.stream;
+  //   if (webcamRef.current) {
+  //     const stream = webcamRef.current.stream;
+  //     const mediaRecorder = new MediaRecorder(stream, {
+  //       mimeType: "video/webm",
+  //     });
+
+  //     mediaRecorder.ondataavailable = (event) => {
+  //       if (event.data.size > 0) {
+  //         setRecordedChunks((prev) => [...prev, event.data]);
+  //       }
+  //     };
+
+  //     mediaRecorder.onstop = () => {
+  //       if (recordedChunks.length > 0) {
+  //         const blob = new Blob(recordedChunks, { type: "video/webm" });
+  //         const newVideoURL = URL.createObjectURL(blob);
+  //         setVideoURL(newVideoURL);
+  //       }
+  //     };
+
+  //     mediaRecorderRef.current = mediaRecorder;
+  //     mediaRecorder.start();
+  //     setIsVideoRecording(true);
+  //   }
+  // };
+  // const stopVideoRecording = () => {
+  //   if (mediaRecorderRef.current) {
+  //     mediaRecorderRef.current.stop();
+  //     setIsVideoRecording(false);
+  //   }
+  // };
+
+  const [videoBlob, setVideoBlob] = useState(null);
+  const [videoUrl, setVideoUrl] = useState('');
+  const streamRef = useRef(null);
+  const startVideoRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      streamRef.current = stream;
+      videoRef.current.srcObject = stream;
+      
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "video/webm",
+        mimeType: 'video/webm'
       });
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data.size > 0) {
-          setRecordedChunks((prev) => [...prev, event.data]);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        if (recordedChunks.length > 0) {
-          const blob = new Blob(recordedChunks, { type: "video/webm" });
-          const newVideoURL = URL.createObjectURL(blob);
-          setVideoURL(newVideoURL);
-        }
-      };
-
       mediaRecorderRef.current = mediaRecorder;
+      
+      const chunks = [];
+      
+      mediaRecorder.ondataavailable = (e) => {
+        if (e.data.size > 0) {
+          chunks.push(e.data);
+        }
+      };
+      
+      mediaRecorder.onstop = () => {
+        const blob = new Blob(chunks, { type: 'video/webm' });
+        setVideoBlob(blob);
+        setVideoUrl(URL.createObjectURL(blob));
+      };
+      
       mediaRecorder.start();
       setIsVideoRecording(true);
+    } catch (err) {
+      console.error('Error accessing media devices:', err);
     }
   };
+
   const stopVideoRecording = () => {
-    if (mediaRecorderRef.current) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
       mediaRecorderRef.current.stop();
-      setIsVideoRecording(false);
     }
+    if (streamRef.current) {
+      streamRef.current.getTracks().forEach(track => track.stop());
+    }
+    setIsVideoRecording(false);
   };
+
   //everything starts from here
   const start = () => {
     startInterview();
   };
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-900 dark:via-indigo-950/30 dark:to-gray-900">
-      <div className="container mx-auto px-4 py-16">
-        <div className="w-full max-w-6xl mx-auto">
-          <div className="flex items-center justify-between mb-8">
+      <div className="container mx-auto px-4 py-10 pb-2">
+        <div className="w-full max-w-full mx-auto">
+          <div className="flex items-center justify-between mb-2">
             <div className="flex items-center space-x-3 mt-6">
               <div className="bg-gradient-to-br from-indigo-600 to-purple-600 p-3 rounded-2xl shadow-lg">
                 <Sparkles className="h-7 w-7 text-white" />
@@ -262,7 +307,7 @@ export function Interview() {
 
               {infoBox && (
                 <div className="p-8">
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <InstructionsCard
                       title="Interview Best Practices"
                       icon={<BarChart className="h-5 w-5 text-indigo-500" />}
@@ -313,7 +358,7 @@ export function Interview() {
                     summary={summary}
                   />
                   <VideoComponent
-                    webcamRef={webcamRef}
+                    webcamRef={videoRef}
                     isRecording={isVideoRecording}
                   />
                   <ResponsesComponent
@@ -529,7 +574,7 @@ function VideoComponent({ webcamRef, isRecording }) {
 
       <div className="relative flex-grow bg-gray-900 flex items-center justify-center">
         <Webcam
-          audio={true}
+          audio={false}
           ref={webcamRef}
           className="w-full h-full object-cover transform -scale-x-100"
           mirrored={true}
