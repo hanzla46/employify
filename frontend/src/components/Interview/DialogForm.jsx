@@ -5,12 +5,12 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "./ui/select";
-import { Card, CardContent } from "./ui/card";
-import { Input } from "./ui/input";
-import { handleError } from "../utils";
+} from "../ui/select";
+import { Card, CardContent } from "../ui/card";
+import { Input } from "../ui/input";
+import { handleError } from "../../utils";
 import { Briefcase, Building, BookOpen, Clock } from "lucide-react";
-import { Spinner } from "../lib/Spinner";
+import { Spinner } from "../../lib/Spinner";
 const options = {
   company: ["Multinational", "Midsized", "Startup"],
   industry: [

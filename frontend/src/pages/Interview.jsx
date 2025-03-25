@@ -20,7 +20,7 @@ import SpeechRecognition, {
 } from "react-speech-recognition";
 import ProtectedRoute from "../components/ProtectedRoute";
 import { handleSuccess, handleError } from "../utils";
-import DialogForm from "../components/DialogForm";
+import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";
 
 const url = import.meta.env.VITE_API_URL;
