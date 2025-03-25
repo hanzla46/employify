@@ -54,7 +54,6 @@ export function Interview() {
   const [infoBox, setInfoBox] = useState(true);
   const [loading, setLoading] = useState(false);
 
-
   const startInterview = async () => {
     try {
       const response = await axios.post(
@@ -68,7 +67,6 @@ export function Interview() {
           },
         }
       );
-
       if (response.data.success) {
         setQuestion(response.data.question);
         setCategory(response.data.category);
@@ -89,13 +87,14 @@ export function Interview() {
       console.error("Failed to start interview:", error.message);
       //  Handle errors from axios more specifically
       if (error.response) {
-        handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
+        handleError(
+          `Server Error (${error.response.status}): ${error.response.data.message}`
+        );
       } else if (error.request) {
         handleError("No response received from server.");
       } else {
-          handleError("Error setting up request: " + error.message);
+        handleError("Error setting up request: " + error.message);
       }
-
     }
   };
 
@@ -108,7 +107,7 @@ export function Interview() {
     SpeechRecognition.stopListening();
     setIsAudioRecording(false);
     stopVideoRecording();
-    await new Promise(resolve => {
+    await new Promise((resolve) => {
       if (mediaRecorderRef.current?.state === "recording") {
         mediaRecorderRef.current.onstop = resolve;
         mediaRecorderRef.current.stop();
@@ -117,24 +116,17 @@ export function Interview() {
       }
     });
     const formData = new FormData();
-    let videoFile = null;
-    formData.append('video', videoBlob, 'recording.webm');
+    formData.append("video", videoBlob, "recording.webm");
     formData.append("question", question);
     formData.append("category", category);
     formData.append("answer", transcript);
     formData.append("written", written);
-    if (videoFile) {
-      formData.append("video", videoFile);
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
     }
-      console.log("Form Data:", formData);
-      for (let [key, value] of formData.entries()) {
-          console.log(key, value);
-      }
-
     setVideoURL(null);
     setRecordedChunks([]);
     setVideoBlob(null);
-
     try {
       const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
@@ -143,20 +135,16 @@ export function Interview() {
           "Content-Type": "multipart/form-data", // Correct for file uploads
         },
       });
-
       if (response.data.success) {
         setQuestion(response.data.question);
         setCategory(response.data.category);
         setScore(response.data.score);
         setSummary(response.data.aiSummary);
-        console.log(summary);
-
         resetTranscript();
         setWritten(""); // Clear the written response
         setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
         startVideoRecording();
-
         if (
           response.data.completed == true ||
           response.data.completed == "true"
@@ -172,13 +160,15 @@ export function Interview() {
       }
     } catch (error) {
       console.error("Error sending response:", error);
-        if (error.response) {
-            handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
-        } else if (error.request) {
-            handleError("No response received from server.");
-        } else {
-            handleError("Error setting up request: " + error.message);
-        }
+      if (error.response) {
+        handleError(
+          `Server Error (${error.response.status}): ${error.response.data.message}`
+        );
+      } else if (error.request) {
+        handleError("No response received from server.");
+      } else {
+        handleError("Error setting up request: " + error.message);
+      }
     } finally {
       setLoading(false);
     }
@@ -211,45 +201,44 @@ export function Interview() {
       setIsVideoRecording(true);
     }
   };
-
   const startVideoRecording = async () => {
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+        audio: true,
+      });
       streamRef.current = stream;
       videoRef.current.srcObject = stream;
-      
       const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: 'video/webm'
+        mimeType: "video/webm",
       });
       mediaRecorderRef.current = mediaRecorder;
-      
       const chunks = [];
-      
       mediaRecorder.ondataavailable = (e) => {
         if (e.data.size > 0) {
           chunks.push(e.data);
         }
       };
-      
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'video/webm' });
+        const blob = new Blob(chunks, { type: "video/webm" });
         setVideoBlob(blob);
         setVideoURL(URL.createObjectURL(blob));
       };
-      
       mediaRecorder.start();
       setIsVideoRecording(true);
     } catch (err) {
-      console.error('Error accessing media devices:', err);
+      console.error("Error accessing media devices:", err);
     }
   };
-
   const stopVideoRecording = () => {
-    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== 'inactive') {
+    if (
+      mediaRecorderRef.current &&
+      mediaRecorderRef.current.state !== "inactive"
+    ) {
       mediaRecorderRef.current.stop();
     }
     if (streamRef.current) {
-      streamRef.current.getTracks().forEach(track => track.stop());
+      streamRef.current.getTracks().forEach((track) => track.stop());
     }
     setIsVideoRecording(false);
   };
@@ -618,10 +607,9 @@ function ResponsesComponent({
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
 
-    useEffect(() => {
-        adjustHeight();
-    }, [written]);
-
+  useEffect(() => {
+    adjustHeight();
+  }, [written]);
 
   return (
     <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50">
