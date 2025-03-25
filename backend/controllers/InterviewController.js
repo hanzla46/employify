@@ -31,8 +31,7 @@ const startInterview = async (req, res) => {
       company,
       industry,
       experience,
-      questions: [
-      ],
+      questions: [],
       overallScore: 0,
       skills: userSkills.skills,
       aiSummary: "",
@@ -65,42 +64,27 @@ const continueInterview = async (req, res) => {
     console.log("Request Files:", req.file);
     const userId = req.user._id;
     const { question, written, answer, category } = req.body;
-
-    // --- Get the video file buffer from req.file (provided by multer) ---
     if (!req.file) {
-      return res
-        .status(400)
-        .json({ message: "No video file uploaded.", success: false });
+      return res.status(400).json({ message: "No video file uploaded.", success: false });
     }
-    console.log("before file buffer");
     const videoFileBuffer = req.file.buffer;
-    console.log("after file buffer");
-    const interview = await Interview.findOne({
-      userId,
-      status: "ongoing",
-    }).sort({ createdAt: -1 });
+    const interview = await Interview.findOne({userId, status: "ongoing",}).sort({ createdAt: -1 });
     if (!interview) {
-      return res
-        .status(404)
-        .json({ message: "No ongoing interview found.", success: false });
+      return res.status(404).json({ message: "No ongoing interview found.", success: false });
     }
-
-    // --- Add the new question and answer to the interview ---
     interview.questions.push({
       question,
-      answer: answer + written, // Combine spoken and written answers
+      answer: answer + written,
       category,
-      score: null, // Score will be updated later
-      facialAnalysis: [], // Will be populated later
+      score: null,
+      facialAnalysis: [],
     });
     await interview.save();
 
-    // --- Process the video *without* awaiting the result ---
     const QId = interview.questions.length;
-    ProcessVideo(videoFileBuffer, QId, userId); // Don't await
+    ProcessVideo(videoFileBuffer, QId, userId);
 
-    // --- Generate the next question using Gemini ---
-    const prompt = GeneratePrompt(interview); // Pass the updated interview
+    const prompt = GeneratePrompt(interview);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
     const result = await model.generateContent(prompt);
@@ -119,15 +103,11 @@ const continueInterview = async (req, res) => {
       completed,
     } = parsedResult;
 
-    // --- Update the *previous* question's score and analysis ---
     if (interview.questions.length > 1) {
-      // Check if there's a previous question
-      let lastQuestion = interview.questions[interview.questions.length - 2]; // Get the *second to last* question (the one we just answered)
+      let lastQuestion = interview.questions[interview.questions.length - 2];
       lastQuestion.score = score;
       lastQuestion.analysis = currentAnalysis;
     }
-
-    // --- Save the interview with the updated scores ---
     await interview.save();
 
     res.status(200).json({
@@ -137,8 +117,8 @@ const continueInterview = async (req, res) => {
       hypotheticalResponse: hypothetical_response,
       success: true,
       completed: completed,
-      score, // Send the score of the *previous* question
-      overallScore, // Overall score so far
+      score,
+      overallScore,
     });
   } catch (error) {
     console.error("Error in continueInterview:", error);
