@@ -99,7 +99,6 @@ export function Interview() {
     }
   };
 
-
   const sendResponse = async () => {
     if (!transcript && !written) {
       handleError("Response can't be empty");
@@ -119,16 +118,6 @@ export function Interview() {
     });
     const formData = new FormData();
     let videoFile = null;
-    // if (recordedChunks.length > 0) {
-    //   try {
-    //     const blob = new Blob(recordedChunks, { type: "video/webm" });
-    //     formData.append("video", blob, "interview-recording.webm");
-    //     console.log("Video blob size:", blob.size);
-    //   } catch (error) {
-    //     console.error("Error creating video blob:", error);
-    //     handleError("Failed to process video recording");
-    //   }
-    // }
     formData.append('video', videoBlob, 'recording.webm');
     formData.append("question", question);
     formData.append("category", category);
