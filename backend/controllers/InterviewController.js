@@ -110,7 +110,6 @@ const continueInterview = async (req, res) => {
     const prompt = GeneratePrompt(interview); // Pass the updated interview
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
     const result = await model.generateContent(prompt);
     const content = result.response.candidates[0].content.parts[0].text;
     const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];

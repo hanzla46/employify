@@ -17,15 +17,15 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     }
 
     const videoPart = fileToGenerativePart(videoFile);
-    const prompt = `Analyze this video and provide insights. length, objects, actions, etc.`;
+    const prompt = `Analyze this video and provide insights on person's facial expressions and emotions. remebeber that the person is giving an interview. your output should be: top 3 emotions with intensity from 0 to 1 and a one sentence summary of the person's movement. response should be in json and like this: array of objects of emotion and intensity and then string of summary. if you find no person, you can give random output of emotions and summary.`;
 
     const result = await model.generateContent([prompt, videoPart]);
     const response = await result.response;
     const text = response.text();
-
+    const jsonString = text.match(/```json\n([\s\S]*?)\n```/)[1];
+    const parsedResult = JSON.parse(jsonString);
     console.log("Gemini Response:", text);
-    return text; // Return the text for potential later use
-
+    console.log("Parsed Result:", parsedResult);
   } catch (error) {
     console.error("Error processing video with Gemini:", error);
     // DO NOT re-throw here.  We want the main interview flow to continue.

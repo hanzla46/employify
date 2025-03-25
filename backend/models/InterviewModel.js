@@ -6,20 +6,17 @@ const questionSchema = new mongoose.Schema({
   category: { type: String, required: true },
   score: { type: String, default: "0" },
   analysis: { type: String, default: "" },
-  facialAnalysis: [
+  facialAnalysis:
     {
       timestamp: { type: Date, default: Date.now },
-      emotions: {
-        happy: { type: Number, default: 0 },
-        sad: { type: Number, default: 0 },
-        angry: { type: Number, default: 0 },
-        surprised: { type: Number, default: 0 },
-        disgusted: { type: Number, default: 0 },
-        neutral: { type: Number, default: 0 },
-      },
-      intensity: { type: Number, default: 0 },
+      emotions: [
+        {
+          emotion: { type: String, required: true },
+          intensity: { type: Number, default: 0 },
+        },
+      ],
+      expressionAnalysis: { type: String, default: "" },
     },
-  ],
 });
 
 const interviewSchema = new mongoose.Schema({
