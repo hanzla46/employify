@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const Interview = require("../models/InterviewModel");
 
 const ProcessVideo = async (videoFile, QId, userId) => {
   try {
@@ -26,6 +27,16 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     const parsedResult = JSON.parse(jsonString);
     console.log("Gemini Response:", text);
     console.log("Parsed Result:", parsedResult);
+    const interview = await Interview.findOne({ userId, status: "ongoing" }).sort({ createdAt: -1 });
+    if (!interview) {
+      console.error("No ongoing interview found for user:", userId);
+      return;
+    } else if (!interview.questions[QId - 1]) {
+      console.error("No question found for QId:", QId);
+      return;
+    }
+    interview.questions[QId - 1].facialAnalysis = parsedResult;
+    await interview.save();
   } catch (error) {
     console.error("Error processing video with Gemini:", error);
     // DO NOT re-throw here.  We want the main interview flow to continue.

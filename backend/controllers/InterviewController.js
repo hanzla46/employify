@@ -32,13 +32,6 @@ const startInterview = async (req, res) => {
       industry,
       experience,
       questions: [
-        {
-          question: "Tell me about yourself.",
-          answer: "not much", //  Consider removing the default answer
-          category: "General",
-          score: null,
-          facialAnalysis: [], // Start with an empty array
-        },
       ],
       overallScore: 0,
       skills: userSkills.skills,
