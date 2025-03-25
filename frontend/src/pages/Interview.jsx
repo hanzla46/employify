@@ -1,6 +1,6 @@
 import "regenerator-runtime/runtime";
 import Webcam from "react-webcam";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react"; // Added useEffect
 import axios from "axios";
 import {
   Bot,
@@ -24,6 +24,7 @@ import DialogForm from "../components/DialogForm";
 import { Spinner } from "../lib/Spinner";
 
 const url = import.meta.env.VITE_API_URL;
+console.log("API URL:", url); //  Verify the URL
 
 export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
@@ -40,6 +41,8 @@ export function Interview() {
   const webcamRef = useRef(null);
   const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [videoURL, setVideoURL] = useState(null);
+  const [videoBlob, setVideoBlob] = useState(null);
+  const streamRef = useRef(null);
   const [recordedChunks, setRecordedChunks] = useState([]);
   const [summary, setSummary] = useState("");
   const [interviewData, setInterviewData] = useState({
@@ -50,19 +53,22 @@ export function Interview() {
   });
   const [infoBox, setInfoBox] = useState(true);
   const [loading, setLoading] = useState(false);
+
+
   const startInterview = async () => {
     try {
       const response = await axios.post(
         url + "/interview/start",
-        { interviewData },
+        { interviewData }, // Send interviewData correctly
         {
           withCredentials: true,
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/json",
+            "Content-Type": "application/json", // Correct for startInterview
           },
         }
       );
+
       if (response.data.success) {
         setQuestion(response.data.question);
         setCategory(response.data.category);
@@ -81,8 +87,18 @@ export function Interview() {
       }
     } catch (error) {
       console.error("Failed to start interview:", error.message);
+      //  Handle errors from axios more specifically
+      if (error.response) {
+        handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
+      } else if (error.request) {
+        handleError("No response received from server.");
+      } else {
+          handleError("Error setting up request: " + error.message);
+      }
+
     }
   };
+
 
   const sendResponse = async () => {
     if (!transcript && !written) {
@@ -93,40 +109,65 @@ export function Interview() {
     SpeechRecognition.stopListening();
     setIsAudioRecording(false);
     stopVideoRecording();
-    let videoFile = null;
-    if (videoBlob) {
-      videoFile = new File([videoBlob], "interview-recording.webm", {
-        type: "video/webm",
-      });
-    }
+    await new Promise(resolve => {
+      if (mediaRecorderRef.current?.state === "recording") {
+        mediaRecorderRef.current.onstop = resolve;
+        mediaRecorderRef.current.stop();
+      } else {
+        resolve();
+      }
+    });
     const formData = new FormData();
+    let videoFile = null;
+    // if (recordedChunks.length > 0) {
+    //   try {
+    //     const blob = new Blob(recordedChunks, { type: "video/webm" });
+    //     formData.append("video", blob, "interview-recording.webm");
+    //     console.log("Video blob size:", blob.size);
+    //   } catch (error) {
+    //     console.error("Error creating video blob:", error);
+    //     handleError("Failed to process video recording");
+    //   }
+    // }
+    formData.append('video', videoBlob, 'recording.webm');
     formData.append("question", question);
+    formData.append("category", category);
     formData.append("answer", transcript);
     formData.append("written", written);
     if (videoFile) {
       formData.append("video", videoFile);
     }
-    formData.append("category", category);
+      console.log("Form Data:", formData);
+      for (let [key, value] of formData.entries()) {
+          console.log(key, value);
+      }
+
     setVideoURL(null);
     setRecordedChunks([]);
+    setVideoBlob(null);
+
     try {
       const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
         headers: {
           Accept: "application/json",
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "multipart/form-data", // Correct for file uploads
         },
       });
+
       if (response.data.success) {
         setQuestion(response.data.question);
         setCategory(response.data.category);
         setScore(response.data.score);
         setSummary(response.data.aiSummary);
+        console.log(summary);
+
         resetTranscript();
-        setWritten("");
+        setWritten(""); // Clear the written response
         setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
         startVideoRecording();
+
         if (
           response.data.completed == true ||
           response.data.completed == "true"
@@ -136,12 +177,22 @@ export function Interview() {
           return;
         }
       } else {
-        console.error("Failed to continue interview");
+        console.error("Failed to continue interview:", response.data.message);
+        handleError("Failed to continue interview: " + response.data.message);
+        setLoading(false);
       }
     } catch (error) {
-      console.log("error" + error);
+      console.error("Error sending response:", error);
+        if (error.response) {
+            handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
+        } else if (error.request) {
+            handleError("No response received from server.");
+        } else {
+            handleError("Error setting up request: " + error.message);
+        }
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   //audio
@@ -171,45 +222,7 @@ export function Interview() {
       setIsVideoRecording(true);
     }
   };
-  // const startVideoRecording = () => {
-  //   setRecordedChunks([]); // Reset previous recordings
-  //   setVideoURL(null); // Reset video URL
 
-  //   if (webcamRef.current) {
-  //     const stream = webcamRef.current.stream;
-  //     const mediaRecorder = new MediaRecorder(stream, {
-  //       mimeType: "video/webm",
-  //     });
-
-  //     mediaRecorder.ondataavailable = (event) => {
-  //       if (event.data.size > 0) {
-  //         setRecordedChunks((prev) => [...prev, event.data]);
-  //       }
-  //     };
-
-  //     mediaRecorder.onstop = () => {
-  //       if (recordedChunks.length > 0) {
-  //         const blob = new Blob(recordedChunks, { type: "video/webm" });
-  //         const newVideoURL = URL.createObjectURL(blob);
-  //         setVideoURL(newVideoURL);
-  //       }
-  //     };
-
-  //     mediaRecorderRef.current = mediaRecorder;
-  //     mediaRecorder.start();
-  //     setIsVideoRecording(true);
-  //   }
-  // };
-  // const stopVideoRecording = () => {
-  //   if (mediaRecorderRef.current) {
-  //     mediaRecorderRef.current.stop();
-  //     setIsVideoRecording(false);
-  //   }
-  // };
-
-  const [videoBlob, setVideoBlob] = useState(null);
-  const [videoUrl, setVideoUrl] = useState('');
-  const streamRef = useRef(null);
   const startVideoRecording = async () => {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
@@ -232,7 +245,7 @@ export function Interview() {
       mediaRecorder.onstop = () => {
         const blob = new Blob(chunks, { type: 'video/webm' });
         setVideoBlob(blob);
-        setVideoUrl(URL.createObjectURL(blob));
+        setVideoURL(URL.createObjectURL(blob));
       };
       
       mediaRecorder.start();
@@ -351,22 +364,28 @@ export function Interview() {
               )}
 
               {isStarted && (
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-8">
-                  <QuestionAndScore
-                    question={question}
-                    score={score}
-                    summary={summary}
-                  />
-                  <VideoComponent
-                    webcamRef={videoRef}
-                    isRecording={isVideoRecording}
-                  />
-                  <ResponsesComponent
-                    written={written}
-                    setWritten={setWritten}
-                    transcript={transcript}
-                    resetTranscript={resetTranscript}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 p-6">
+                  <div className="md:col-span-5">
+                    <QuestionAndScore
+                      question={question}
+                      score={score}
+                      summary={summary}
+                    />
+                  </div>
+                  <div className="md:col-span-4">
+                    <ResponsesComponent
+                      written={written}
+                      setWritten={setWritten}
+                      transcript={transcript}
+                      resetTranscript={resetTranscript}
+                    />
+                  </div>
+                  <div className="md:col-span-3 md:float-left">
+                    <VideoComponent
+                      webcamRef={videoRef}
+                      isRecording={isVideoRecording}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -511,7 +530,7 @@ function QuestionAndScore({ question, score, summary }) {
   };
 
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
+    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 max-h-min min-h-96">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
         <h3 className="text-lg font-medium text-white flex items-center">
           <Sparkles className="h-5 w-5 mr-2" />
@@ -547,10 +566,7 @@ function QuestionAndScore({ question, score, summary }) {
           <Info className="h-4 w-4 mr-2" />
           AI Feedback
         </h4>
-        <p
-          className="text-gray-800 dark:text-gray-200"
-          dangerouslySetInnerHTML={{ __html: summary }}
-        ></p>
+        <div dangerouslySetInnerHTML={{ __html: summary }} />
       </div>
     </div>
   );
@@ -558,7 +574,7 @@ function QuestionAndScore({ question, score, summary }) {
 
 function VideoComponent({ webcamRef, isRecording }) {
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
+    <div className="h-96 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex items-center justify-between">
         <h3 className="text-lg font-medium text-white flex items-center">
           <Video className="h-5 w-5 mr-2" />
@@ -613,8 +629,13 @@ function ResponsesComponent({
     textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
   };
 
+    useEffect(() => {
+        adjustHeight();
+    }, [written]);
+
+
   return (
-    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50 h-full">
+    <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
         <h3 className="text-lg font-medium text-white flex items-center">
           <Mic className="h-5 w-5 mr-2" />
@@ -628,7 +649,7 @@ function ResponsesComponent({
             <Mic className="h-4 w-4 mr-2" />
             Recorded Speech
           </h4>
-          <div className="min-h-24 p-4 border border-indigo-100 dark:border-indigo-900/50 rounded-xl bg-white dark:bg-gray-800 shadow-inner">
+          <div className="min-h-24 max-h-max p-4 border border-indigo-100 dark:border-indigo-900/50 rounded-xl bg-white dark:bg-gray-800 shadow-inner">
             <p
               className="text-gray-800 dark:text-gray-200"
               style={{ wordBreak: "break-word" }}

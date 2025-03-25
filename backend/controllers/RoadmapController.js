@@ -14,8 +14,11 @@ const generateRoadmap = async (req, res) => {
     const prompt = getRoadmapPrompt(profile);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash",
-      generation_config: { response_mime_type: "application/json" },
+      model: "gemini-2.5-pro-exp-03-25",
+      generation_config: {
+        temperature: 2,
+        response_mime_type: "application/json",
+      },
     });
     const result = await model.generateContent(prompt);
     const content = result.response.candidates[0].content.parts[0].text;
