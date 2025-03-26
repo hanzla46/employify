@@ -160,6 +160,7 @@ export function Interview() {
       }
     } catch (error) {
       console.error("Error sending response:", error);
+      setLoading(false);
       if (error.response) {
         handleError(
           `Server Error (${error.response.status}): ${error.response.data.message}`

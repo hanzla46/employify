@@ -11,8 +11,8 @@ export default function FancyButton({ text, onClick, disabled = false }) {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       whileTap={{ scale: 0.95 }}
-      className={`relative px-8 py-4 font-bold text-white transition-all duration-500 
-        rounded-xl shadow-2xl 
+      className={`h-3/5 relative px-8 py-4 font-bold text-white transition-all duration-500 
+        rounded-3xl shadow-2xl 
         bg-gradient-to-br from-[#4a90e2] via-[#50c878] to-[#8a2be2] 
         background-size-200 background-position-0
         hover:background-position-100
