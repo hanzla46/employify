@@ -71,7 +71,7 @@ export function Interview() {
         setCategory(response.data.category);
         handleSuccess("Interview started successfully!");
         setIsStarted(true);
-        startVideoRecording();
+        // startVideoRecording();
         SpeechRecognition.startListening({ continuous: true });
         setIsAudioRecording(true);
         setInfoBox(false);
@@ -105,7 +105,7 @@ export function Interview() {
     setLoading(true);
     SpeechRecognition.stopListening();
     setIsAudioRecording(false);
-    stopVideoRecording();
+    // stopVideoRecording();
     await new Promise((resolve) => {
       if (mediaRecorderRef.current?.state === "recording") {
         mediaRecorderRef.current.onstop = resolve;
@@ -115,7 +115,12 @@ export function Interview() {
       }
     });
     const formData = new FormData();
-    formData.append("video", videoBlob, "recording.webm");
+    if(!videoBlob){
+      handleError("video was not recorded! restart recording.")
+    }
+    else{
+      formData.append("video", videoBlob, "recording.webm");
+    }
     formData.append("question", question);
     formData.append("category", category);
     formData.append("answer", transcript);
@@ -143,7 +148,7 @@ export function Interview() {
         setWritten(""); // Clear the written response
         setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
-        startVideoRecording();
+        // startVideoRecording();
         if (
           response.data.completed == true ||
           response.data.completed == "true"

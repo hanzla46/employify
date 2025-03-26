@@ -48,13 +48,11 @@ const startInterview = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in startInterview:", error); // More detailed error logging
-    res
-      .status(500)
-      .json({
-        message: "Internal server error",
-        success: false,
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Internal server error",
+      success: false,
+      error: error.message,
+    });
   }
 };
 
@@ -64,13 +62,18 @@ const continueInterview = async (req, res) => {
     console.log("Request Files:", req.file);
     const userId = req.user._id;
     const { question, written, answer, category } = req.body;
-    if (!req.file) {
-      return res.status(400).json({ message: "No video file uploaded.", success: false });
-    }
+    // if (!req.file) {
+    //   return res.status(400).json({ message: "No video file uploaded.", success: false });
+    // }
     const videoFileBuffer = req.file.buffer;
-    const interview = await Interview.findOne({userId, status: "ongoing",}).sort({ createdAt: -1 });
+    const interview = await Interview.findOne({
+      userId,
+      status: "ongoing",
+    }).sort({ createdAt: -1 });
     if (!interview) {
-      return res.status(404).json({ message: "No ongoing interview found.", success: false });
+      return res
+        .status(404)
+        .json({ message: "No ongoing interview found.", success: false });
     }
     interview.questions.push({
       question,
@@ -80,10 +83,11 @@ const continueInterview = async (req, res) => {
       facialAnalysis: [],
     });
     await interview.save();
- 
-    const QId = interview.questions.length;
-    ProcessVideo(videoFileBuffer, QId, userId);
 
+    const QId = interview.questions.length;
+    if (req.file) {
+      ProcessVideo(videoFileBuffer, QId, userId);
+    }
     const prompt = GeneratePrompt(interview);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
@@ -122,13 +126,11 @@ const continueInterview = async (req, res) => {
     });
   } catch (error) {
     console.error("Error in continueInterview:", error);
-    res
-      .status(500)
-      .json({
-        message: "Internal server error",
-        success: false,
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Internal server error",
+      success: false,
+      error: error.message,
+    });
   }
 };
 
