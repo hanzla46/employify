@@ -7,7 +7,6 @@ import {
   Video,
   Mic,
   Send,
-  XCircle,
   CheckCircle,
   PauseCircle,
   Info,

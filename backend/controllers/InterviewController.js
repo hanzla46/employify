@@ -80,13 +80,13 @@ const continueInterview = async (req, res) => {
       facialAnalysis: [],
     });
     await interview.save();
-
+ 
     const QId = interview.questions.length;
     ProcessVideo(videoFileBuffer, QId, userId);
 
     const prompt = GeneratePrompt(interview);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     const result = await model.generateContent(prompt);
     const content = result.response.candidates[0].content.parts[0].text;
     const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];

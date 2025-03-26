@@ -56,7 +56,7 @@ const GeneratePrompt = (interview) => {
   ${interview.questions && interview.questions.length > 0 ? 
     interview.questions.map((q, index) => 
       `  ${index + 1}. **Question:** ${q.question}\n     **Facial Analysis:** ${q.facialAnalysis && q.facialAnalysis.length > 0
-        ? q.facialAnalysis.map(fa => `Expression: ${JSON.stringify(fa.emotions, null, 2)}, Intensity: ${fa.intensity}`).join("; ")
+        ? q.facialAnalysis.emotions.map(fa => `Expression: ${JSON.stringify(fa.emotions, null, 2)}, Intensity: ${fa.intensity}` ).join("; ") 
         : "No facial data available"}`
     ).join("\n") 
     : "No facial data available."
