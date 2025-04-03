@@ -15,8 +15,9 @@ import {
   Sun,
   CircleUserRound
 } from "lucide-react";
-
+import {SkillsContext} from '../Context/SkillsContext'
 export function Account() {
+  const { setRoadmap } = useContext(SkillsContext);
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
   const [darkMode, setDarkMode] = useState(false);
@@ -26,6 +27,7 @@ export function Account() {
       const res = await logout();
       if (res.success) {
         handleSuccess("Logged out successfully");
+        setRoadmap([]);
         setTimeout(() => navigate("/"), 1000);
       }
     } catch (error) {

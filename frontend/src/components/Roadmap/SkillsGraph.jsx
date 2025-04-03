@@ -94,6 +94,9 @@ const SkillsGraph = () => {
           ) {
             setGraphData(result.data.data);
             setRoadmap(result.data.data);
+            setTimeout(() => {
+              console.log(roadmap);
+            }, 500);
           } else {
             setGraphData({ error: "No roadmap data found." });
           }
@@ -304,7 +307,7 @@ const SkillsGraph = () => {
   }, [graphData, setNodes, setEdges]);
 
   if (loading) {
-    return <div>Loading skills graph...</div>;
+    return <div className="text-black dark:text-white">Loading skills graph...</div>;
   }
 
   if (graphData?.error) {

@@ -12,6 +12,7 @@ const generateRoadmap = async (req, res) => {
         .json({ success: false, message: "Profile not found" });
     }
     const prompt = getRoadmapPrompt(profile);
+    console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-pro-exp-03-25",
@@ -24,7 +25,8 @@ const generateRoadmap = async (req, res) => {
     const content = result.response.candidates[0].content.parts[0].text;
     const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
     const roadmap = JSON.parse(jsonString);
-    return res.status(200).json({ success: true, data: roadmap });
+    console.log(roadmap);
+    return res.status(200).json({ success: true, data: roadmap , prompt});
   } catch (error) {
     console.error("Failed to generate roadmap:", error.message);
     return res.status(500).json({ success: false, message: error.message });
