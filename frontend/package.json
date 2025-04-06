@@ -12,6 +12,7 @@
   "dependencies": {
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-slider": "^1.2.3",
     "@tailwindcss/vite": "^4.0.13",
     "@vercel/speed-insights": "^1.2.0",
     "aos": "^2.3.4",

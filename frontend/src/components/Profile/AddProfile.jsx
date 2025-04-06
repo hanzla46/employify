@@ -1,9 +1,9 @@
 import React, { useState } from "react";
-import { handleError, handleSuccess } from "../utils";
+import { handleError, handleSuccess } from "../../utils";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Accept"] = "application/json";
-const SkillsForm = ({ setProfile, setHasProfile }) => {
+const ProfileForm = ({ setProfile, setHasProfile }) => {
   const url = import.meta.env.VITE_API_URL;
   const [activeTab, setActiveTab] = useState("hard");
   const [hardSkills, setHardSkills] = useState([
@@ -636,4 +636,4 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
   );
 };
 
-export default SkillsForm;
+export default ProfileForm;
