@@ -1,8 +1,8 @@
 const Interview = require("../models/InterviewModel");
-const Skill = require("../models/Skills");
 const { GeneratePrompt } = require("../models/GptPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { ProcessVideo } = require("../Services/ProcessVideo.Interview");
+const Profile = require("../models/ProfileModel");
 
 const startInterview = async (req, res) => {
   try {
@@ -15,13 +15,10 @@ const startInterview = async (req, res) => {
       { $set: { status: "completed" } }
     );
 
-    let userSkills = await Skill.findOne({ userId });
-
-    // Use a more robust default skills object if none are found
-    if (!userSkills) {
-      userSkills = {
-        skills: [], // Start with an empty array
-      };
+    let profile = await Profile.findOne({ userId });
+    let userSkills = [];
+    if (profile) {
+      userSkills = profile.hardSkills.concat(profile.softSkills);
     }
 
     const newInterview = new Interview({
@@ -33,7 +30,7 @@ const startInterview = async (req, res) => {
       experience,
       questions: [],
       overallScore: 0,
-      skills: userSkills.skills,
+      skills: userSkills,
       aiSummary: "",
     });
 
