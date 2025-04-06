@@ -5,9 +5,8 @@
 /* globals.css */
 @font-face {
   font-family: "MyCustomFont";
-  src: url("./assets/fonts/my-font.woff2") format("woff2"),
-       url("./assets/fonts/my-font.woff") format("woff"),
-       url("./assets/Dalbine-Italic.ttf") format("truetype");
+  src: url("./assets/Dalbine-Regular.otf") format("opentype"),
+       url("./assets/Dalbine-Regular.ttf") format("truetype");
   font-weight: normal;
   font-style: normal;
 }
