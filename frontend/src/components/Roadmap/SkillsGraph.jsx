@@ -62,7 +62,7 @@ const TaskNode = ({ data }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96" style={{ minWidth: `${NODE_WIDTH - 16}px` }}> {/* Adjust width based on padding */}
+    <div className="p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96 m-8" style={{ minWidth: `${NODE_WIDTH - 16}px` }}> {/* Adjust width based on padding */}
       <div className="font-bold text-lg mb-2">{data.label}</div>
       <div className="text-sm text-gray-600 mb-3">{data.description}</div>
       {data.subtasks && data.subtasks.length > 0 && (

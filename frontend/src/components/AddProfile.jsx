@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { handleSuccess } from "../utils";
+import { handleError, handleSuccess } from "../utils";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Accept"] = "application/json";
@@ -7,7 +7,7 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
   const url = import.meta.env.VITE_API_URL;
   const [activeTab, setActiveTab] = useState("hard");
   const [hardSkills, setHardSkills] = useState([
-    { id: 1, name: "", experience: ""},
+    { id: 1, name: "", experience: "" },
   ]);
   const [softSkills, setSoftSkills] = useState([
     { id: 1, name: "", proficiency: "" },
@@ -27,7 +27,7 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
       name: "",
     },
   ]);
-
+  const [careerGoal, setCareerGoal] = useState("");
   const addSkill = (type) => {
     if (type === "hard") {
       const newSkill = {
@@ -106,6 +106,7 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
     console.log("Soft skills:", softSkills);
     console.log("Jobs:", jobs);
     console.log("Projects:", projects);
+    console.log("Goal:", careerGoal);
     const result = await axios.post(
       url + "/profile/add",
       {
@@ -113,6 +114,7 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
         softSkills,
         jobs,
         projects,
+        careerGoal,
       },
       {
         withCredentials: true,
@@ -126,6 +128,9 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
       setHasProfile(true);
       setProfile([...hardSkills, ...softSkills, ...jobs, ...projects]);
       handleSuccess("Information submitted successfully!");
+    }
+    else{
+      handleError(result.data.message);
     }
   };
 
@@ -417,6 +422,19 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
       </div>
     ));
   };
+  const renderGoalTab = () => {
+    return (
+      <>
+        <input
+          onChange={(e) => setCareerGoal(e.target.value)}
+          value={careerGoal}
+          placeholder="Career Goal"
+          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+          required
+        />
+      </>
+    );
+  };
 
   return (
     <div className="max-w-2xl mx-auto p-6 bg-white dark:bg-gray-900 rounded-lg shadow-lg">
@@ -465,6 +483,16 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
           onClick={() => setActiveTab("project")}
         >
           Projects
+        </button>
+        <button
+          className={`py-2 px-4 font-medium text-sm focus:outline-none ${
+            activeTab === "goal"
+              ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
+              : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`}
+          onClick={() => setActiveTab("goal")}
+        >
+          Career Goal
         </button>
       </div>
 
@@ -584,6 +612,15 @@ const SkillsForm = ({ setProfile, setHasProfile }) => {
             </svg>
             Add Another Project
           </button>
+        </div>
+        {/* Career Goal Tab Content */}
+        <div className={activeTab === "goal" ? "block" : "hidden"}>
+          <div className="mb-4">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
+              Where do you see yourself in upcoming years
+            </p>
+          </div>
+          {renderGoalTab()}
         </div>
 
         <div className="mt-8">

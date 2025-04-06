@@ -13,7 +13,7 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 *   **Career Goal:** ${profile.careerGoal ? profile.careerGoal : "Being Backend Developer and getting remote job"}
 *   **Current Skills:** 
     *   **Hard Skills:** ${profile.hardSkills
-      .map((skill) => `${skill.name} (${skill.experience} experience)`)
+      .map((skill) => `${skill.name} (${skill.experience} years experience)`)
       .join(", ")}
     *   **Soft Skills:** ${profile.softSkills
       .map((skill) => `${skill.name} (${skill.proficiency} proficiency)`)
@@ -30,7 +30,7 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 1.  **Task Node Requirements:** Each node represents a significant, actionable step and MUST include:
     *   'id': Unique numeric identifier (number).
     *   'name': Clear, concise, and compelling task title.
-    *   'description': Detailed, actionable description explaining the *'what,' 'why,'* and *'how.'* Outline the expected outcome and its importance for the overall goal and differentiation.
+    *   'description': Actionable description explaining the *'what,' 'why,'* and *'how.'* Outline the expected outcome and its importance for the overall goal and differentiation. Don't repeat words from the name. Use a maximum of 2-3 sentences.
     *   'position': Object with x,y coordinates (use values 0-1000) for logical graph layout.
     *   'subtasks': Array of 2-5 highly specific, granular subtasks. Each subtask must include:
         *   'id': Unique identifier within the task (e.g., 101, 102).
@@ -88,7 +88,7 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 
 ### **Instruction:**
 
-Generate the JSON roadmap now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${profile.careerGoal || "their undefined career goal"}** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
+Generate the JSON roadmap now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${profile.careerGoal || "their career goal"}** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
 
   return prompt;
 };
