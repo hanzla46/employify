@@ -8,11 +8,9 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const url = import.meta.env.VITE_API_URL;
-  console.log(url);
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        console.log("Checking auth..." + url);
         const response = await axios.get(url + "/auth/me", {
           withCredentials: true,
           headers: {

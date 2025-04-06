@@ -17,6 +17,7 @@
     "aos": "^2.3.4",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
+    "dagre": "^0.8.5",
     "dotenv": "^16.4.7",
     "framer-motion": "^12.5.0",
     "html-react-parser": "^5.2.2",

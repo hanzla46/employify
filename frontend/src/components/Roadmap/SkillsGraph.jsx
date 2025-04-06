@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, useCallback } from "react";
 import ReactFlow, {
   MiniMap,
   Controls,
@@ -6,42 +6,84 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   MarkerType,
+  ReactFlowProvider, // Import ReactFlowProvider
 } from "reactflow";
 import "reactflow/dist/style.css";
 import axios from "axios";
+import dagre from "dagre"; // Import dagre
 import { SkillsContext } from "../../Context/SkillsContext";
 
-// Custom node component to display tasks with subtasks
+// --- Dagre Layout Configuration ---
+const dagreGraph = new dagre.graphlib.Graph();
+dagreGraph.setDefaultEdgeLabel(() => ({}));
+
+const NODE_WIDTH = 280; // Estimate width of your TaskNode + padding
+const NODE_HEIGHT = 180; // Estimate height (can vary with expansion, use an average)
+
+const getLayoutedElements = (nodes, edges, direction = "LR") => {
+  dagreGraph.setGraph({ rankdir: direction, nodesep: 50, ranksep: 100 }); // Adjust spacing
+
+  nodes.forEach((node) => {
+    // Use dimensions that better reflect the custom node size
+    dagreGraph.setNode(node.id, { width: NODE_WIDTH, height: NODE_HEIGHT });
+  });
+
+  edges.forEach((edge) => {
+    dagreGraph.setEdge(edge.source, edge.target);
+  });
+
+  dagre.layout(dagreGraph);
+
+  nodes.forEach((node) => {
+    const nodeWithPosition = dagreGraph.node(node.id);
+    if (nodeWithPosition) {
+      // We are shifting the dagre node position (anchor=center) to the top left
+      // so it matches the React Flow node anchor point (top left).
+      node.position = {
+        x: nodeWithPosition.x - NODE_WIDTH / 2,
+        y: nodeWithPosition.y - NODE_HEIGHT / 2,
+      };
+    } else {
+        // Fallback if node not found in layout (shouldn't happen)
+        console.warn(`Node ${node.id} not found in Dagre layout results.`);
+        node.position = { x: Math.random() * 400, y: Math.random() * 400 };
+    }
+
+    // Optional: Set target/source handles based on layout direction
+    node.targetPosition = direction === 'LR' ? 'left' : 'top';
+    node.sourcePosition = direction === 'LR' ? 'right' : 'bottom';
+  });
+
+  return { nodes, edges };
+};
+
+// --- Custom Node Component ---
 const TaskNode = ({ data }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md min-w-64">
+    <div className="p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96" style={{ minWidth: `${NODE_WIDTH - 16}px` }}> {/* Adjust width based on padding */}
       <div className="font-bold text-lg mb-2">{data.label}</div>
-
-      {/* Description */}
       <div className="text-sm text-gray-600 mb-3">{data.description}</div>
-
-      {/* Expand/Collapse button */}
-      <button
-        className="bg-blue-500 text-white px-2 py-1 rounded text-sm mb-2"
-        onClick={() => setExpanded(!expanded)}
-      >
-        {expanded ? "Hide Subtasks" : "Show Subtasks"}
-      </button>
-
-      {/* Subtasks */}
+      {data.subtasks && data.subtasks.length > 0 && (
+        <button
+          className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mb-2 transition-colors duration-150"
+          onClick={() => setExpanded(!expanded)}
+        >
+          {expanded ? "Hide Subtasks" : `Show ${data.subtasks.length} Subtasks`}
+        </button>
+      )}
       {expanded && (
         <div className="mt-3 border-t pt-2">
           <div className="text-sm font-semibold mb-1">Subtasks:</div>
           {data.subtasks.map((subtask, index) => (
             <div
-              key={index}
+              key={subtask.id || index} // Use subtask.id if available and unique
               className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded"
             >
-              <div className="text-sm">{subtask.label}</div>
+              <div className="text-sm mr-2">{subtask.label}</div>
               <button
-                className="bg-green-500 text-white px-2 py-1 rounded text-xs"
+                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150"
                 onClick={() => data.onSubtaskAction(subtask.id)}
               >
                 {subtask.buttonText || "Action"}
@@ -50,34 +92,46 @@ const TaskNode = ({ data }) => {
           ))}
         </div>
       )}
+      {/* Add other data points if needed */}
+      <div className="text-xs text-gray-500 mt-2 border-t pt-1">
+        Category: {data.category || 'N/A'} | Diff: {data.difficulty || 'N/A'} | Est: {data.estimated_time || 'N/A'}
+      </div>
+      {data.ai_impact && (
+        <div className="text-xs text-purple-700 mt-1 italic">
+          Importance: {data.ai_impact}
+        </div>
+      )}
     </div>
   );
 };
 
-// Define node types
+// --- Define Node Types ---
 const nodeTypes = {
   taskNode: TaskNode,
 };
 
-const SkillsGraph = () => {
+// --- Main Graph Component ---
+const SkillsGraphInternal = () => { // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { roadmap, setRoadmap } = useContext(SkillsContext);
   const url = import.meta.env.VITE_API_URL;
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Handle subtask button clicks
-  const handleSubtaskAction = (taskId, subtaskId) => {
+  const handleSubtaskAction = useCallback((taskId, subtaskId) => {
     console.log(`Action triggered on subtask ${subtaskId} of task ${taskId}`);
-    // Implement your action logic here
-  };
+    // Implement your action logic here (e.g., mark as complete, open modal)
+  }, []); // Add dependencies if needed
 
   // Fetch data from API
   useEffect(() => {
     const fetchRoadmap = async () => {
       try {
         setLoading(true);
+        setError(null); // Reset error state
         const result = await axios.get(url + "/roadmap/get", {
           withCredentials: true,
           headers: {
@@ -85,257 +139,193 @@ const SkillsGraph = () => {
             "Content-Type": "application/json",
           },
         });
+
         if (result.data.success) {
-          console.log("Roadmap data:", result.data);
+          console.log("API Roadmap data:", result.data.data);
           if (
             result.data.data &&
             result.data.data.tasks &&
+            Array.isArray(result.data.data.tasks) && // Ensure it's an array
             result.data.data.tasks.length > 0
           ) {
-            setGraphData(result.data.data);
-            setRoadmap(result.data.data);
-            setTimeout(() => {
-              console.log(roadmap);
-            }, 500);
+            setGraphData(result.data.data); // Store raw data
+            setRoadmap(result.data.data); // Update context
           } else {
-            setGraphData({ error: "No roadmap data found." });
+            console.warn("No roadmap tasks found in API response.");
+            setError("No roadmap data found. Please generate a roadmap first.");
+            setGraphData({ tasks: [] }); // Set empty tasks to avoid breaking layout logic later
           }
+        } else {
+           console.error("API call failed:", result.data.message);
+           setError(result.data.message || "Failed to fetch roadmap (API error).");
+           setGraphData({ tasks: [] });
         }
-      } catch (error) {
-        console.error("Error fetching roadmap:", error);
-        setGraphData({ error: "Failed to load roadmap. Please try again." });
+      } catch (err) {
+        console.error("Error fetching roadmap:", err);
+        setError("Failed to load roadmap. Please check connection or try again.");
+        setGraphData({ tasks: [] }); // Set empty tasks on error
       } finally {
         setLoading(false);
       }
     };
-    
+
     if (!roadmap || !roadmap.tasks || roadmap.tasks.length === 0) {
+      console.log("No roadmap in context, fetching from API...");
       fetchRoadmap();
     } else {
+      console.log("Using roadmap data from context.");
       setGraphData(roadmap);
       setLoading(false);
     }
-  }, [url, roadmap, setRoadmap]);
+  }, [url, roadmap, setRoadmap]); // Dependencies for fetching
 
-  // Sort tasks by their dependencies to ensure proper ordering
-  const sortTasksByDependencies = (tasks) => {
-    // Create a map of task id to task for quick lookup
-    const taskMap = new Map();
-    tasks.forEach(task => taskMap.set(task.id.toString(), task));
-    
-    // Track visited tasks
-    const visited = new Set();
-    const result = [];
-    
-    // Depth-first traversal function
-    const dfs = (taskId) => {
-      if (visited.has(taskId)) return;
-      
-      visited.add(taskId);
-      
-      const task = taskMap.get(taskId);
-      if (!task) return;
-      
-      // Process dependencies first
-      if (task.dependencies && task.dependencies.length > 0) {
-        task.dependencies.forEach(depId => {
-          dfs(depId.toString());
-        });
-      }
-      
-      result.push(task);
-    };
-    
-    // Start with tasks that have no dependencies
-    tasks.forEach(task => {
-      if (!task.dependencies || task.dependencies.length === 0) {
-        dfs(task.id.toString());
-      }
-    });
-    
-    // Process any remaining tasks
-    tasks.forEach(task => {
-      dfs(task.id.toString());
-    });
-    
-    return result;
-  };
 
-  // Process data and transform to ReactFlow format
+  // Process data and transform to ReactFlow format using Dagre layout
   useEffect(() => {
-    if (!graphData || !graphData.tasks || graphData.tasks.length === 0) return;
+    // Ensure graphData and tasks exist and are an array before processing
+    if (!graphData || !Array.isArray(graphData.tasks)) {
+        console.log("Waiting for graph data or graphData.tasks is not an array...");
+        // Optionally set nodes/edges to empty if needed, depending on desired behavior
+        // setNodes([]);
+        // setEdges([]);
+        return;
+    }
 
-    // Sort tasks based on dependencies
-    const sortedTasks = sortTasksByDependencies(graphData.tasks);
-    
-    // Calculate better positions if not provided
-    const calculatePositions = (tasks) => {
-      const levelMap = new Map(); // Map to track the level of each task
-      const taskMap = new Map(); // Map of task id to task
-      
-      // Create task map for quick lookup
-      tasks.forEach(task => {
-        taskMap.set(task.id.toString(), task);
-      });
-      
-      // Calculate the level of each task
-      const calculateLevel = (taskId, visited = new Set()) => {
-        if (levelMap.has(taskId)) return levelMap.get(taskId);
-        if (visited.has(taskId)) return 0; // Prevent cycles
-        
-        visited.add(taskId);
-        
-        const task = taskMap.get(taskId);
-        if (!task) return 0;
-        
-        if (!task.dependencies || task.dependencies.length === 0) {
-          levelMap.set(taskId, 0);
-          return 0;
-        }
-        
-        // Get the maximum level of dependencies
-        let maxLevel = -1;
-        task.dependencies.forEach(depId => {
-          const depLevel = calculateLevel(depId.toString(), new Set(visited));
-          maxLevel = Math.max(maxLevel, depLevel);
-        });
-        
-        const level = maxLevel + 1;
-        levelMap.set(taskId, level);
-        return level;
-      };
-      
-      // Calculate levels for all tasks
-      tasks.forEach(task => {
-        calculateLevel(task.id.toString());
-      });
-      
-      // Group tasks by level
-      const tasksByLevel = new Map();
-      levelMap.forEach((level, taskId) => {
-        if (!tasksByLevel.has(level)) {
-          tasksByLevel.set(level, []);
-        }
-        tasksByLevel.get(level).push(taskId);
-      });
-      
-      // Calculate positions
-      const nodeSpacingX = 250;
-      const nodeSpacingY = 150;
-      const nodesPerLevel = new Map(); // Track how many nodes are in each level
-      
-      // Initialize counters for each level
-      tasksByLevel.forEach((taskIds, level) => {
-        nodesPerLevel.set(level, taskIds.length);
-      });
-      
-      // Assign positions
-      levelMap.forEach((level, taskId) => {
-        const task = taskMap.get(taskId);
-        if (!task) return;
-        
-        // If task already has valid position, keep it
-        if (task.position && 
-            typeof task.position.x === 'number' && 
-            typeof task.position.y === 'number') {
-          return;
-        }
-        
-        // Get the count of tasks in this level
-        const tasksInLevel = nodesPerLevel.get(level) || 1;
-        
-        // Calculate index of this task in its level
-        const levelTasks = tasksByLevel.get(level) || [];
-        const indexInLevel = levelTasks.indexOf(taskId);
-        
-        // Calculate position
-        const x = (level + 1) * nodeSpacingX;
-        const y = (indexInLevel + 0.5) * nodeSpacingY * (600 / Math.max(tasksInLevel, 1));
-        
-        task.position = { x, y };
-      });
-      
-      return tasks;
-    };
-    
-    const tasksWithPositions = calculatePositions(sortedTasks);
+     if (graphData.tasks.length === 0 && !loading) {
+        console.log("No tasks to display.");
+        setNodes([]);
+        setEdges([]);
+        return; // Exit if there are no tasks
+     }
 
-    // Transform tasks into nodes
-    const flowNodes = tasksWithPositions.map((task) => ({
-      id: task.id.toString(),
+    console.log("Processing graph data for ReactFlow layout...");
+
+    // Validate and sanitize tasks (ensure IDs are present and unique)
+    const validTasks = graphData.tasks.filter(task => task && task.id != null);
+    const taskIds = new Set(validTasks.map(t => t.id.toString()));
+
+    // 1. Transform tasks into initial nodes
+    const initialNodes = validTasks.map((task) => ({
+      id: task.id.toString(), // CRITICAL: Ensure ID is a string
       type: "taskNode",
-      position: task.position || {
-        x: Math.random() * 500,
-        y: Math.random() * 500,
-      }, // Fallback position
+      // Position will be set by Dagre
+      position: { x: 0, y: 0 }, // Placeholder
       data: {
-        label: task.name,
-        description: task.description,
-        subtasks: (task.subtasks || []).map((st) => ({
-          id: st.id,
-          label: st.name,
+        label: task.name || "Unnamed Task",
+        description: task.description || "",
+        subtasks: (task.subtasks || []).map((st, index) => ({
+          // Ensure subtasks have unique IDs if possible, otherwise use index as fallback key
+          id: st.id != null ? st.id : `${task.id}-sub-${index}`,
+          label: st.name || "Unnamed Subtask",
           buttonText: st.buttonText || "Complete",
         })),
         onSubtaskAction: (subtaskId) => handleSubtaskAction(task.id, subtaskId),
+        // Pass other data for display in the node
+        category: task.category,
+        difficulty: task.difficulty,
+        estimated_time: task.estimated_time,
+        ai_impact: task.ai_impact,
       },
     }));
 
-    // Transform dependencies into edges
-    const flowEdges = [];
-    tasksWithPositions.forEach((task) => {
-      if (task.dependencies && task.dependencies.length > 0) {
+    // 2. Transform dependencies into initial edges
+    const initialEdges = [];
+    validTasks.forEach((task) => {
+      if (task.dependencies && Array.isArray(task.dependencies)) {
         task.dependencies.forEach((depId) => {
-          flowEdges.push({
-            id: `e${depId}-${task.id}`,
-            source: depId.toString(),
-            target: task.id.toString(),
-            type: "smoothstep",
-            animated: true,
-            markerEnd: {
-              type: MarkerType.ArrowClosed,
-              width: 20,
-              height: 20,
-            },
-            style: { stroke: "#4285F4", strokeWidth: 2 },
-          });
+          const sourceId = depId.toString(); // Ensure string
+          const targetId = task.id.toString(); // Ensure string
+
+          // CRITICAL: Check if both source and target nodes actually exist
+          if (taskIds.has(sourceId) && taskIds.has(targetId)) {
+            initialEdges.push({
+              id: `e-${sourceId}-${targetId}`, // Ensure unique edge ID
+              source: sourceId,
+              target: targetId,
+              type: "smoothstep", // Or 'default', 'straight', 'step'
+              animated: true,
+              markerEnd: {
+                type: MarkerType.ArrowClosed,
+                width: 15, // Smaller arrow
+                height: 15,
+              },
+              style: { stroke: "#60a5fa", strokeWidth: 2 }, // Example style
+            });
+          } else {
+            console.warn(
+              `Skipping edge from ${sourceId} to ${targetId}: Node not found in task list.`
+            );
+          }
         });
       }
     });
 
-    setNodes(flowNodes);
-    setEdges(flowEdges);
-  }, [graphData, setNodes, setEdges]);
+    // 3. Calculate layout using Dagre
+    // Only run layout if there are nodes to prevent Dagre errors
+    if (initialNodes.length > 0) {
+        console.log(`Running Dagre layout for ${initialNodes.length} nodes and ${initialEdges.length} edges...`);
+        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+            initialNodes, // Pass the nodes *before* layout
+            initialEdges, // Pass the created edges
+            "LR" // Layout direction: LR (Left to Right) or TB (Top to Bottom)
+        );
+
+        console.log("Layout complete. Setting nodes and edges.");
+        setNodes(layoutedNodes);
+        setEdges(layoutedEdges); // Use the edges returned by layout function (or initialEdges if not modified)
+    } else {
+        console.log("No nodes to layout.");
+        setNodes([]);
+        setEdges([]);
+    }
+
+  }, [graphData, handleSubtaskAction]); // Rerun layout when graphData changes
+
 
   if (loading) {
-    return <div className="text-black dark:text-white">Loading skills graph...</div>;
+    return <div className="p-4 text-center text-gray-600 dark:text-gray-300">Loading skills graph...</div>;
   }
 
-  if (graphData?.error) {
-    return <div>{graphData.error}</div>;
+  if (error) {
+    return <div className="p-4 text-center text-red-600 dark:text-red-400">{error}</div>;
+  }
+
+  // Handle case where graphData is loaded but tasks array is empty after filtering
+  if (!nodes || nodes.length === 0) {
+     return <div className="p-4 text-center text-gray-600 dark:text-gray-300">No roadmap tasks available to display.</div>;
   }
 
   return (
-    <div style={{ width: "100%", height: "600px" }}>
-      {(!graphData || !graphData.tasks || graphData.tasks.length === 0) ? (
-        <div>No data available. Please try again later.</div>
-      ) : (
+    // Height needs to be explicitly set on the container for ReactFlow
+    <div style={{ width: "100%", height: "700px" }}> {/* Increased height */}
         <ReactFlow
-          nodes={nodes}
-          edges={edges}
-          onNodesChange={onNodesChange}
-          onEdgesChange={onEdgesChange}
-          nodeTypes={nodeTypes}
-          fitView
-          fitViewOptions={{ padding: 0.2 }}
-          defaultZoom={0.8}
+            nodes={nodes}
+            edges={edges}
+            onNodesChange={onNodesChange}
+            onEdgesChange={onEdgesChange}
+            nodeTypes={nodeTypes}
+            fitView // Adjusts viewport to fit all nodes
+            fitViewOptions={{ padding: 0.1, maxZoom: 1.2 }} // Add padding around fitView
+            minZoom={0.2} // Allow zooming out further
         >
-          <Controls />
-          <MiniMap nodeStrokeColor="#ccc" nodeColor="#fff" nodeBorderRadius={2} />
-          <Background variant="dots" gap={12} size={1} />
+            <Controls />
+            <MiniMap nodeStrokeColor="#ccc" nodeColor="#fff" nodeBorderRadius={2} pannable zoomable />
+            <Background variant="dots" gap={15} size={1} />
         </ReactFlow>
-      )}
     </div>
   );
 };
+
+
+// --- Wrapper Component with Provider ---
+// React Flow hooks like useNodesState require being inside a ReactFlowProvider
+const SkillsGraph = () => {
+    return (
+        <ReactFlowProvider>
+            <SkillsGraphInternal />
+        </ReactFlowProvider>
+    )
+}
+
 
 export default SkillsGraph;
