@@ -8,7 +8,7 @@
   src: url("./assets/Dalbine-Regular.otf") format("opentype"),
        url("./assets/Dalbine-Regular.ttf") format("truetype");
   font-weight: normal;
-  font-style: normal;
+  font-style:oblique;
 }
 body {
   font-family: "MyCustomFont", sans-serif;
