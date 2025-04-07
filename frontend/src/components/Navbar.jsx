@@ -5,7 +5,7 @@ import { ThemeToggle } from "./ThemeToggle";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
 import FancyButton from "./Button";
-
+import logo from "@/assets/logo.png";
 export function Navbar({ darkMode, setDarkMode }) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const { user } = useContext(AuthContext);
@@ -23,15 +23,15 @@ export function Navbar({ darkMode, setDarkMode }) {
     { path: "/about", label: "About" },
     {
       path: user ? "/account" : "/signup",
-      label: user ? firstName : <FancyButton text={"Sign Up"} />
-        ,
+      label: user ? firstName : <FancyButton text={"Sign Up"} />,
     },
   ];
 
   return (
-    <nav className="fixed w-full z-50 bg-gradient-to-r from-gray-900 via-gray-800 to-black 
-      bg-opacity-90 backdrop-blur-xl shadow-2xl border-b border-gray-700 dark:border-gray-600 
-      transition-all duration-300">
+    <nav
+      className="fixed bg-transparent w-full z-50 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-opacity-30 opacity-80 backdrop-blur-3xl shadow-2xl border-b border-gray-700 dark:border-gray-600 
+      transition-all duration-300"
+    >
       <div className="container mr-auto px-4">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
@@ -40,11 +40,7 @@ export function Navbar({ darkMode, setDarkMode }) {
             className={`flex items-center space-x-2 ml-1 md:ml-5 
               transform hover:scale-105 transition-transform duration-300`}
           >
-            <Brain className="h-8 w-8 text-cyan-400 animate-pulse" />
-            <span className="text-xl font-bold text-cyan-300 tracking-wide 
-              bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-blue-600">
-              Employify
-            </span>
+            <img className="w-48 h-11" src={logo} alt="logo" />
           </NavLink>
 
           {/* Desktop Navigation */}
@@ -74,10 +70,10 @@ export function Navbar({ darkMode, setDarkMode }) {
                 <div
                   className={`flex flex-row items-center h-3/5 relative z-10 
                     ${
-                    item.path !== "/account"
-                      ? "group-hover:text-cyan-200"
-                      : ""
-                  }`}
+                      item.path !== "/account"
+                        ? "group-hover:text-cyan-200"
+                        : ""
+                    }`}
                 >
                   {item.path === "/account" && (
                     <UserRoundCog className="mr-1 text-white" />
@@ -111,10 +107,12 @@ export function Navbar({ darkMode, setDarkMode }) {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden absolute top-16 left-0 w-full 
+        <div
+          className="md:hidden absolute top-16 left-0 w-full 
           bg-gradient-to-br from-gray-900 to-black 
           shadow-2xl z-40 flex flex-col items-center space-y-4 py-4 px-4 
-          border-b border-gray-700">
+          border-b border-gray-700"
+        >
           {navItems.map((item) => (
             <NavLink
               key={item.path}
