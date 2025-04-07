@@ -41,12 +41,19 @@ export function Account() {
     // Add dark mode toggle logic here
     document.documentElement.classList.toggle("dark");
   };
-
-  // Mock user data for demonstration
+let uemail ="";
+  if(user){
+    if(user.email.length > 22){
+      uemail = user.email.slice(0, 7) + "..." + user.email.slice(-6);
+    }
+    else{
+      uemail = user.email;
+    }
+  }
   const userData = user
     ? {
         name: user.name.slice(0, 19) || "John Doe",
-        email: user.email.slice(0, 18) || "john.doe@example.com",
+        email: uemail || "john.doe@example.com",
         avatar: user.avatar || "404",
         memberSince: user.memberSince || "January 2023",
       }
