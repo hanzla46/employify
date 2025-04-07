@@ -17,7 +17,7 @@ import {
 import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
-import ProtectedRoute from "../components/ProtectedRoute";
+import ProtectedRoute from "../Context/ProtectedRoute";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";

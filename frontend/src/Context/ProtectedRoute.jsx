@@ -1,7 +1,7 @@
 import { useContext } from "react";
-import { AuthContext } from "../Context/AuthContext";
+import { AuthContext } from "./AuthContext";
 import { Link } from "react-router-dom";
-import FancyButton from "./Button";
+import FancyButton from "../components/Button";
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
