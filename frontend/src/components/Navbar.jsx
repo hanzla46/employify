@@ -64,7 +64,7 @@ export function Navbar({ darkMode, setDarkMode }) {
                     item.path === "/account" || item.path === "/signup"
                       ? "mr-11"
                       : ""
-                  }`
+                  } ${item.path === "/signup" ? "shadow-none hover:shadow-none selection:shadow-none bg-none" : ""}`
                 }
               >
                 <div

@@ -24,6 +24,14 @@ export function Roadmap() {
     projectImprovement: "",
     jobExperience: "",
   });
+  const [questions, setQuestions] = useState({
+    hardSkillsTask: "",
+    softSkillsQuestion: "",
+    projectLink: "",
+    projectContribution: "",
+    projectImprovement: "",
+    jobExperience: "",
+  });
   return (
     <div className="min-h-screen pt-16 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-700">
       <div className="container mx-auto px-4 py-8">
@@ -44,14 +52,15 @@ export function Roadmap() {
             {hasProfile && !evaluated ? (
               <EvaluateProfile
                 setEvaluated={setEvaluated}
-                profile={profile}
                 formData={evaluationForm}
                 setFormData={setEvaluationForm}
+                questions={questions}
+                setQuestions={setQuestions}
               />
             ) : (
               ""
             )}
-            {evaluated ? <SkillsGraph evaluationForm={evaluationForm} /> : ""}
+            {evaluated ? <SkillsGraph evaluationForm={evaluationForm} questions={questions} /> : ""}
           </ProtectedRoute>
         </div>
       </div>

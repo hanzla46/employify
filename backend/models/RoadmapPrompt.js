@@ -1,8 +1,25 @@
-const moment = require('moment'); 
+const moment = require("moment");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const getRoadmapPrompt = (profile, questions, evaluationForm) => {
+  // const evaluate = async (q, a) => {
+  //   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  //   const model = genAI.getGenerativeModel({
+  //     model: "gemini-2.0-flash",
+  //     generation_config: {
+  //       temperature: 2,
+  //       response_mime_type: "application/json",
+  //     },
+  //   });
+  //   const result = await model.generateContent(prompt);
+  //   const content = result.response.candidates[0].content.parts[0].text;
+  //   return content;
+  // };
+  const taskEvaluation = "user did well in this task, but need to improve a bit more";
+  const projectEvaluation = "user lack a bit in this project, but overall good";
 
-const getRoadmapPrompt = (profile) => {
-
-  const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${profile.careerGoal || "Being Backend Developer and getting remote job"}**, considering their unique background and the transformative impact of AI on their target field.
+  const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
+    profile.careerGoal || "Being Backend Developer and getting remote job"
+  }**, considering their unique background and the transformative impact of AI on their target field.
 
 The roadmap should be intensely practical, focusing on high-impact actions that differentiate the user in a competitive market. It must go beyond basic skill acquisition and provide concrete steps for networking effectively, building a compelling portfolio/presence, and navigating the specific path to their desired outcome (e.g., landing a specific job role, securing freelance clients, launching a startup, obtaining funding).
 
@@ -10,7 +27,11 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 
 ### **User Profile Snapshot:**
 
-*   **Career Goal:** ${profile.careerGoal ? profile.careerGoal : "Being Backend Developer and getting remote job"}
+*   **Career Goal:** ${
+    profile.careerGoal
+      ? profile.careerGoal
+      : "Being Backend Developer and getting remote job"
+  }
 *   **Current Skills:** 
     *   **Hard Skills:** ${profile.hardSkills
       .map((skill) => `${skill.name} (${skill.experience} years experience)`)
@@ -24,6 +45,20 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 *   **Projects Completed:** ${profile.projects
     .map((project) => project.name)
     .join(", ")}
+
+### User Profile Evaluation:
+*   **Hard Skills Task:** ${questions.hardSkillsTask}
+*   **Hard Skills Task Evaluation:** ${taskEvaluation}
+*   **user's own Hard Skills Rating:** ${evaluationForm.hardSkillRating} /100
+*   **Soft Skills Question:** ${questions.softSkillsQuestion}
+*   **Soft Skills Response:** ${evaluationForm.softSkillsResponse}
+*   **Project Link question:** ${questions.projectLink}
+*   **Evaluation of project of Project Link provided by user:** ${projectEvaluation}
+*   **Project Contribution:** ${evaluationForm.projectContribution}
+*   **Project Improvement:** ${evaluationForm.projectImprovement}
+*   **Job Experience:** ${evaluationForm.jobExperience}
+
+
 
 ### **Roadmap Generation Rules:**
 
@@ -88,10 +123,11 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 
 ### **Instruction:**
 
-Generate the JSON roadmap now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${profile.careerGoal || "their career goal"}** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
+Generate the JSON roadmap now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${
+    profile.careerGoal || "their career goal"
+  }** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
 
   return prompt;
 };
 
 module.exports = { getRoadmapPrompt };
-

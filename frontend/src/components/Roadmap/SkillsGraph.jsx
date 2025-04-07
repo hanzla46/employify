@@ -111,7 +111,7 @@ const nodeTypes = {
 };
 
 // --- Main Graph Component ---
-const SkillsGraphInternal = ({evaluationForm}) => { // Renamed to avoid conflict with provider wrapper
+const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { roadmap, setRoadmap } = useContext(SkillsContext);
@@ -132,7 +132,7 @@ const SkillsGraphInternal = ({evaluationForm}) => { // Renamed to avoid conflict
       try {
         setLoading(true);
         setError(null); // Reset error state
-        const result = await axios.post(url + "/roadmap/get", {evaluationForm}, {
+        const result = await axios.post(url + "/roadmap/get", {evaluationForm, questions}, {
           withCredentials: true,
           headers: {
             Accept: "application/json",
@@ -319,10 +319,10 @@ const SkillsGraphInternal = ({evaluationForm}) => { // Renamed to avoid conflict
 
 // --- Wrapper Component with Provider ---
 // React Flow hooks like useNodesState require being inside a ReactFlowProvider
-const SkillsGraph = ({evaluationForm}) => {
+const SkillsGraph = ({evaluationForm, questions}) => {
     return (
         <ReactFlowProvider>
-            <SkillsGraphInternal evaluationForm={evaluationForm} />
+            <SkillsGraphInternal evaluationForm={evaluationForm} questions={questions} />
         </ReactFlowProvider>
     )
 }
