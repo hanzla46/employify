@@ -32,4 +32,21 @@ const add = async (req, res) => {
 const update = async (req, res) => {
   res.status(201).json({ message: "profile updated" });
 };
-module.exports = { add, update };
+const check = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    console.log("Checking existing profile for user:", userId);
+    const existing = await Profile.findOne({ userId });
+    if (existing) {
+      console.log("Profile exists for user:", userId);
+      return res.status(200).json({ profile: true, success: true });
+    } else {
+      console.log("No profile found for user:", userId);
+      return res.status(200).json({ profile: false, success: true });
+    }
+  } catch (error) {
+    console.error("Error checking profile:", error);
+    res.status(500).json({ message: "Internal server error", success: false });
+  }
+};
+module.exports = { add, update, check };
