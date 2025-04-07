@@ -12,8 +12,8 @@ import "reactflow/dist/style.css";
 import axios from "axios";
 import dagre from "dagre"; // Import dagre
 import { SkillsContext } from "../../Context/SkillsContext";
+import { Atom } from "react-loading-indicators";
 
-// --- Dagre Layout Configuration ---
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -290,7 +290,7 @@ const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avo
 
 
   if (loading) {
-    return <div className="p-4 text-center text-gray-600 dark:text-gray-300">Loading skills graph...</div>;
+    return <Atom color="#32cd32" size="large" text="Loading Roadmap Graph" textColor="#17d83f" />;
   }
 
   if (error) {

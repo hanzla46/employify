@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import FancyButton from "@/components/Button";
+import { Atom } from "react-loading-indicators";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 import { Textarea } from "@/components/ui/textarea";
@@ -139,9 +140,7 @@ export default function EvaluateProfile({
       )}
       {loading && (
         <div className="flex justify-center items-center h-screen">
-          <p className="text-xl font-bold text-black dark:text-white">
-            Loading...
-          </p>
+          <Atom color="#32cd32" size="large" text="Loading" textColor="#17d83f" />
         </div>
       )}
     </div>
