@@ -37,26 +37,16 @@ export function Home() {
   const [darkMode, setDarkMode] = useState(false);
   
   useEffect(() => {
-    // Check for user's preferred color scheme
-    if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
-      setDarkMode(true);
-      document.documentElement.classList.add('dark');
-    }
-    
+  
     AOS.init({
       duration: 1200,
       easing: 'ease-out-cubic',
       once: true
     });
   }, []);
-  
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
-    document.documentElement.classList.toggle('dark');
-  };
 
   return (
-    <div className="pt-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800">
+    <div className="pt-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-700">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         {/* Hero Section with 3D elements and gradient backgrounds */}

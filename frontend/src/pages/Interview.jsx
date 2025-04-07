@@ -253,7 +253,7 @@ export function Interview() {
     startInterview();
   };
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-900 dark:via-indigo-950/30 dark:to-gray-900">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-800 dark:via-indigo-950/30 dark:to-gray-700">
       <div className="container mx-auto px-4 py-10 pb-2">
         <div className="w-full max-w-full mx-auto">
           <div className="flex items-center justify-between mb-2">
@@ -317,7 +317,7 @@ export function Interview() {
                     />
 
                     <div className="col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden">
-                      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+                      <div className="bg-gradient-to-r from-indigo-600 to-[var(--color-primary-400)] p-4">
                         <h3 className="text-xl font-semibold text-white text-center">
                           Interview Setup
                         </h3>
@@ -414,7 +414,7 @@ function InterviewHeader({
   loading,
 }) {
   return (
-    <div className="bg-gradient-to-r from-indigo-600 via-purple-600 to-indigo-800 p-3">
+    <div className="bg-gradient-to-r from-indigo-600 to-[var(--color-primary-400)] p-3">
       <div className="flex flex-col md:flex-row justify-between items-center">
         <div className="flex items-center mb-4 md:mb-0">
           <div className="w-10 h-9 bg-white/20 backdrop-blur-sm rounded-xl flex items-center justify-center shadow-lg">
@@ -477,7 +477,7 @@ function InterviewHeader({
 function InstructionsCard({ title, items, icon }) {
   return (
     <div className="col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden">
-      <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4">
+      <div className="bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 p-4">
         <div className="flex items-center justify-center">
           {icon}
           <h3 className="text-xl font-semibold text-white ml-2">{title}</h3>

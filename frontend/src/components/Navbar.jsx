@@ -17,7 +17,7 @@ export function Navbar({ darkMode, setDarkMode }) {
   const navItems = [
     { path: "/", label: "Home" },
     { path: "/interview", label: "AI Interview" },
-    { path: "/roadmap", label: "Skills Roadmap" },
+    { path: "/roadmap", label: "Career Roadmap" },
     { path: "/jobs", label: "Job Portal" },
     { path: "/pricing", label: "Pricing" },
     { path: "/about", label: "About" },
@@ -29,11 +29,11 @@ export function Navbar({ darkMode, setDarkMode }) {
 
   return (
     <nav
-      className="fixed bg-transparent w-full z-50 bg-gradient-to-r from-gray-800 via-gray-700 to-gray-900 bg-opacity-30 opacity-80 backdrop-blur-3xl shadow-2xl border-b border-gray-700 dark:border-gray-600 
+      className="fixed bg-transparent w-full z-50 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 bg-opacity-30 opacity-80 backdrop-blur-3xl shadow-2xl border-b border-gray-700 dark:border-gray-600 
       transition-all duration-300"
     >
-      <div className="container mr-auto px-4">
-        <div className="flex items-center justify-between h-16">
+      <div className="container mr-auto px-3">
+        <div className="flex items-center justify-between h-14">
           {/* Logo */}
           <NavLink
             to="/"

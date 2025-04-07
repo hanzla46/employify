@@ -94,17 +94,16 @@ export function Jobs() {
   };
   
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gradient-to-b pt-16 from-gray-50 to-white dark:from-gray-800 dark:to-gray-700">
       {/* Header */}
-      <header className="sticky top-0 z-10 bg-white dark:bg-gray-800 shadow-md">
+      <header className="sticky top-12 z-10 bg-white dark:bg-gray-800 shadow-md">
         <div className="container mx-auto px-4 py-4">
           <div className="flex justify-between items-center">
-            <h1 className="text-2xl font-bold text-primary-600 dark:text-primary-400">CareerMatch</h1>
+            <h1 className="text-2xl font-bold text-primary-600 dark:text-primary-400">Personalized Job Matching</h1>
             <div className="hidden md:flex space-x-4">
               <button className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Jobs</button>
               <button className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Companies</button>
               <button className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Saved ({savedJobs.length})</button>
-              <button className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">Profile</button>
             </div>
             <button className="md:hidden text-gray-600 dark:text-gray-300" onClick={() => setMobileFiltersOpen(true)}>
               <Menu className="h-6 w-6" />

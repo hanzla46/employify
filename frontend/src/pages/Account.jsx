@@ -52,7 +52,7 @@ export function Account() {
     : null;
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 transition-colors duration-200">
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-700 text-gray-900 dark:text-gray-100 transition-colors duration-200">
       <div className="container mx-auto px-4 py-12">
         {user ? (
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
