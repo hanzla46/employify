@@ -13,6 +13,14 @@ export default function EvaluateProfile({
   questions,
   setQuestions,
 }) {
+  
+  useEffect(() => {
+    if(localStorage.getItem("roadmap")) {
+      setEvaluated(true);
+      return;
+    }
+  },[])
+  
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {

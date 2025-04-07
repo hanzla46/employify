@@ -28,6 +28,7 @@ export function Account() {
       if (res.success) {
         handleSuccess("Logged out successfully");
         setRoadmap([]);
+        localStorage.removeItem("roadmap");
         setTimeout(() => navigate("/"), 1000);
       }
     } catch (error) {

@@ -130,6 +130,12 @@ const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avo
   useEffect(() => {
     const fetchRoadmap = async () => {
       try {
+        if(localStorage.getItem("roadmap")) {
+          console.log("Using cached roadmap data from localStorage.");  
+          setGraphData(JSON.parse(localStorage.getItem("roadmap")));
+          setLoading(false);
+          return;
+        }
         setLoading(true);
         setError(null); // Reset error state
         const result = await axios.post(url + "/roadmap/get", {evaluationForm, questions}, {
@@ -142,6 +148,7 @@ const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avo
 
         if (result.data.success) {
           console.log("API Roadmap data:", result.data.data);
+          localStorage.setItem("roadmap", JSON.stringify(result.data.data)); // Store raw data in localStorage
           if (
             result.data.data &&
             result.data.data.tasks &&
