@@ -12,29 +12,32 @@ import { handleError } from "../../utils";
 import { Briefcase, Building, BookOpen, Clock } from "lucide-react";
 import { Spinner } from "../../lib/Spinner";
 const options = {
-  company: ["Multinational", "Midsized", "Startup"],
-  industry: [
-    "Health",
-    "Tech",
-    "Govt",
-    "Others",
-    "Finance",
-    "Education",
-    "Retail",
-    "Manufacturing",
-    "Telecommunications",
-    "Energy",
-    "Entertainment",
-    "Transportation",
-    "Real Estate",
-    "Hospitality",
-    "Agriculture",
-    "Pharmaceuticals",
-    "Legal",
-    "Media",
-    "Automotive",
+  company: [
+    "Startup",
+    "Small Business",
+    "Mid-Sized Company",
+    "Enterprise",
+    "Freelance",
+    "Agency",
+    "Non-Profit",
+    "Government",
+    "Multinational Corporation"
   ],
-  experience: ["0-1", "1-3", "3-5", "5-10", "10+"],
+  industry: [
+    "Technology & IT",
+    "Finance & Banking",
+    "Healthcare Admin & Research",
+    "Marketing & Advertising",
+    "Legal",
+    "Business & Management",
+    "Sales & E-Commerce",
+    "Government & Policy",
+    "Education & EdTech",
+    "Travel, Hospitality & Tourism",
+    "Real Estate",
+    "Other"
+  ],
+  experience: ["0-1", "1-2", "2-3", "4-6", "6+"],
 };
 
 export default function DialogForm({ start, setInterviewData, interviewData }) {
