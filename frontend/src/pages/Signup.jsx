@@ -1,14 +1,17 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate,useLocation } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
 
 export function Signup() {
+  const location = useLocation();
+
+  const redirectPath = new URLSearchParams(location.search).get('redirect') || '/';
   const { user, loading, setUser } = useContext(AuthContext);
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
-  useEffect(() => {
+  useEffect(() => { 
     if (user) {
       handleSuccess("Already loggedin \n Redirecting to account page...");
       setTimeout(() => {
@@ -158,7 +161,7 @@ export function Signup() {
       if (res.success) {
         handleSuccess("Signed up successfully");
         setTimeout(() => {
-          navigate("/");
+          navigate(redirectPath);
         }, 1000);
       } else {
         handleError(res.message);
@@ -353,7 +356,7 @@ export function Signup() {
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Already have an account?{" "}
             <Link
-              to="/login"
+              to={`/login?redirect=${redirectPath}`}
               className="text-primary-600 hover:text-primary-500 font-medium"
             >
               Sign in
