@@ -14,7 +14,8 @@ const getRoadmapPrompt = (profile, questions, evaluationForm) => {
   //   const content = result.response.candidates[0].content.parts[0].text;
   //   return content;
   // };
-  const taskEvaluation = "user did well in this task, but need to improve a bit more";
+  const taskEvaluation1 = "user did well in this task, but need to improve a bit more";
+  const taskEvaluation2 = "user need alot of improvments";
   const projectEvaluation = "user lack a bit in this project, but overall good";
 
   const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
@@ -47,11 +48,15 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
     .join(", ")}
 
 ### User Profile Evaluation:
-*   **Hard Skills Task:** ${questions.hardSkillsTask}
-*   **Hard Skills Task Evaluation:** ${taskEvaluation}
-*   **user's own Hard Skills Rating:** ${evaluationForm.hardSkillRating} /100
-*   **Soft Skills Question:** ${questions.softSkillsQuestion}
-*   **Soft Skills Response:** ${evaluationForm.softSkillsResponse}
+*   **Hard Skills Task 1:** ${questions.hardSkillsTask1}
+*   **Hard Skills Task 1 Evaluation:** ${taskEvaluation1}
+*   **Hard Skills Task 2:** ${questions.hardSkillsTask2}
+*   **Hard Skills Task 2 Evaluation:** ${taskEvaluation2}
+*   **user's Skills Rating (self claimed):** ${evaluationForm.hardSkillRating} /100
+*   **Soft Skills Question 1:** ${questions.softSkillsQuestion1}
+*   **Soft Skills 1 Response:** ${evaluationForm.softSkillsResponse1}
+*   **Soft Skills Question 2:** ${questions.softSkillsQuestion2}
+*   **Soft Skills 2 Response:** ${evaluationForm.softSkillsResponse2}
 *   **Project Link question:** ${questions.projectLink}
 *   **Evaluation of project of Project Link provided by user:** ${projectEvaluation}
 *   **Project Contribution:** ${evaluationForm.projectContribution}

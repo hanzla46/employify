@@ -16,17 +16,21 @@ export function Roadmap() {
   } = useContext(SkillsContext);
   const [evaluated, setEvaluated] = useState(false);
   const [evaluationForm, setEvaluationForm] = useState({
-    taskFile: null,
-    hardSkillRating: 3,
-    softSkillsResponse: "",
+    taskFile1: null,
+    taskFile2: null,
+    hardSkillRating: 40,
+    softSkillsResponse1: "",
+    softSkillsResponse2: "",
     projectLink: "",
     projectContribution: "",
     projectImprovement: "",
     jobExperience: "",
   });
   const [questions, setQuestions] = useState({
-    hardSkillsTask: "",
-    softSkillsQuestion: "",
+    hardSkillsTask1: "",
+    hardSkillsTask2: "",
+    softSkillsQuestion1: "",
+    softSkillsQuestion2: "",
     projectLink: "",
     projectContribution: "",
     projectImprovement: "",

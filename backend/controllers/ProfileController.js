@@ -54,11 +54,13 @@ const getQuestions = async (req, res) => {
     }
     console.log("Profile data:", profile);
     const { hardSkills, softSkills, jobs, projects, careerGoal } = profile;
-    const prompt = `Generate questions for evaluating a profile with the following data: Hard Skills: ${hardSkills}, Soft Skills: ${softSkills}, Jobs: ${jobs}, Projects: ${projects}, Career Goal: ${careerGoal}. it should be difficult according to user's profile. Response should be in JSON format: 
+    const prompt = `Generate questions for evaluating a profile with the following data: Hard Skills: ${hardSkills}, Soft Skills: ${softSkills}, Jobs: ${jobs}, Projects: ${projects}, Career Goal: ${careerGoal}. it should be difficult according to user's profile. Give questions that require actual human creativity. Nad skills you will test should have actual value in current job market. Response should be in JSON format: 
     \`\`\`json
     {
-    hardSkillsTask(give a task that can be completed in max 3 hours, ask for a file),
-    softSkillsQuestion(a tricky question),
+    hardSkillsTask1(give a task that can be completed in 1-2 hours, ask for a file),
+    hardSkillsTask2(give a task that can be completed in 1-2 hours, ask for a file),
+    softSkillsQuestion2(a tricky question),
+    softSkillsQuestion2(a tricky question),
     projectLink(ask for link of a project),
     projectContribution,
     projectImprovement(ask about something user has improved in the project using their hard skills), 
@@ -81,8 +83,10 @@ const getQuestions = async (req, res) => {
     const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
     const questions = JSON.parse(jsonString);
     const {
-      hardSkillsTask,
-      softSkillsQuestion,
+      hardSkillsTask1,
+      hardSkillsTask2,
+      softSkillsQuestion1,
+      softSkillsQuestion2,
       projectLink,
       projectContribution,
       projectImprovement,
@@ -92,8 +96,10 @@ const getQuestions = async (req, res) => {
     return res
       .status(200)
       .json({
-        hardSkillsTask,
-        softSkillsQuestion,
+        hardSkillsTask1,
+        hardSkillsTask2,
+        softSkillsQuestion1,
+        softSkillsQuestion2,
         projectLink,
         projectContribution,
         projectImprovement,

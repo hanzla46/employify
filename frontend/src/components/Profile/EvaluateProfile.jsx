@@ -14,14 +14,13 @@ export default function EvaluateProfile({
   questions,
   setQuestions,
 }) {
-  
   useEffect(() => {
-    if(localStorage.getItem("roadmap")) {
+    if (localStorage.getItem("roadmap")) {
       setEvaluated(true);
       return;
     }
-  },[])
-  
+  }, []);
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -34,7 +33,7 @@ export default function EvaluateProfile({
         setQuestions(result.data);
         console.log("Fetched questions:", result.data);
       } else {
-        console.error("Failed to fetch questions:", result.statusText);
+        console.error("Failed to fetch questions:", result.message);
       }
     };
     fetchQuetions();
@@ -55,17 +54,34 @@ export default function EvaluateProfile({
         <Card className="shadow-2xl rounded-2xl">
           <CardContent className="space-y-4 p-6">
             <form onSubmit={handleSubmit}>
-              <h2 className="text-xl font-bold text-black dark:text-white">
-                🔥 Hard Skills Task
-              </h2>
-              <p className="text-black dark:text-white">
-                {questions.hardSkillsTask}
-              </p>
-              <Input
-                type="file"
-                onChange={(e) => handleChange("taskFile", e.target.files[0])}
-                className="text-black dark:text-white mb-3"
-              />
+              <div>
+                {" "}
+                <h2 className="text-xl font-bold text-black dark:text-white">
+                  🔥 Hard Skills Task
+                </h2>
+                <p className="text-black dark:text-white">
+                  {questions.hardSkillsTask1}
+                </p>
+                <Input
+                  type="file"
+                  onChange={(e) => handleChange("taskFile1", e.target.files[0])}
+                  className="text-black dark:text-white mb-3"
+                />
+              </div>
+              <div>
+                {" "}
+                <h2 className="text-xl font-bold text-black dark:text-white">
+                  🔥 Hard Skills Task
+                </h2>
+                <p className="text-black dark:text-white">
+                  {questions.hardSkillsTask2}
+                </p>
+                <Input
+                  type="file"
+                  onChange={(e) => handleChange("taskFile2", e.target.files[0])}
+                  className="text-black dark:text-white mb-3" 
+                />
+              </div>
               <label className="font-medium text-black dark:text-white">
                 Rate Your Skills (1-100)
               </label>
@@ -87,13 +103,24 @@ export default function EvaluateProfile({
               <h2 className="text-xl font-bold pt-6 text-black dark:text-white">
                 🧠 Soft Skills
               </h2>
+              <div>
               <Textarea
-                placeholder={questions.softSkillsQuestion}
-                value={formData.softSkillsResponse}
+                placeholder={questions.softSkillsQuestion1}
+                value={formData.softSkillsResponse1}
                 onChange={(e) =>
-                  handleChange("softSkillsResponse", e.target.value)
+                  handleChange("softSkillsResponse1", e.target.value)
                 }
               />
+              </div>
+              <div className="mt-3">
+              <Textarea
+                placeholder={questions.softSkillsQuestion2}
+                value={formData.softSkillsResponse2}
+                onChange={(e) =>
+                  handleChange("softSkillsResponse2", e.target.value)
+                }
+              />
+              </div>
               <div className="flex gap-3 flex-col">
                 <h2 className="text-xl font-bold pt-6 text-black dark:text-white">
                   🧪 Project / Research
@@ -140,7 +167,12 @@ export default function EvaluateProfile({
       )}
       {loading && (
         <div className="flex justify-center items-center h-screen">
-          <Atom color="#32cd32" size="large" text="Loading" textColor="#17d83f" />
+          <Atom
+            color="#32cd32"
+            size="large"
+            text="Loading"
+            textColor="#17d83f"
+          />
         </div>
       )}
     </div>
