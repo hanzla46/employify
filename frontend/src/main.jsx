@@ -5,7 +5,7 @@ import './index.css';
 import { injectSpeedInsights } from '@vercel/speed-insights';
 injectSpeedInsights();
 createRoot(document.getElementById('root')).render(
-  // <StrictMode>
+  <StrictMode>
     <App />
-  // </StrictMode>
+   </StrictMode>
 );
