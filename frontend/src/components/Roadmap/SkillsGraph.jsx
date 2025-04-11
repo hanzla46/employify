@@ -44,14 +44,14 @@ const getLayoutedElements = (nodes, edges, direction = "LR") => {
         y: nodeWithPosition.y - NODE_HEIGHT / 2,
       };
     } else {
-        // Fallback if node not found in layout (shouldn't happen)
-        console.warn(`Node ${node.id} not found in Dagre layout results.`);
-        node.position = { x: Math.random() * 400, y: Math.random() * 400 };
+      // Fallback if node not found in layout (shouldn't happen)
+      console.warn(`Node ${node.id} not found in Dagre layout results.`);
+      node.position = { x: Math.random() * 400, y: Math.random() * 400 };
     }
 
     // Optional: Set target/source handles based on layout direction
-    node.targetPosition = direction === 'LR' ? 'left' : 'top';
-    node.sourcePosition = direction === 'LR' ? 'right' : 'bottom';
+    node.targetPosition = direction === "LR" ? "left" : "top";
+    node.sourcePosition = direction === "LR" ? "right" : "bottom";
   });
 
   return { nodes, edges };
@@ -62,7 +62,12 @@ const TaskNode = ({ data }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className="p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96 m-8" style={{ minWidth: `${NODE_WIDTH - 16}px` }}> {/* Adjust width based on padding */}
+    <div
+      className="p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96 m-8"
+      style={{ minWidth: `${NODE_WIDTH - 16}px` }}
+    >
+      {" "}
+      {/* Adjust width based on padding */}
       <div className="font-bold text-lg mb-2">{data.label}</div>
       <div className="text-sm text-gray-600 mb-3">{data.description}</div>
       {data.subtasks && data.subtasks.length > 0 && (
@@ -94,7 +99,8 @@ const TaskNode = ({ data }) => {
       )}
       {/* Add other data points if needed */}
       <div className="text-xs text-gray-500 mt-2 border-t pt-1">
-        Category: {data.category || 'N/A'} | Diff: {data.difficulty || 'N/A'} | Est: {data.estimated_time || 'N/A'}
+        Category: {data.category || "N/A"} | Diff: {data.difficulty || "N/A"} |
+        Est: {data.estimated_time || "N/A"}
       </div>
       {data.ai_impact && (
         <div className="text-xs text-purple-700 mt-1 italic">
@@ -111,7 +117,12 @@ const nodeTypes = {
 };
 
 // --- Main Graph Component ---
-const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avoid conflict with provider wrapper
+const SkillsGraphInternal = ({
+  evaluationForm,
+  setEvaluationForm,
+  questions,
+}) => {
+  // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { roadmap, setRoadmap } = useContext(SkillsContext);
@@ -130,19 +141,25 @@ const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avo
   useEffect(() => {
     const fetchRoadmap = async () => {
       try {
-        if(localStorage.getItem("roadmap")) {
-          console.log("Using cached roadmap data from localStorage.");  
+        if (localStorage.getItem("roadmap")) {
+          console.log("Using cached roadmap data from localStorage.");
           setGraphData(JSON.parse(localStorage.getItem("roadmap")));
           setLoading(false);
           return;
         }
         setLoading(true);
         setError(null); // Reset error state
-        const result = await axios.post(url + "/roadmap/get", {evaluationForm, questions}, {
+        let formData = new FormData();
+        formData.append("evaluationForm", evaluationForm);
+        formData.append("questions", questions); // Append questions to formData
+        formData.append("file1", evaluationForm.taskfile1); // Append file1 to formData
+        formData.append("file2", evaluationForm.taskfile2); // Append file2 to formData
+        console.log(formData);
+        const result = await axios.post(url + "/roadmap/get", formData, {
           withCredentials: true,
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/json",
+            "Content-Type": "multipart/form-data",
           },
         });
 
@@ -163,13 +180,17 @@ const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avo
             setGraphData({ tasks: [] }); // Set empty tasks to avoid breaking layout logic later
           }
         } else {
-           console.error("API call failed:", result.data.message);
-           setError(result.data.message || "Failed to fetch roadmap (API error).");
-           setGraphData({ tasks: [] });
+          console.error("API call failed:", result.data.message);
+          setError(
+            result.data.message || "Failed to fetch roadmap (API error)."
+          );
+          setGraphData({ tasks: [] });
         }
       } catch (err) {
         console.error("Error fetching roadmap:", err);
-        setError("Failed to load roadmap. Please check connection or try again.");
+        setError(
+          "Failed to load roadmap. Please check connection or try again."
+        );
         setGraphData({ tasks: [] }); // Set empty tasks on error
       } finally {
         setLoading(false);
@@ -186,30 +207,33 @@ const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avo
     }
   }, [url, roadmap, setRoadmap]); // Dependencies for fetching
 
-
   // Process data and transform to ReactFlow format using Dagre layout
   useEffect(() => {
     // Ensure graphData and tasks exist and are an array before processing
     if (!graphData || !Array.isArray(graphData.tasks)) {
-        console.log("Waiting for graph data or graphData.tasks is not an array...");
-        // Optionally set nodes/edges to empty if needed, depending on desired behavior
-        // setNodes([]);
-        // setEdges([]);
-        return;
+      console.log(
+        "Waiting for graph data or graphData.tasks is not an array..."
+      );
+      // Optionally set nodes/edges to empty if needed, depending on desired behavior
+      // setNodes([]);
+      // setEdges([]);
+      return;
     }
 
-     if (graphData.tasks.length === 0 && !loading) {
-        console.log("No tasks to display.");
-        setNodes([]);
-        setEdges([]);
-        return; // Exit if there are no tasks
-     }
+    if (graphData.tasks.length === 0 && !loading) {
+      console.log("No tasks to display.");
+      setNodes([]);
+      setEdges([]);
+      return; // Exit if there are no tasks
+    }
 
     console.log("Processing graph data for ReactFlow layout...");
 
     // Validate and sanitize tasks (ensure IDs are present and unique)
-    const validTasks = graphData.tasks.filter(task => task && task.id != null);
-    const taskIds = new Set(validTasks.map(t => t.id.toString()));
+    const validTasks = graphData.tasks.filter(
+      (task) => task && task.id != null
+    );
+    const taskIds = new Set(validTasks.map((t) => t.id.toString()));
 
     // 1. Transform tasks into initial nodes
     const initialNodes = validTasks.map((task) => ({
@@ -270,69 +294,95 @@ const SkillsGraphInternal = ({evaluationForm, questions}) => { // Renamed to avo
     // 3. Calculate layout using Dagre
     // Only run layout if there are nodes to prevent Dagre errors
     if (initialNodes.length > 0) {
-        console.log(`Running Dagre layout for ${initialNodes.length} nodes and ${initialEdges.length} edges...`);
-        const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
-            initialNodes, // Pass the nodes *before* layout
-            initialEdges, // Pass the created edges
-            "LR" // Layout direction: LR (Left to Right) or TB (Top to Bottom)
+      console.log(
+        `Running Dagre layout for ${initialNodes.length} nodes and ${initialEdges.length} edges...`
+      );
+      const { nodes: layoutedNodes, edges: layoutedEdges } =
+        getLayoutedElements(
+          initialNodes, // Pass the nodes *before* layout
+          initialEdges, // Pass the created edges
+          "LR" // Layout direction: LR (Left to Right) or TB (Top to Bottom)
         );
 
-        console.log("Layout complete. Setting nodes and edges.");
-        setNodes(layoutedNodes);
-        setEdges(layoutedEdges); // Use the edges returned by layout function (or initialEdges if not modified)
+      console.log("Layout complete. Setting nodes and edges.");
+      setNodes(layoutedNodes);
+      setEdges(layoutedEdges); // Use the edges returned by layout function (or initialEdges if not modified)
     } else {
-        console.log("No nodes to layout.");
-        setNodes([]);
-        setEdges([]);
+      console.log("No nodes to layout.");
+      setNodes([]);
+      setEdges([]);
     }
-
   }, [graphData, handleSubtaskAction]); // Rerun layout when graphData changes
 
-
   if (loading) {
-    return <Atom color="#32cd32" size="large" text="Loading Roadmap Graph" textColor="#17d83f" />;
+    return (
+      <Atom
+        color="#32cd32"
+        size="large"
+        text="Loading Roadmap Graph"
+        textColor="#17d83f"
+      />
+    );
   }
 
   if (error) {
-    return <div className="p-4 text-center text-red-600 dark:text-red-400">{error}</div>;
+    return (
+      <div className="p-4 text-center text-red-600 dark:text-red-400">
+        {error}
+      </div>
+    );
   }
 
   // Handle case where graphData is loaded but tasks array is empty after filtering
   if (!nodes || nodes.length === 0) {
-     return <div className="p-4 text-center text-gray-600 dark:text-gray-300">No roadmap tasks available to display.</div>;
+    return (
+      <div className="p-4 text-center text-gray-600 dark:text-gray-300">
+        No roadmap tasks available to display.
+      </div>
+    );
   }
 
   return (
     // Height needs to be explicitly set on the container for ReactFlow
-    <div style={{ width: "100%", height: "700px" }}> {/* Increased height */}
-        <ReactFlow
-            nodes={nodes}
-            edges={edges}
-            onNodesChange={onNodesChange}
-            onEdgesChange={onEdgesChange}
-            nodeTypes={nodeTypes}
-            fitView // Adjusts viewport to fit all nodes
-            fitViewOptions={{ padding: 0.1, maxZoom: 1.2 }} // Add padding around fitView
-            minZoom={0.2} // Allow zooming out further
-        >
-            <Controls />
-            <MiniMap nodeStrokeColor="#ccc" nodeColor="#fff" nodeBorderRadius={2} pannable zoomable />
-            <Background variant="dots" gap={15} size={1} />
-        </ReactFlow>
+    <div style={{ width: "100%", height: "700px" }}>
+      {" "}
+      {/* Increased height */}
+      <ReactFlow
+        nodes={nodes}
+        edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        nodeTypes={nodeTypes}
+        fitView // Adjusts viewport to fit all nodes
+        fitViewOptions={{ padding: 0.1, maxZoom: 1.2 }} // Add padding around fitView
+        minZoom={0.2} // Allow zooming out further
+      >
+        <Controls />
+        <MiniMap
+          nodeStrokeColor="#ccc"
+          nodeColor="#fff"
+          nodeBorderRadius={2}
+          pannable
+          zoomable
+        />
+        <Background variant="dots" gap={15} size={1} />
+      </ReactFlow>
     </div>
   );
 };
 
-
 // --- Wrapper Component with Provider ---
 // React Flow hooks like useNodesState require being inside a ReactFlowProvider
-const SkillsGraph = ({evaluationForm, questions}) => {
-    return (
-        <ReactFlowProvider>
-            <SkillsGraphInternal evaluationForm={evaluationForm} questions={questions} />
-        </ReactFlowProvider>
-    )
-}
-
+const SkillsGraph = ({ evaluationForm, setEvaluationForm, questions }) => {
+  return (
+    <ReactFlowProvider>
+      <SkillsGraphInternal
+        evaluationForm={evaluationForm}
+        setEvaluationForm={setEvaluationForm}
+        questions={questions}
+      />
+    </ReactFlowProvider>
+  );
+};
 
 export default SkillsGraph;

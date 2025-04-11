@@ -1,21 +1,50 @@
 const moment = require("moment");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const getRoadmapPrompt = (profile, questions, evaluationForm) => {
-  // const evaluate = async (q, a) => {
-  //   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-  //   const model = genAI.getGenerativeModel({
-  //     model: "gemini-2.0-flash",
-  //     generation_config: {
-  //       temperature: 2,
-  //       response_mime_type: "application/json",
-  //     },
-  //   });
-  //   const result = await model.generateContent(prompt);
-  //   const content = result.response.candidates[0].content.parts[0].text;
-  //   return content;
-  // };
-  const taskEvaluation1 = "user did well in this task, but need to improve a bit more";
-  const taskEvaluation2 = "user need alot of improvments";
+const mime = require("mime-types");
+const getRoadmapPrompt = (profile, questions, evaluationForm, file1, file2) => {
+  const evaluate = async (question, file) => {
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+
+    function fileToGenerativePart(fileData, filename) {
+      const mimeType = mime.lookup(filename) || "text/plain"; // Default to text/plain if type is unknown
+      return {
+        inlineData: {
+          data: fileData, // The Base64 encoded data
+          mimeType: mimeType,
+        },
+      };
+    }
+
+    try {
+      const name = file.originalname || "file.txt"; // Fallback name if originalname is not available
+      const data = file.buffer.toString("base64"); // Convert buffer to Base64 string
+      const filePart = fileToGenerativePart(data, name);
+
+      const prompt = `Analyze this task and its response and provide insights about the user's performance. Task is: ${question} and the user's code response is: ${filePart}`;
+
+      const result = await model.generateContent([prompt, filePart]);
+      const response = await result.response;
+      const text = response.text();
+
+      console.log("Gemini Response:", text);
+
+      try {
+        const jsonStringMatch = text.match(/```json\n([\s\S]*?)\n```/);
+        const jsonString = jsonStringMatch ? jsonStringMatch[1] : text;
+        const parsedResult = JSON.parse(jsonString);
+        return parsedResult;
+      } catch (parseError) {
+        console.error("Error parsing JSON response:", parseError);
+        return text;
+      }
+    } catch (error) {
+      console.error("Error in evaluate function:", error);
+      return { error: error.message };
+    }
+  };
+  const taskEvaluation1 = evaluate(questions.hardSkillsTask1, file1);
+  const taskEvaluation2 = evaluate(questions.hardSkillsTask2, file2);
   const projectEvaluation = "user lack a bit in this project, but overall good";
 
   const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
@@ -52,7 +81,9 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 *   **Hard Skills Task 1 Evaluation:** ${taskEvaluation1}
 *   **Hard Skills Task 2:** ${questions.hardSkillsTask2}
 *   **Hard Skills Task 2 Evaluation:** ${taskEvaluation2}
-*   **user's Skills Rating (self claimed):** ${evaluationForm.hardSkillRating} /100
+*   **user's Skills Rating (self claimed):** ${
+    evaluationForm.hardSkillRating
+  } /100
 *   **Soft Skills Question 1:** ${questions.softSkillsQuestion1}
 *   **Soft Skills 1 Response:** ${evaluationForm.softSkillsResponse1}
 *   **Soft Skills Question 2:** ${questions.softSkillsQuestion2}

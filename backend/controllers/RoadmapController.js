@@ -5,14 +5,14 @@ const generateRoadmap = async (req, res) => {
   try {
     console.log("Generating roadmap...");
     const user = req.user;
-    const { questions, evaluationForm } = req.body;
+    const { questions, evaluationForm , file1, file2} = req.body;
     const profile = await Profile.findOne({ userId: user._id });
     if (!profile) {
       return res
         .status(404)
         .json({ success: false, message: "Profile not found" });
     }
-    const prompt = getRoadmapPrompt(profile, questions, evaluationForm);
+    const prompt = getRoadmapPrompt(profile, questions, evaluationForm, file1, file2);
     console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
