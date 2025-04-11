@@ -183,7 +183,7 @@ export function Signup() {
 
   return (
     <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-4/5 md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 mt-14">
+      <div className="w-4/5 md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 mt-11">
         <h1 className="text-2xl md:text-3xl font-bold mb-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400">
           Create Account
         </h1>
