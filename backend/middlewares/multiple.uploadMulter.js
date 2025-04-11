@@ -14,6 +14,8 @@ const fileUpload = multer({
             'text/javascript',
             'application/javascript',
             'text/html',
+            'text/python',
+            'text/x-python',
             'text/css',
             'application/json',
             'text/plain',

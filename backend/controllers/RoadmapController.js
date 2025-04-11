@@ -5,14 +5,41 @@ const generateRoadmap = async (req, res) => {
   try {
     console.log("Generating roadmap...");
     const user = req.user;
-    const { questions, evaluationForm , file1, file2} = req.body;
+    const questions = JSON.parse(req.body.questions);
+    const evaluationForm = JSON.parse(req.body.evaluationForm);
+    console.log("Request body:", req.body);
+    console.log("Uploaded files:", req.files);
     const profile = await Profile.findOne({ userId: user._id });
     if (!profile) {
       return res
         .status(404)
         .json({ success: false, message: "Profile not found" });
     }
-    const prompt = getRoadmapPrompt(profile, questions, evaluationForm, file1, file2);
+
+    if (!req.files || !req.files.file1 || !req.files.file2) {
+      console.error("Files are not properly received by the server:", req.files);
+      return res.status(400).json({ success: false, message: "Files are missing" });
+    }
+
+    const { file1, file2 } = req.files;
+
+    if (!file1 || !file2) {
+      console.error("Missing files in request:", req.files);
+      return res
+        .status(400)
+        .json({ success: false, message: "Files are required" });
+    }
+
+    const firstFile = file1[0];
+    const secondFile = file2[0];
+    console.log(firstFile, secondFile);
+    const prompt = await getRoadmapPrompt(
+      profile,
+      questions,
+      evaluationForm,
+      firstFile,
+      secondFile,
+    );
     console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({

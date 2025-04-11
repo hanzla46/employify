@@ -17,11 +17,7 @@ export function Roadmap() {
   const [evaluated, setEvaluated] = useState(false);
   const [evaluationForm, setEvaluationForm] = useState({
     taskFile1: null,
-    file1EncodedString: "",
-    file1Name: "",
     taskFile2: null,
-    file2EncodedString: "",
-    file2Name: "",
     hardSkillRating: 40,
     softSkillsResponse1: "",
     softSkillsResponse2: "",

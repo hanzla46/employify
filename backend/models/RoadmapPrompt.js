@@ -1,11 +1,16 @@
 const moment = require("moment");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const mime = require("mime-types");
-const getRoadmapPrompt = (profile, questions, evaluationForm, file1, file2) => {
+const getRoadmapPrompt = async (
+  profile,
+  questions,
+  evaluationForm,
+  file1,
+  file2
+) => {
   const evaluate = async (question, file) => {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
     function fileToGenerativePart(fileData, filename) {
       const mimeType = mime.lookup(filename) || "text/plain"; // Default to text/plain if type is unknown
       return {
@@ -15,41 +20,29 @@ const getRoadmapPrompt = (profile, questions, evaluationForm, file1, file2) => {
         },
       };
     }
-
     try {
       const name = file.originalname || "file.txt"; // Fallback name if originalname is not available
-      const data = file.buffer.toString("base64"); // Convert buffer to Base64 string
+      const data = file.buffer.toString("base64");
       const filePart = fileToGenerativePart(data, name);
-
-      const prompt = `Analyze this task and its response and provide insights about the user's performance. Task is: ${question} and the user's code response is: ${filePart}`;
-
+      const prompt = `Analyze this task and its response and provide insights about the user's performance. Give your response in one paragraph without formatting and extra special characters. Task is: ${question} and the user's response is: ${filePart}`;
       const result = await model.generateContent([prompt, filePart]);
       const response = await result.response;
       const text = response.text();
-
       console.log("Gemini Response:", text);
-
-      try {
-        const jsonStringMatch = text.match(/```json\n([\s\S]*?)\n```/);
-        const jsonString = jsonStringMatch ? jsonStringMatch[1] : text;
-        const parsedResult = JSON.parse(jsonString);
-        return parsedResult;
-      } catch (parseError) {
-        console.error("Error parsing JSON response:", parseError);
-        return text;
-      }
+          return text;
     } catch (error) {
       console.error("Error in evaluate function:", error);
       return { error: error.message };
     }
   };
-  const taskEvaluation1 = evaluate(questions.hardSkillsTask1, file1);
-  const taskEvaluation2 = evaluate(questions.hardSkillsTask2, file2);
-  const projectEvaluation = "user lack a bit in this project, but overall good";
-
-  const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
-    profile.careerGoal || "Being Backend Developer and getting remote job"
-  }**, considering their unique background and the transformative impact of AI on their target field.
+  try {
+    const taskEvaluation1 = await evaluate(questions.hardSkillsTask1, file1);
+    const taskEvaluation2 = await evaluate(questions.hardSkillsTask2, file2);
+    const projectEvaluation =
+      "user lack a bit in this project, but overall good";
+    const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
+      profile.careerGoal || "Being Backend Developer and getting remote job"
+    }**, considering their unique background and the transformative impact of AI on their target field.
 
 The roadmap should be intensely practical, focusing on high-impact actions that differentiate the user in a competitive market. It must go beyond basic skill acquisition and provide concrete steps for networking effectively, building a compelling portfolio/presence, and navigating the specific path to their desired outcome (e.g., landing a specific job role, securing freelance clients, launching a startup, obtaining funding).
 
@@ -58,10 +51,10 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 ### **User Profile Snapshot:**
 
 *   **Career Goal:** ${
-    profile.careerGoal
-      ? profile.careerGoal
-      : "Being Backend Developer and getting remote job"
-  }
+      profile.careerGoal
+        ? profile.careerGoal
+        : "Being Backend Developer and getting remote job"
+    }
 *   **Current Skills:** 
     *   **Hard Skills:** ${profile.hardSkills
       .map((skill) => `${skill.name} (${skill.experience} years experience)`)
@@ -70,11 +63,11 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
       .map((skill) => `${skill.name} (${skill.proficiency} proficiency)`)
       .join(", ")}
 *   **Job Experience:** ${profile.jobs
-    .map((job) => `${job.title} at ${job.company} for 1 year`)
-    .join(", ")}
+      .map((job) => `${job.title} at ${job.company} for 1 year`)
+      .join(", ")}
 *   **Projects Completed:** ${profile.projects
-    .map((project) => project.name)
-    .join(", ")}
+      .map((project) => project.name)
+      .join(", ")}
 
 ### User Profile Evaluation:
 *   **Hard Skills Task 1:** ${questions.hardSkillsTask1}
@@ -82,8 +75,8 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 *   **Hard Skills Task 2:** ${questions.hardSkillsTask2}
 *   **Hard Skills Task 2 Evaluation:** ${taskEvaluation2}
 *   **user's Skills Rating (self claimed):** ${
-    evaluationForm.hardSkillRating
-  } /100
+      evaluationForm.hardSkillRating
+    } /100
 *   **Soft Skills Question 1:** ${questions.softSkillsQuestion1}
 *   **Soft Skills 1 Response:** ${evaluationForm.softSkillsResponse1}
 *   **Soft Skills Question 2:** ${questions.softSkillsQuestion2}
@@ -160,10 +153,12 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 ### **Instruction:**
 
 Generate the JSON roadmap now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${
-    profile.careerGoal || "their career goal"
-  }** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
-
-  return prompt;
+      profile.careerGoal || "their career goal"
+    }** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
+    return prompt;
+  } catch (error) {
+    console.error("Error generating roadmap prompt:", error);
+    throw error;
+  }
 };
-
 module.exports = { getRoadmapPrompt };

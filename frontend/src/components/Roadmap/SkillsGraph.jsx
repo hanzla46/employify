@@ -149,11 +149,19 @@ const SkillsGraphInternal = ({
         }
         setLoading(true);
         setError(null); // Reset error state
+        console.log("Evaluation Form:", evaluationForm);
+        console.log("Questions:", questions);
+        console.log("Task File 1:", evaluationForm.taskFile1);
+        console.log("Task File 2:", evaluationForm.taskFile2);
         let formData = new FormData();
-        formData.append("evaluationForm", evaluationForm);
-        formData.append("questions", questions); // Append questions to formData
-        formData.append("file1", evaluationForm.taskfile1); // Append file1 to formData
-        formData.append("file2", evaluationForm.taskfile2); // Append file2 to formData
+        formData.append("evaluationForm", JSON.stringify(evaluationForm)); // Append evaluationForm to formData
+        formData.append("questions", JSON.stringify(questions)); // Append questions to formData
+        if (!evaluationForm.taskFile1 || !evaluationForm.taskFile2) {
+          console.error("Task files are missing in evaluationForm:", evaluationForm);
+          return;
+        }
+        formData.append("file1", evaluationForm.taskFile1); // Append file1 to formData
+        formData.append("file2", evaluationForm.taskFile2); // Append file2 to formData
         console.log(formData);
         const result = await axios.post(url + "/roadmap/get", formData, {
           withCredentials: true,
