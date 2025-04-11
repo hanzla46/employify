@@ -32,15 +32,15 @@ export function Navbar({ darkMode, setDarkMode }) {
       className="fixed bg-transparent w-full z-50 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 bg-opacity-30 opacity-80 backdrop-blur-3xl shadow-2xl border-b border-gray-700 dark:border-gray-600 
       transition-all duration-300"
     >
-      <div className="container mr-auto px-3">
-        <div className="flex items-center justify-between h-14">
+      <div className="container mr-auto px-2">
+        <div className="flex items-center justify-between h-12">
           {/* Logo */}
           <NavLink
             to="/"
             className={`flex items-center space-x-2 ml-1 md:ml-5 
               transform hover:scale-105 transition-transform duration-300`}
           >
-            <img className="w-48 h-11" src={logo} alt="logo" />
+            <img className="w-40 h-9" src={logo} alt="logo" />
           </NavLink>
 
           {/* Desktop Navigation */}
@@ -50,7 +50,7 @@ export function Navbar({ darkMode, setDarkMode }) {
                 key={item.path}
                 to={item.path}
                 className={({ isActive }) =>
-                  `relative px-4 py-2 rounded-xl text-lg font-bold transition-all duration-300 ease-in-out
+                  `relative px-2 py-1 rounded-xl text-base font-bold transition-all duration-300 ease-in-out
                   group overflow-hidden
                   ${
                     isActive
