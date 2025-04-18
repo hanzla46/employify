@@ -10,7 +10,7 @@ const getRoadmapPrompt = async (
 ) => {
   const evaluate = async (question, file) => {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     function fileToGenerativePart(fileData, filename) {
       const mimeType = mime.lookup(filename) || "text/plain"; // Default to text/plain if type is unknown
       return {
