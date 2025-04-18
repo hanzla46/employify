@@ -36,8 +36,8 @@ const getRoadmapPrompt = async (
     }
   };
   try {
-    const taskEvaluation1 = await evaluate(questions.hardSkillsTask1, file1);
-    const taskEvaluation2 = await evaluate(questions.hardSkillsTask2, file2);
+    const taskEvaluation1 = "User did good";
+    const taskEvaluation2 = "Need improvements";
     const projectEvaluation =
       "user lack a bit in this project, but overall good";
     const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
