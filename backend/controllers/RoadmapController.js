@@ -43,7 +43,7 @@ const generateRoadmap = async (req, res) => {
     console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-pro-exp-03-25",
+      model: "gemini-2.0-flash",
       generation_config: {
         temperature: 2,
         response_mime_type: "application/json",
