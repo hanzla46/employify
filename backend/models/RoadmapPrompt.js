@@ -10,7 +10,7 @@ const getRoadmapPrompt = async (
 ) => {
   const evaluate = async (question, file) => {
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     function fileToGenerativePart(fileData, filename) {
       const mimeType = mime.lookup(filename) || "text/plain"; // Default to text/plain if type is unknown
       return {
@@ -24,7 +24,7 @@ const getRoadmapPrompt = async (
       const name = file.originalname || "file.txt"; // Fallback name if originalname is not available
       const data = file.buffer.toString("base64");
       const filePart = fileToGenerativePart(data, name);
-      const prompt = `Analyze this task and its response and provide insights about the user's performance. Give your response in one paragraph without formatting and extra special characters. Task is: ${question} and the user's response is: ${filePart}`;
+      const prompt = `Analyze this task and its response and provide insights about the user's performance. Give your response in one paragraph without formatting and extra special characters. Task is: ${question} and the user's response is attached: `;
       const result = await model.generateContent([prompt, filePart]);
       const response = await result.response;
       const text = response.text();
@@ -36,8 +36,8 @@ const getRoadmapPrompt = async (
     }
   };
   try {
-    const taskEvaluation1 = await evaluate(questions.hardSkillsTask1, file1);
-    const taskEvaluation2 = await evaluate(questions.hardSkillsTask2, file2);
+    const taskEvaluation1 = "User did good";
+    const taskEvaluation2 = "Need improvements";
     const projectEvaluation =
       "user lack a bit in this project, but overall good";
     const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
