@@ -29,7 +29,7 @@ const GeneratePrompt = (interview) => {
       * The question should be respectful and professional in tone.
       * The questions you can ask from the candidate can be from the same category as the previous questions or from a different category. Categories are: 1 General/Personal Questions, 2 Technical/Role-Specific Questions, 3 Behavioral Questions, 4 Problem-Solving/Analytical Questions, 5 Situational/Case Study Questions, 6 Questions About Work Experience, 7 Company-Specific/Industry Knowledge Questions, 8 Cultural Fit Questions, 9 Questions the Candidate Asks the Interviewer.
       * You can ask maximum 6-7 questions in an interview. So, you can ask a maximum of 7 questions in total.
-      * You can ask a maximum of 2 questions from the same category.
+      * You can ask a maximum of 3 questions from the same category. Dont keep asking follow up questions from the same category. You can ask from different categories.
 
   **5. Realistic Hypothetical Response Generation:**
   *   Based on the candidate's previous answers, the facial expression analysis, and your overall assessment, generate a plausible and realistic hypothetical response to the new question.
@@ -47,7 +47,7 @@ const GeneratePrompt = (interview) => {
   - **Previous Questions and Answers:**
   ${interview.questions && interview.questions.length > 0 ? 
     interview.questions
-      .map((q, index) => `  ${index + 1}. **Q:** ${q.question}\n     **A:** ${q.answer}`)
+      .map((q, index) => `  ${index + 1}. **Q:** ${q.question}\n     **A:** ${q.answer} \n     **Category:** ${q.category || "General"}\n     **Score:** ${q.score || "0"}`)
       .join("\n") 
     : "No questions answered yet."
   }
@@ -64,7 +64,7 @@ const GeneratePrompt = (interview) => {
 
   - **Skills Being Assessed:**  
   ${interview.skills && interview.skills.length > 0 ? 
-    interview.skills.map(skill => `  - ${skill.name || "Unknown Skill "}, level: ${skill.level || "intermediate"}, Experience Years ${skill.experienceYears || "2"}`).join("\n") 
+    interview.skills.map(skill => `  - ${skill.name || "Unknown Skill "}, Experience Years ${skill.experience || "2"}`).join("\n") 
     : "No skills data available."
   }
 

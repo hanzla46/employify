@@ -7,7 +7,7 @@ const questionSchema = new mongoose.Schema({
   score: { type: String, default: "0" },
   analysis: { type: String, default: "" },
   facialAnalysis:
-    {
+    { 
       timestamp: { type: Date, default: Date.now },
       emotions: [
         {
@@ -30,13 +30,9 @@ const interviewSchema = new mongoose.Schema({
   questions: { type: [questionSchema], default: [] },
   skills: [
     {
+      id: { type: Number, required: true },
       name: { type: String, required: true },
-      level: {
-        type: String,
-        enum: ["Beginner", "Intermediate", "Advanced"],
-        required: true,
-      },
-      experienceYears: { type: Number, required: true },
+      experience: { type: Number, required: true },
     },
   ],
   overallScore: { type: String, default: "0" },

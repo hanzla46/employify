@@ -18,7 +18,7 @@ const startInterview = async (req, res) => {
     let profile = await Profile.findOne({ userId });
     let userSkills = [];
     if (profile) {
-      userSkills = profile.hardSkills.concat(profile.softSkills);
+      userSkills = profile.hardSkills;
     }
 
     const newInterview = new Interview({
@@ -62,7 +62,7 @@ const continueInterview = async (req, res) => {
     // if (!req.file) {
     //   return res.status(400).json({ message: "No video file uploaded.", success: false });
     // }
-    const videoFileBuffer = req.file.buffer;
+   
     const interview = await Interview.findOne({
       userId,
       status: "ongoing",
@@ -78,11 +78,12 @@ const continueInterview = async (req, res) => {
       category,
       score: null,
       facialAnalysis: [],
-    });
+    }); 
     await interview.save();
 
     const QId = interview.questions.length;
     if (req.file) {
+      const videoFileBuffer = req.file.buffer;
       ProcessVideo(videoFileBuffer, QId, userId);
     }
     const prompt = GeneratePrompt(interview);

@@ -128,9 +128,9 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
       setHasProfile(true);
       setProfile([...hardSkills, ...softSkills, ...jobs, ...projects]);
       handleSuccess("Information submitted successfully!");
-    }
-    else{
+    } else if(result.data.success == false){
       handleError(result.data.message);
+      alert(result.data.message);
     }
   };
 

@@ -16,7 +16,10 @@ const ProcessVideo = async (videoFile, QId, userId) => {
         },
       };
     }
-
+    if (!videoFile) {
+      console.error("No video file provided for processing.");
+      return;
+    }
     const videoPart = fileToGenerativePart(videoFile);
     const prompt = `Analyze this video and provide insights on the person's facial expressions and emotions. Remember that the person is giving an interview. Your output should be: top 3 emotions with intensity from 0 to 1 and a one-sentence summary of the person's movement. Response should be in JSON and like this: array of objects of emotion and intensity and then a string of summary. If you find no person, you can give random output of emotions and summary.`;
 
@@ -29,7 +32,10 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     console.log("Gemini Response:", text);
     console.log("Parsed Result:", parsedResult);
 
-    const interview = await Interview.findOne({ userId, status: "ongoing" }).sort({ createdAt: -1 });
+    const interview = await Interview.findOne({
+      userId,
+      status: "ongoing",
+    }).sort({ createdAt: -1 });
     if (!interview) {
       console.error("No ongoing interview found for user:", userId);
       return;
