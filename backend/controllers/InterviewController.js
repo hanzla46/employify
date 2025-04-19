@@ -121,6 +121,7 @@ const continueInterview = async (req, res) => {
       completed: completed,
       score,
       overallScore,
+      prompt,
     });
   } catch (error) {
     console.error("Error in continueInterview:", error);
