@@ -19,17 +19,21 @@ const GeneratePrompt = (interview) => {
 
   **4. Targeted Question Generation:**
   *   Generate a new, highly relevant follow-up question that is strategically designed to:
-      *   Probe deeper into areas of weakness or concern identified during the analysis.
-      *   Explore areas where the candidate showed particular strength, enthusiasm, or genuine interest.
-      *   Clarify any inconsistencies between the candidate's verbal and nonverbal cues.
-      *   Assess skills that have not yet been fully evaluated, ensuring a well-rounded assessment of the candidate's suitability.
-      *   The question should be clear, concise, and avoid leading the candidate.
-      *  The question should be tailored to the candidate's experience level and the context of the interview.
+      * Probe deeper into areas of weakness or concern identified during the analysis.
+      * Explore areas where the candidate showed particular strength, enthusiasm, or genuine interest.
+      * Clarify any inconsistencies between the candidate's verbal and nonverbal cues.
+      * Assess skills that have not yet been fully evaluated, ensuring a well-rounded assessment of the candidate's suitability.
+      * The question should be clear, CONCISE, and avoid leading the candidate.
+      * The question should be tailored to the candidate's experience level and the context of the interview.
       * The question should be open-ended to encourage thoughtful, detailed responses.
       * The question should be respectful and professional in tone.
       * The questions you can ask from the candidate can be from the same category as the previous questions or from a different category. Categories are: 1 General/Personal Questions, 2 Technical/Role-Specific Questions, 3 Behavioral Questions, 4 Problem-Solving/Analytical Questions, 5 Situational/Case Study Questions, 6 Questions About Work Experience, 7 Company-Specific/Industry Knowledge Questions, 8 Cultural Fit Questions, 9 Questions the Candidate Asks the Interviewer.
-      * You can ask maximum 6-7 questions in an interview. So, you can ask a maximum of 7 questions in total.
-      * You can ask a maximum of 3 questions from the same category. Dont keep asking follow up questions from the same category. You can ask from different categories.
+      * You can ask maximum 9-11 questions in an interview.
+      * You can ask a maximum of 3 questions from the same category. Dont keep asking follow up questions from the same category. You can ask from different categories. * Prioritize unexplored categories from: 1-9.
+      * Only repeat category if essential for clarification. 
+      * Mirror candidate's speech patterns in hypothetical responses.
+      * Include natural fillers ("Hmm, let me think...") when appropriate.
+      * Match response length to candidate's verbosity.
 
   **5. Realistic Hypothetical Response Generation:**
   *   Based on the candidate's previous answers, the facial expression analysis, and your overall assessment, generate a plausible and realistic hypothetical response to the new question.
