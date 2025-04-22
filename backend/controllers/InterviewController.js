@@ -59,9 +59,9 @@ const continueInterview = async (req, res) => {
     console.log("Request Files:", req.file);
     const userId = req.user._id;
     const { question, written, answer, category } = req.body;
-    // if (!req.file) {
-    //   return res.status(400).json({ message: "No video file uploaded.", success: false });
-    // }
+    if (!req.file) {
+      console.log( "No video file uploaded.");
+    }
    
     const interview = await Interview.findOne({
       userId,

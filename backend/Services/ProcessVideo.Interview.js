@@ -12,7 +12,7 @@ const ProcessVideo = async (videoFile, QId, userId) => {
       return {
         inlineData: {
           data: base64EncodedData,
-          mimeType: "video/webm", // Or the correct MIME type
+          mimeType: "video/mp4", // Or the correct MIME type
         },
       };
     }
@@ -21,7 +21,7 @@ const ProcessVideo = async (videoFile, QId, userId) => {
       return;
     }
     const videoPart = fileToGenerativePart(videoFile);
-    const prompt = `Analyze this video and provide insights on the person's facial expressions and emotions. Remember that the person is giving an interview. Your output should be: top 3 emotions with intensity from 0 to 1 and a one-sentence summary of the person's movement. Response should be in JSON and like this: array of objects of emotion and intensity and then a string of summary. If you find no person, you can give random output of emotions and summary.`;
+    const prompt = `Analyze this video and provide insights on the person's facial expressions and emotions. Remember that the person is giving an interview. Your output should be: top 3 emotions with intensity from 0 to 1 and a one-sentence summary of the person's movement. Response should be in JSON and like this: array of objects of emotion and intensity and then a string of summary and then length of video in seconds. If you find no person, you can give random output of emotions and summary.`;
 
     const result = await model.generateContent([prompt, videoPart]);
     const response = await result.response;

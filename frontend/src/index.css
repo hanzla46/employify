@@ -1,52 +1,51 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* globals.css */
 @font-face {
   font-family: "Public Sans", sans-serif;
-   src: url('https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap')
-format("opentype");
-       /* url("./assets/Dalbine-Regular.ttf") format("truetype"); */
+  src: url("https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap")
+    format("opentype");
+  /* url("./assets/Dalbine-Regular.ttf") format("truetype"); */
   font-weight: normal;
-  font-style:oblique;
+  font-style: oblique;
 }
 body {
-  font-family:  "Public Sans", sans-serif;
+  font-family: "Public Sans", sans-serif;
 }
 
 :root {
-    /* Default color scheme  */
-    --color-primary-50: #ecfdf5;
-    --color-primary-100: #d1fae5;
-    --color-primary-200: #a7f3d0;
-    --color-primary-300: #6ee7b7;
-    --color-primary-400: #34d399;
-    --color-primary-500: #10b981;
-    --color-primary-600: #059669;
-    --color-primary-700: #047857;
-    --color-primary-800: #065f46;
-    --color-primary-900: #064e3b;
-    --color-primary-950: #022c22;
-  }
-  
-  /* Dark theme variations */
-  .dark {
-    --color-primary-50: #022c22;
-    --color-primary-100:#064e3b;
-    --color-primary-200: #065f46;
-    --color-primary-300: #047857;
-    --color-primary-400:  #059669;
-    --color-primary-500: #10b981;
-    --color-primary-600: #34d399;
-    --color-primary-700: #6ee7b7;
-    --color-primary-800: #a7f3d0;
-    --color-primary-900: #d1fae5;
-    --color-primary-950: #ecfdf5;
-  }
-  
-  /* 
+  /* Default color scheme  */
+  --color-primary-50: #ecfdf5;
+  --color-primary-100: #d1fae5;
+  --color-primary-200: #a7f3d0;
+  --color-primary-300: #6ee7b7;
+  --color-primary-400: #34d399;
+  --color-primary-500: #10b981;
+  --color-primary-600: #059669;
+  --color-primary-700: #047857;
+  --color-primary-800: #065f46;
+  --color-primary-900: #064e3b;
+  --color-primary-950: #022c22;
+}
+
+/* Dark theme variations */
+.dark {
+  --color-primary-50: #022c22;
+  --color-primary-100: #064e3b;
+  --color-primary-200: #065f46;
+  --color-primary-300: #047857;
+  --color-primary-400: #059669;
+  --color-primary-500: #10b981;
+  --color-primary-600: #34d399;
+  --color-primary-700: #6ee7b7;
+  --color-primary-800: #a7f3d0;
+  --color-primary-900: #d1fae5;
+  --color-primary-950: #ecfdf5;
+}
+
+/* 
     To change the color scheme, just replace the values above.
     Common Tailwind colors you might want to use:
     

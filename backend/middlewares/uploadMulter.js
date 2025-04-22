@@ -7,12 +7,17 @@ const upload = multer({
     fileSize: 50 * 1024 * 1024, // 50MB limit
   },
   fileFilter: (req, file, cb) => {
-    if (file.mimetype === 'video/webm' || file.mimetype === 'video/mp4') {
+    console.log("⏺ Received file:", file);
+    console.log("🧠 Mime type:", file.mimetype);
+    if (file.mimetype === "video/webm" || file.mimetype === "video/mp4") {
       cb(null, true);
     } else {
-      cb(new Error('Invalid file type. Only WEBM and MP4 videos are allowed.'), false);
+      cb(
+        new Error("Invalid file type. Only WEBM and MP4 videos are allowed."),
+        false
+      );
     }
-  }
+  },
 });
 
 module.exports = upload;

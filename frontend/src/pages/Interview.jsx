@@ -1,6 +1,7 @@
 import "regenerator-runtime/runtime";
 import Webcam from "react-webcam";
-import { useRef, useState, useEffect } from "react"; // Added useEffect
+import { useRef, useState, useEffect } from "react";
+import { useReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
 import {
   Bot,
@@ -35,14 +36,15 @@ export function Interview() {
   const [score, setScore] = useState();
   const [isStarted, setIsStarted] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const videoRef = useRef(null);
-  const mediaRecorderRef = useRef(null);
-  const webcamRef = useRef(null);
+  // const videoRef = useRef(null);
+  // const mediaRecorderRef = useRef(null);
+  // const webcamRef = useRef(null);
   const [isVideoRecording, setIsVideoRecording] = useState(false);
-  const [videoURL, setVideoURL] = useState(null);
-  const [videoBlob, setVideoBlob] = useState(null);
-  const streamRef = useRef(null);
-  const [recordedChunks, setRecordedChunks] = useState([]);
+  // const [videoURL, setVideoURL] = useState(null);
+  // const [videoBlob, setVideoBlob] = useState(null);
+  // const streamRef = useRef(null);
+  // const [recordedChunks, setRecordedChunks] = useState([]);
+  const [recordedBlob, setRecordedBlob] = useState(null);
   const [summary, setSummary] = useState("");
   const [interviewData, setInterviewData] = useState({
     position: "",
@@ -52,7 +54,28 @@ export function Interview() {
   });
   const [infoBox, setInfoBox] = useState(true);
   const [loading, setLoading] = useState(false);
+  const {
+    status,
+    startRecording: startVideoRecording,
+    stopRecording: stopVideoRecording,
+    mediaBlobUrl,
+    previewStream,
+    clearBlobUrl,
+  } = useReactMediaRecorder({ video: true });
 
+  useEffect(() => {
+    const handleBlob = async () => {
+      if (mediaBlobUrl) {
+        const blob = await fetch(mediaBlobUrl).then((res) => res.blob());
+        if (blob && blob.type.startsWith("video/")) {
+          setRecordedBlob(blob);
+        } else {
+          handleError("Invalid video blob: " + blob.type);
+        }
+      }
+    };
+    handleBlob();
+  }, [mediaBlobUrl]);
   const startInterview = async () => {
     try {
       const response = await axios.post(
@@ -71,7 +94,7 @@ export function Interview() {
         setCategory(response.data.category);
         handleSuccess("Interview started successfully!");
         setIsStarted(true);
-        // startVideoRecording();
+        startVideoRecording();
         SpeechRecognition.startListening({ continuous: true });
         setIsAudioRecording(true);
         setInfoBox(false);
@@ -105,21 +128,11 @@ export function Interview() {
     setLoading(true);
     SpeechRecognition.stopListening();
     setIsAudioRecording(false);
-    // stopVideoRecording();
-    await new Promise((resolve) => {
-      if (mediaRecorderRef.current?.state === "recording") {
-        mediaRecorderRef.current.onstop = resolve;
-        mediaRecorderRef.current.stop();
-      } else {
-        resolve();
-      }
-    });
+    setIsVideoRecording(false);
+    await stopVideoRecording();
     const formData = new FormData();
-    if(!videoBlob){
-      handleError("video was not recorded! restart recording.")
-    }
-    else{
-      formData.append("video", videoBlob, "recording.webm");
+    if (recordedBlob) {
+      formData.append("video", recordedBlob, "recording.webm");
     }
     formData.append("question", question);
     formData.append("category", category);
@@ -128,15 +141,11 @@ export function Interview() {
     for (let [key, value] of formData.entries()) {
       console.log(key, value);
     }
-    setVideoURL(null);
-    setRecordedChunks([]);
-    setVideoBlob(null);
     try {
       const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
         headers: {
           Accept: "application/json",
-          "Content-Type": "multipart/form-data", // Correct for file uploads
         },
       });
       if (response.data.success) {
@@ -145,10 +154,12 @@ export function Interview() {
         setScore(response.data.score);
         setSummary(response.data.aiSummary);
         resetTranscript();
-        setWritten(""); // Clear the written response
+        setWritten("");
+        clearBlobUrl();
+        setRecordedBlob(null);
         setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
-        // startVideoRecording();
+        startVideoRecording();
         if (
           response.data.completed == true ||
           response.data.completed == "true"
@@ -205,47 +216,6 @@ export function Interview() {
       startVideoRecording();
       setIsVideoRecording(true);
     }
-  };
-  const startVideoRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      streamRef.current = stream;
-      videoRef.current.srcObject = stream;
-      const mediaRecorder = new MediaRecorder(stream, {
-        mimeType: "video/webm",
-      });
-      mediaRecorderRef.current = mediaRecorder;
-      const chunks = [];
-      mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunks.push(e.data);
-        }
-      };
-      mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: "video/webm" });
-        setVideoBlob(blob);
-        setVideoURL(URL.createObjectURL(blob));
-      };
-      mediaRecorder.start();
-      setIsVideoRecording(true);
-    } catch (err) {
-      console.error("Error accessing media devices:", err);
-    }
-  };
-  const stopVideoRecording = () => {
-    if (
-      mediaRecorderRef.current &&
-      mediaRecorderRef.current.state !== "inactive"
-    ) {
-      mediaRecorderRef.current.stop();
-    }
-    if (streamRef.current) {
-      streamRef.current.getTracks().forEach((track) => track.stop());
-    }
-    setIsVideoRecording(false);
   };
 
   //everything starts from here
@@ -365,8 +335,8 @@ export function Interview() {
                   </div>
                   <div className="md:col-span-3 md:float-left">
                     <VideoComponent
-                      webcamRef={videoRef}
-                      isRecording={isVideoRecording}
+                      stream={previewStream}
+                      isVideoRecording={isVideoRecording}
                     />
                   </div>
                 </div>
@@ -555,7 +525,13 @@ function QuestionAndScore({ question, score, summary }) {
   );
 }
 
-function VideoComponent({ webcamRef, isRecording }) {
+function VideoComponent({ stream, isVideoRecording }) {
+  const videoRef = useRef(null);
+  useEffect(() => {
+    if (videoRef.current && stream) {
+      videoRef.current.srcObject = stream;
+    }
+  }, [stream]);
   return (
     <div className="h-96 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50">
       <div className="bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex items-center justify-between">
@@ -563,7 +539,7 @@ function VideoComponent({ webcamRef, isRecording }) {
           <Video className="h-5 w-5 mr-2" />
           Your Camera
         </h3>
-        {isRecording && (
+        {isVideoRecording && (
           <div className="flex items-center px-3 py-1 bg-black/30 rounded-full">
             <div className="h-3 w-3 rounded-full bg-red-500 animate-pulse mr-2"></div>
             <span className="text-xs text-white">Recording</span>
@@ -572,14 +548,19 @@ function VideoComponent({ webcamRef, isRecording }) {
       </div>
 
       <div className="relative flex-grow bg-gray-900 flex items-center justify-center">
-        <Webcam
-          audio={false}
-          ref={webcamRef}
-          className="w-full h-full object-cover transform -scale-x-100"
-          mirrored={true}
-        />
-
-        {!isRecording && (
+        {stream ? (
+          <video
+            ref={videoRef}
+            autoPlay
+            muted
+            playsInline
+            className="w-full h-full object-cover transform -scale-x-100"
+            mirrored={true}
+          />
+        ) : (
+          ""
+        )}
+        {!isVideoRecording && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm">
             <div className="p-6 bg-black/60 rounded-full">
               <PauseCircle className="h-16 w-16 text-white/90" />
