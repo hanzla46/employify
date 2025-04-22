@@ -36,14 +36,7 @@ export function Interview() {
   const [score, setScore] = useState();
   const [isStarted, setIsStarted] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  // const videoRef = useRef(null);
-  // const mediaRecorderRef = useRef(null);
-  // const webcamRef = useRef(null);
   const [isVideoRecording, setIsVideoRecording] = useState(false);
-  // const [videoURL, setVideoURL] = useState(null);
-  // const [videoBlob, setVideoBlob] = useState(null);
-  // const streamRef = useRef(null);
-  // const [recordedChunks, setRecordedChunks] = useState([]);
   const [recordedBlob, setRecordedBlob] = useState(null);
   const [summary, setSummary] = useState("");
   const [interviewData, setInterviewData] = useState({
@@ -62,7 +55,17 @@ export function Interview() {
     previewStream,
     clearBlobUrl,
   } = useReactMediaRecorder({ video: true });
-
+  // question audio
+  useEffect(() => {
+    if (!question) return;
+    const synth = window.speechSynthesis;
+    const utterance = new SpeechSynthesisUtterance(question);
+    let voices = window.speechSynthesis.getVoices();
+    utterance.voice = voices[4];
+    synth.cancel();
+    synth.speak(utterance);
+  }, [question]);
+  //video blob
   useEffect(() => {
     const handleBlob = async () => {
       if (mediaBlobUrl) {
