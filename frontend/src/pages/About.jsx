@@ -19,7 +19,9 @@ import { motion } from "framer-motion";
 export function About() {
   const [activeTab, setActiveTab] = useState("story");
   const [isVisible, setIsVisible] = useState(false);
-
+  useEffect(() => {
+    document.title = "About | Employify AI";
+  }, []);
   useEffect(() => {
     setIsVisible(true);
   }, []);

@@ -27,6 +27,9 @@ const url = import.meta.env.VITE_API_URL;
 console.log("API URL:", url);
 
 export function Interview() {
+  useEffect(() => {
+      document.title = "Interview | Employify AI";
+    }, []);
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isAudioRecording, setIsAudioRecording] = useState(false);

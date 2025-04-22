@@ -1,7 +1,10 @@
-import React from 'react';
+import React, {useEffect} from 'react';
 import { Check } from 'lucide-react';
 
 export function Pricing() {
+  useEffect(() => {
+      document.title = "Pricing | Employify AI";
+    }, []);
   const plans = [
     {
       name: 'Free',

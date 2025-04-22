@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState , useEffect} from "react";
 import { BookOpen, Code, Database, Cloud, Globe, Terminal } from "lucide-react";
 import ProtectedRoute from "../Context/ProtectedRoute";
 import ProfileForm from "../components/Profile/AddProfile";
@@ -6,6 +6,9 @@ import EvaluateProfile from "../components/Profile/EvaluateProfile";
 import SkillsGraph from "../components/Roadmap/SkillsGraph";
 import { SkillsContext } from "../Context/SkillsContext";
 export function Roadmap() {
+  useEffect(() => {
+      document.title = "Roadmap | Employify AI";
+    }, []);
   const {
     hasProfile,
     setHasProfile,

@@ -69,6 +69,9 @@ function Testimonial({ quote, author, role, avatar }) {
 }
 
 export function Home() {
+  useEffect(() => {
+      document.title = "Employify AI";
+    }, []);
   const { user } = useContext(AuthContext);
   const [darkMode, setDarkMode] = useState(false);
 

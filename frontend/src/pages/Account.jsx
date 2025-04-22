@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../Context/AuthContext";
@@ -17,6 +17,9 @@ import {
 } from "lucide-react";
 import {SkillsContext} from '../Context/SkillsContext'
 export function Account() {
+  useEffect(() => {
+      document.title = "Account | Employify AI";
+    }, []);
   const { setRoadmap } = useContext(SkillsContext);
   const { user, logout } = useContext(AuthContext);
   const navigate = useNavigate();
