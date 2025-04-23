@@ -5,6 +5,9 @@ import { AuthContext } from "../Context/AuthContext";
 import FancyButton from "../components/Button";
 
 export function Login() {
+  useEffect(() => {
+      document.title = "Login | Employify AI";
+    }, []);
   const { login } = useContext(AuthContext);
   const { user,loading, setUser } = useContext(AuthContext);
   const navigate = useNavigate();

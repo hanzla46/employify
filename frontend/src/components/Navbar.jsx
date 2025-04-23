@@ -32,7 +32,7 @@ export function Navbar({ darkMode, setDarkMode }) {
       className="fixed bg-transparent w-full z-50 bg-gradient-to-r from-gray-700 via-gray-800 to-gray-900 bg-opacity-30 opacity-80 backdrop-blur-3xl shadow-2xl border-b border-gray-700 dark:border-gray-600 
       transition-all duration-300"
     >
-      <div className="container mr-auto px-2">
+      <div className="container max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-12">
           {/* Logo */}
           <NavLink
@@ -44,7 +44,8 @@ export function Navbar({ darkMode, setDarkMode }) {
           </NavLink>
 
           {/* Desktop Navigation */}
-          <div className="hidden md:flex items-center space-x-6">
+          <div className="hidden md:flex items-center gap-4 flex-1 justify-end">
+            <div className="flex items-center gap-4 flex-wrap justify-end">
             {navItems.map((item) => (
               <NavLink
                 key={item.path}
@@ -54,7 +55,7 @@ export function Navbar({ darkMode, setDarkMode }) {
                   group overflow-hidden
                   ${
                     isActive
-                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg px-3 py-1.5"
                       : "hover:bg-gradient-to-r hover:from-gray-700 hover:to-gray-800 text-gray-300 hover:text-white"
                   } ${
                     item.path === "/account"
@@ -86,7 +87,7 @@ export function Navbar({ darkMode, setDarkMode }) {
             ))}
             {/* Theme Toggle */}
             <ThemeToggle darkMode={darkMode} setDarkMode={setDarkMode} />
-          </div>
+          </div></div>
 
           {/* Mobile Menu Button */}
           <div className="md:hidden flex items-center">

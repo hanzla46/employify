@@ -12,6 +12,7 @@ import { About } from "./pages/About";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup";
 import { Account } from "./pages/Account.jsx";
+import { NotFound } from "./pages/NotFound.jsx";
 import { AuthProvider } from "./Context/AuthContext.jsx";
 import { SkillsProvider } from "./Context/SkillsContext.jsx";
 import { ToastContainer } from "./utils.js";
@@ -54,6 +55,7 @@ function App() {
                 <Route path="/jobs" element={<Jobs />} />
                 <Route path="/pricing" element={<Pricing />} />
                 <Route path="/about" element={<About />} />
+                <Route path="*" element={<NotFound />} />
               </Routes>
               <Footer />
             </div>

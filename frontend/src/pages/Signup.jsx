@@ -5,6 +5,9 @@ import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
 
 export function Signup() {
+  useEffect(() => {
+      document.title = "Signup | Employify AI";
+    }, []);
   const location = useLocation();
 
   const redirectPath = new URLSearchParams(location.search).get('redirect') || '/';

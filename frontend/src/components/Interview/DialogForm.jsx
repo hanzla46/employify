@@ -19,8 +19,6 @@ const options = {
     "Enterprise",
     "Freelance",
     "Agency",
-    "Non-Profit",
-    "Government",
     "Multinational Corporation"
   ],
   industry: [

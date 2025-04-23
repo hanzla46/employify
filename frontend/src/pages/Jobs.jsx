@@ -2,6 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { Briefcase, MapPin, DollarSign, Clock, Search, Filter, BookmarkPlus, Share2, ChevronRight, Star, StarHalf, Menu, X } from 'lucide-react';
 
 export function Jobs() {
+  useEffect(() => {
+      document.title = "Jobs | Employify AI";
+    }, []);
   const [jobs, setJobs] = useState([
     {
       id: 1,

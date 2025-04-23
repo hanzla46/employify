@@ -77,16 +77,20 @@ const continueInterview = async (req, res) => {
       answer: answer + written,
       category,
       score: null,
-      facialAnalysis: [],
+      facialAnalysis: { emotions: [], expressionAnalysis: "" },
     }); 
     await interview.save();
+    const previousInterviews = await Interview.find({
+      userId,
+      status: "completed",
+    }).sort({ createdAt: -1 });
 
     const QId = interview.questions.length;
     if (req.file) {
       const videoFileBuffer = req.file.buffer;
       ProcessVideo(videoFileBuffer, QId, userId);
     }
-    const prompt = GeneratePrompt(interview);
+    const prompt = GeneratePrompt(interview, previousInterviews);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     const result = await model.generateContent(prompt);
@@ -110,6 +114,7 @@ const continueInterview = async (req, res) => {
       lastQuestion.score = score;
       lastQuestion.analysis = currentAnalysis;
     }
+    interview.aiSummary = aiSummary;
     await interview.save();
 
     res.status(200).json({

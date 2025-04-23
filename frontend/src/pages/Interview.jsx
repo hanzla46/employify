@@ -24,9 +24,12 @@ import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";
 
 const url = import.meta.env.VITE_API_URL;
-console.log("API URL:", url); //  Verify the URL
+console.log("API URL:", url);
 
 export function Interview() {
+  useEffect(() => {
+      document.title = "Interview | Employify AI";
+    }, []);
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isAudioRecording, setIsAudioRecording] = useState(false);
@@ -61,7 +64,9 @@ export function Interview() {
     const synth = window.speechSynthesis;
     const utterance = new SpeechSynthesisUtterance(question);
     let voices = window.speechSynthesis.getVoices();
-    utterance.voice = voices[4];
+    utterance.voice = voices[2];
+    utterance.pitch = 1.4;
+    utterance.rate = 1.4;
     synth.cancel();
     synth.speak(utterance);
   }, [question]);
@@ -98,6 +103,7 @@ export function Interview() {
         handleSuccess("Interview started successfully!");
         setIsStarted(true);
         startVideoRecording();
+        setIsVideoRecording(true);
         SpeechRecognition.startListening({ continuous: true });
         setIsAudioRecording(true);
         setInfoBox(false);
@@ -163,6 +169,7 @@ export function Interview() {
         setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
         startVideoRecording();
+        setIsVideoRecording(true);
         if (
           response.data.completed == true ||
           response.data.completed == "true"
@@ -406,8 +413,9 @@ function InterviewHeader({
         {isStarted && !isCompleted && (
           <div className="flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg">
             <button
+              disabled={loading}
               aria-label="Toggle microphone"
-              className={`p-3 rounded-full transition-all duration-300 shadow-md ${
+              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
                 isAudioRecording
                   ? "bg-green-500 text-white hover:bg-green-600"
                   : "bg-red-500 text-white hover:bg-red-600"
@@ -418,9 +426,10 @@ function InterviewHeader({
             </button>
 
             <button
+              disabled={loading}
               aria-label="Toggle video"
               onClick={handleVideoRecord}
-              className={`p-3 rounded-full transition-all duration-300 shadow-md ${
+              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
                 videoRecording
                   ? "bg-green-500 text-white hover:bg-green-600"
                   : "bg-red-500 text-white hover:bg-red-600"
