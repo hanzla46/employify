@@ -3,6 +3,14 @@ import { handleError, handleSuccess } from "../../utils";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Accept"] = "application/json";
+import { countryCityMap } from './CountryCityData';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 const ProfileForm = ({ setProfile, setHasProfile }) => {
   const url = import.meta.env.VITE_API_URL;
   const [activeTab, setActiveTab] = useState("hard");
@@ -28,6 +36,8 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
     },
   ]);
   const [careerGoal, setCareerGoal] = useState("");
+  const [selectedCountry, setSelectedCountry] = useState("");
+  const [selectedCity, setSelectedCity] = useState("");
   const addSkill = (type) => {
     if (type === "hard") {
       const newSkill = {
@@ -115,6 +125,10 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
         jobs,
         projects,
         careerGoal,
+        location: {
+          country: selectedCountry,
+          city: selectedCity,
+        },
       },
       {
         withCredentials: true,
@@ -128,7 +142,7 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
       setHasProfile(true);
       setProfile([...hardSkills, ...softSkills, ...jobs, ...projects]);
       handleSuccess("Information submitted successfully!");
-    } else if(result.data.success == false){
+    } else if (result.data.success == false) {
       handleError(result.data.message);
       alert(result.data.message);
     }
@@ -422,16 +436,74 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
       </div>
     ));
   };
-  const renderGoalTab = () => {
+  const renderCareerTab = () => {
     return (
       <>
-        <input
-          onChange={(e) => setCareerGoal(e.target.value)}
-          value={careerGoal}
-          placeholder="Career Goal"
-          className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-          required
-        />
+        <div className="mb-3">
+          <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+            Where do you see yourself in upcoming years
+          </p>
+          <input
+            onChange={(e) => setCareerGoal(e.target.value)}
+            value={careerGoal}
+            placeholder="Career Goal"
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+            required
+          />
+        </div>
+        <div className="space-y-2 space-x-2">
+          <p className="text-sm text-gray-600 dark:text-gray-400">Location</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <Select
+              onValueChange={(val) => {
+                setSelectedCountry(val);
+                setSelectedCity("");
+              }}
+            >
+              <SelectTrigger className="border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300">
+                <SelectValue placeholder="Select Country" />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800">
+                {Object.keys(countryCityMap).map((c) => (
+                  <SelectItem
+                    className="text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                    key={c}
+                    value={c}
+                  >
+                    {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* City Dropdown */}
+            <Select
+              onValueChange={(val) => setSelectedCity(val)}
+              disabled={!selectedCountry}
+              value={selectedCity || undefined}
+            >
+              <SelectTrigger className="border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300">
+                <SelectValue
+                  placeholder={
+                    selectedCountry ? "Select City" : "Select country first"
+                  }
+                />
+              </SelectTrigger>
+              <SelectContent className="bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800">
+                {selectedCountry &&
+                  countryCityMap[selectedCountry].map((city) => (
+                    <SelectItem
+                      className="text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600"
+                      key={city}
+                      value={city}
+                    >
+                      {city}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </>
     );
   };
@@ -486,13 +558,13 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
         </button>
         <button
           className={`py-2 px-4 font-medium text-sm focus:outline-none ${
-            activeTab === "goal"
+            activeTab === "career"
               ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
               : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
           }`}
-          onClick={() => setActiveTab("goal")}
+          onClick={() => setActiveTab("career")}
         >
-          Career Goal
+          Career
         </button>
       </div>
 
@@ -614,13 +686,8 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
           </button>
         </div>
         {/* Career Goal Tab Content */}
-        <div className={activeTab === "goal" ? "block" : "hidden"}>
-          <div className="mb-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Where do you see yourself in upcoming years
-            </p>
-          </div>
-          {renderGoalTab()}
+        <div className={activeTab === "career" ? "block" : "hidden"}>
+          {renderCareerTab()}
         </div>
 
         <div className="mt-8">

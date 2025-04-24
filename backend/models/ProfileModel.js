@@ -32,6 +32,10 @@ const ProfileSchema = new mongoose.Schema({
     },
   ],
   careerGoal: { type: String, required: true },
+  location: { 
+    city: { type: String, required: true },
+    country: { type: String, required: true },
+  },
 });
 
 const Profile = mongoose.model("Profile", ProfileSchema);

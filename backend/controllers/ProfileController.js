@@ -4,7 +4,8 @@ const add = async (req, res) => {
   try {
     const userId = req.user._id;
     console.log("checking existing profile");
-    const { hardSkills, softSkills, jobs, projects, careerGoal } = req.body;
+    const { hardSkills, softSkills, jobs, projects, careerGoal, location } =
+      req.body;
     console.log("Creating new profile");
     const profile = new Profile({
       userId,
@@ -13,6 +14,7 @@ const add = async (req, res) => {
       jobs,
       projects,
       careerGoal,
+      location,
     });
     console.log("Profile data:", profile);
     await profile.save();
@@ -93,18 +95,16 @@ const getQuestions = async (req, res) => {
       jobExperience,
     } = questions;
     console.log("Returning questions:", questions);
-    return res
-      .status(200)
-      .json({
-        hardSkillsTask1,
-        hardSkillsTask2,
-        softSkillsQuestion1,
-        softSkillsQuestion2,
-        projectLink,
-        projectContribution,
-        projectImprovement,
-        jobExperience,
-      });
+    return res.status(200).json({
+      hardSkillsTask1,
+      hardSkillsTask2,
+      softSkillsQuestion1,
+      softSkillsQuestion2,
+      projectLink,
+      projectContribution,
+      projectImprovement,
+      jobExperience,
+    });
   } catch (error) {
     console.error("Error fetching questions:", error);
     res.status(500).json({ message: "Internal server error", success: false });
