@@ -1,5 +1,5 @@
 const Profile = require("../models/ProfileModel");
-const { getRoadmapPrompt } = require("../models/RoadmapPrompt");
+const { getRoadmapPrompt } = require("../Services/RoadmapPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const generateRoadmap = async (req, res) => {
   try {

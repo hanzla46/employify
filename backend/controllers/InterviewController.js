@@ -1,5 +1,5 @@
 const Interview = require("../models/InterviewModel");
-const { GeneratePrompt } = require("../models/InterviewPrompt");
+const { GeneratePrompt } = require("../Services/InterviewPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { ProcessVideo } = require("../Services/ProcessVideo.Interview");
 const Profile = require("../models/ProfileModel");
