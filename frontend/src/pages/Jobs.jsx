@@ -15,135 +15,104 @@ import {
   X,
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
+import axios from "axios";
 const url = import.meta.env.VITE_API_URL;
 export function Jobs() {
+  const [jobs, setJobs] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
-  useEffect(() => {
-    setFilters({
-      search: searchParams.get("search") || "",
-      location: searchParams.get("location") || "",
-      jobType: searchParams.get("type") || "",
-      featured: searchParams.get("featured") === "true",
-    });
-  }, [searchParams]);
-  useEffect(() => {
-    document.title = "Jobs | Employify AI";
-
-    async function fetchJobs() {
-      try {
-        const response = await axios.get(url + "/jobs", {
-          withCredentials: true,
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        });
-        const data = await response.json();
-        setJobs(data);
-      } catch (err) {
-        console.error("Failed to fetch jobs 😵", err);
-      }
-    }
-
-    fetchJobs();
-  }, []);
-
-  const [jobs, setJobs] = useState([
-    {
-      id: 1,
-      title: "Senior Frontend Developer",
-      company: "TechCorp",
-      companyLogo: "/api/placeholder/48/48",
-      location: "San Francisco, CA",
-      salary: "$120k - $180k",
-      type: "Full-time",
-      posted: "2 days ago",
-      skills: ["React", "TypeScript", "GraphQL", "Tailwind"],
-      rating: 4.8,
-      description:
-        "Join our team to build innovative web applications using modern frontend technologies. You will be responsible for creating responsive user interfaces and maintaining high-quality code.",
-      featured: true,
-    },
-    {
-      id: 2,
-      title: "Backend Engineer",
-      company: "DataFlow Systems",
-      companyLogo: "/api/placeholder/48/48",
-      location: "Remote",
-      salary: "$100k - $150k",
-      type: "Full-time",
-      posted: "1 week ago",
-      skills: ["Node.js", "Python", "PostgreSQL", "REST API"],
-      rating: 4.2,
-      description:
-        "Help us develop scalable backend systems for our data processing platform. You will work with a variety of technologies to build efficient and reliable services.",
-      featured: false,
-    },
-    {
-      id: 3,
-      title: "DevOps Engineer",
-      company: "CloudScale",
-      companyLogo: "/api/placeholder/48/48",
-      location: "New York, NY",
-      salary: "$130k - $190k",
-      type: "Full-time",
-      posted: "3 days ago",
-      skills: ["AWS", "Kubernetes", "Terraform", "CI/CD"],
-      rating: 4.5,
-      description:
-        "Join our infrastructure team to build and maintain cloud-based systems. You will automate deployments, optimize performance, and ensure reliability of our platform.",
-      featured: true,
-    },
-    {
-      id: 4,
-      title: "UX/UI Designer",
-      company: "DesignHub",
-      companyLogo: "/api/placeholder/48/48",
-      location: "Boston, MA",
-      salary: "$90k - $130k",
-      type: "Contract",
-      posted: "5 days ago",
-      skills: ["Figma", "Adobe XD", "UI/UX", "Prototyping"],
-      rating: 4.0,
-      description:
-        "Create beautiful and intuitive user interfaces for our products. You will work closely with developers and product managers to bring designs to life.",
-      featured: false,
-    },
-  ]);
-
   const [filters, setFilters] = useState({
     search: "",
     location: "",
     jobType: "",
     featured: false,
   });
-
+  const [uniqueLocations, setUniqueLocations] = useState(["All locations"]);
+  const [uniqueJobTypes, setUniqueJobTypes] = useState(["All types"]);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [savedJobs, setSavedJobs] = useState([]);
   const [expandedJob, setExpandedJob] = useState(null);
+  const [filteredJobs, setFilteredJobs] = useState(jobs);
 
-  // Filter jobs based on search and filter criteria
-  const filteredJobs = jobs.filter((job) => {
-    return (
-      (filters.search === "" ||
-        job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-        job.company.toLowerCase().includes(filters.search.toLowerCase()) ||
-        job.skills.some((skill) =>
-          skill.toLowerCase().includes(filters.search.toLowerCase())
-        )) &&
-      (filters.location === "" || job.location.includes(filters.location)) &&
-      (filters.jobType === "" || job.type === filters.jobType) &&
-      (!filters.featured || job.featured)
-    );
-  });
-
-  const toggleSaveJob = (jobId) => {
-    if (savedJobs.includes(jobId)) {
-      setSavedJobs(savedJobs.filter((id) => id !== jobId));
-    } else {
-      setSavedJobs([...savedJobs, jobId]);
+  useEffect(() => {
+    const urlFilters = {
+      search: searchParams.get("search") || "",
+      location: searchParams.get("location") || "All",
+      jobType: searchParams.get("jobType") || "All",
+      featured: searchParams.get("featured") === "true",
+    };
+    setFilters(urlFilters);
+  }, []);
+  useEffect(() => {
+    const params = {
+      ...(filters.search && { search: filters.search }),
+      ...(filters.location !== "All" && { location: filters.location }),
+      ...(filters.jobType !== "All" && { jobType: filters.jobType }),
+      ...(filters.featured && { featured: "true" }),
+    };
+    setSearchParams(params);
+  }, [filters]);
+  
+  useEffect(() => {
+    document.title = "Jobs | Employify AI";
+    async function fetchJobs() {
+      try {
+        const response = await axios.get(url + "/jobs/getJobs", {
+          withCredentials: true,
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        });
+        const data = response.data;
+        console.log(data);
+        setJobs(data.jobs);
+        setFilteredJobs(data.jobs);
+        console.log(jobs);
+      } catch (err) {
+        console.error("Failed to fetch jobs 😵", err);
+      }
     }
-  };
+    fetchJobs();
+  }, []);
+
+  useEffect(() => {
+    if (!Array.isArray(jobs)) return;
+    setUniqueLocations([
+      "All",
+      "Remote",
+      ...new Set(jobs.map((item) => item.location)),
+    ]);
+    setUniqueJobTypes(["All", ...new Set(jobs.map((item) => item.type))]);
+  }, [jobs]);
+
+  useEffect(() => {
+    const filtered = jobs.filter((job) => {
+      return (
+        (filters.search === "" ||
+          job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+          job.company.name
+            .toLowerCase()
+            .includes(filters.search.toLowerCase())) &&
+        (filters.location === "" ||
+          filters.location === "All" ||
+          (filters.location === "Remote" && job.isRemote) ||
+          job.location === filters.location) &&
+        (filters.jobType === "" ||
+          filters.jobType === "All" ||
+          job.type === filters.jobType) &&
+        (!filters.featured || job.featured)
+      );
+    });
+    setFilteredJobs(filtered);
+  }, [filters, jobs]);
+
+  // const toggleSaveJob = (jobId) => {
+  //   if (savedJobs.includes(jobId)) {
+  //     setSavedJobs(savedJobs.filter((id) => id !== jobId));
+  //   } else {
+  //     setSavedJobs([...savedJobs, jobId]);
+  //   }
+  // };
 
   return (
     <div className="min-h-screen bg-gradient-to-b pt-16 from-gray-50 to-white dark:from-gray-800 dark:to-gray-700">
@@ -292,11 +261,11 @@ export function Jobs() {
                     setFilters({ ...filters, location: e.target.value })
                   }
                 >
-                  <option value="">All Locations</option>
-                  <option value="San Francisco">San Francisco</option>
-                  <option value="New York">New York</option>
-                  <option value="Remote">Remote</option>
-                  <option value="Boston">Boston</option>
+                  {uniqueLocations.map((location) => (
+                    <option key={location} value={location}>
+                      {location}
+                    </option>
+                  ))}
                 </select>
               </div>
               <div>
@@ -307,10 +276,11 @@ export function Jobs() {
                     setFilters({ ...filters, jobType: e.target.value })
                   }
                 >
-                  <option value="">All Types</option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Part-time">Part-time</option>
+                  {uniqueJobTypes.map((type) => (
+                    <option key={type} value={type}>
+                      {type}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -352,8 +322,11 @@ export function Jobs() {
                     <div className="flex">
                       <div className="mr-4 flex-shrink-0">
                         <img
-                          src={job.companyLogo}
-                          alt={`${job.company} logo`}
+                          src={
+                            job.company.logo ||
+                            "https://img.freepik.com/premium-vector/building-logo-icon-design-template-vector_67715-555.jpg?w=360"
+                          }
+                          alt={`${job.company.name} logo`}
                           className="w-12 h-12 rounded-md bg-gray-200 object-cover"
                         />
                       </div>
@@ -369,17 +342,17 @@ export function Jobs() {
                           )}
                         </div>
                         <p className="text-gray-600 dark:text-gray-300 mb-1">
-                          {job.company}
+                          {job.company.name}
                         </p>
                         <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                           <div className="flex items-center mr-2">
                             <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                            <span>{job.rating}</span>
+                            <span>{job.rating || 4.6}</span>
                           </div>
                           <span className="text-gray-300 dark:text-gray-600 mx-1">
                             •
                           </span>
-                          <span>{job.posted}</span>
+                          <span>{job.postedAt}</span>
                         </div>
                       </div>
                     </div>
@@ -403,7 +376,7 @@ export function Jobs() {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
                       <MapPin className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" />
-                      {job.location}
+                      {job.location} {job.isRemote && "(Remote)"}
                     </div>
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
                       <DollarSign className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" />
@@ -415,19 +388,8 @@ export function Jobs() {
                     </div>
                     <div className="flex items-center text-gray-600 dark:text-gray-300">
                       <Clock className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" />
-                      {job.posted}
+                      {job.postedAt}
                     </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {job.skills.map((skill, skillIndex) => (
-                      <span
-                        key={skillIndex}
-                        className="px-3 py-1 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 rounded-full text-sm"
-                      >
-                        {skill}
-                      </span>
-                    ))}
                   </div>
 
                   {expandedJob === job.id && (
@@ -468,16 +430,20 @@ export function Jobs() {
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Be an early applicant
                   </div>
-                  <button className="bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors">
+                  <a
+                    href={job.externalLink}
+                    target="_blank"
+                    className="bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
+                  >
                     Apply Now
-                  </button>
+                  </a>
                 </div>
               </div>
             ))}
           </div>
 
           {/* No results state */}
-          {filteredJobs.length === 0 && (
+          {jobs.length === 0 && (
             <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-10 text-center">
               <div className="text-gray-500 dark:text-gray-400 mb-4">
                 <Search className="h-10 w-10 mx-auto mb-2" />
@@ -503,7 +469,7 @@ export function Jobs() {
           )}
 
           {/* Pagination */}
-          {filteredJobs.length > 0 && (
+          {jobs.length > 0 && (
             <div className="mt-8 flex justify-center">
               <nav className="inline-flex rounded-md shadow">
                 <button className="px-3 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300">

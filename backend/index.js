@@ -39,6 +39,7 @@ app.use("/auth", require("./routes/AuthRouter"));
 app.use("/interview", require("./routes/InterviewRouter"));
 app.use("/profile", require("./routes/ProfileRouter"));
 app.use("/roadmap", require("./routes/RoadmapRouter"));
+app.use("/jobs", require("./routes/JobRouter"));
 
 // ✅
 app.listen(PORT, () => {
