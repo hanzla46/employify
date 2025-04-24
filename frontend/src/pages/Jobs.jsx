@@ -256,7 +256,7 @@ export function Jobs() {
                           <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                             <div className="flex items-center mr-2">
                               <Star className="h-4 w-4 text-yellow-400 mr-1" />
-                              <span>{job.rating || 4.6}</span>
+                              <span>{job.score || 46}</span>
                             </div>
                             <span className="text-gray-300 dark:text-gray-600 mx-1">
                               •
