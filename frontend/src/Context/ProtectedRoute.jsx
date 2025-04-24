@@ -6,7 +6,8 @@ import FancyButton from "../components/Button";
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
   const location = useLocation();
-  const currentPath = location.pathname;
+  const currentPath = location.pathname + location.search;
+  const redirectPath = encodeURIComponent(currentPath);
   if (loading)
     return (
       <p className="text-xl font-bold text-primary-600 dark:text-white">
@@ -20,7 +21,7 @@ const ProtectedRoute = ({ children }) => {
        <p className="text-xl font-bold text-primary-600 dark:text-white mb-5">
         Authenticate to get started
       </p>
-      <Link to={`/signup?redirect=${currentPath}`}>
+      <Link to={`/signup?redirect=${redirectPath}`}>
         {" "}
         <FancyButton text={"Sign Up"} />{" "}
       </Link>
