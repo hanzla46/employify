@@ -10,9 +10,7 @@ import {
   Share2,
   ChevronRight,
   Star,
-  StarHalf,
-  Menu,
-  X,
+  ChevronDown,
 } from "lucide-react";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
@@ -28,10 +26,10 @@ export function Jobs() {
   });
   const [uniqueLocations, setUniqueLocations] = useState(["All locations"]);
   const [uniqueJobTypes, setUniqueJobTypes] = useState(["All types"]);
-  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [savedJobs, setSavedJobs] = useState([]);
   const [expandedJob, setExpandedJob] = useState(null);
   const [filteredJobs, setFilteredJobs] = useState(jobs);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     const urlFilters = {
@@ -51,7 +49,7 @@ export function Jobs() {
     };
     setSearchParams(params);
   }, [filters]);
-  
+
   useEffect(() => {
     document.title = "Jobs | Employify AI";
     async function fetchJobs() {
@@ -113,7 +111,14 @@ export function Jobs() {
   //     setSavedJobs([...savedJobs, jobId]);
   //   }
   // };
+  const [openApplyDropdownJobId, setOpenApplyDropdownJobId] = useState(null);
 
+  // Function to toggle the dropdown for a specific job ID
+  const toggleApplyDropdown = (jobId) => {
+    setOpenApplyDropdownJobId((prevOpenId) =>
+      prevOpenId === jobId ? null : jobId
+    );
+  };
   return (
     <div className="min-h-screen bg-gradient-to-b pt-16 from-gray-50 to-white dark:from-gray-800 dark:to-gray-700">
       {/* Header */}
@@ -134,111 +139,15 @@ export function Jobs() {
                 Saved ({savedJobs.length})
               </button>
             </div>
-            <button
-              className="md:hidden text-gray-600 dark:text-gray-300"
-              onClick={() => setMobileFiltersOpen(true)}
-            >
-              <Menu className="h-6 w-6" />
-            </button>
           </div>
         </div>
       </header>
-
-      {/* Mobile filters sidebar */}
-      {mobileFiltersOpen && (
-        <div className="fixed inset-0 z-50 bg-gray-900 bg-opacity-50 flex md:hidden">
-          <div className="w-80 bg-white dark:bg-gray-800 p-4 h-full ml-auto">
-            <div className="flex justify-between items-center mb-6">
-              <h3 className="text-lg font-semibold dark:text-white">Filters</h3>
-              <button onClick={() => setMobileFiltersOpen(false)}>
-                <X className="h-6 w-6 text-gray-600 dark:text-gray-300" />
-              </button>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Search
-                </label>
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Job title, company, skill..."
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                    value={filters.search}
-                    onChange={(e) =>
-                      setFilters({ ...filters, search: e.target.value })
-                    }
-                  />
-                  <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400" />
-                </div>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Location
-                </label>
-                <select
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  value={filters.location}
-                  onChange={(e) =>
-                    setFilters({ ...filters, location: e.target.value })
-                  }
-                >
-                  <option value="">All Locations</option>
-                  <option value="San Francisco">San Francisco</option>
-                  <option value="New York">New York</option>
-                  <option value="Remote">Remote</option>
-                  <option value="Boston">Boston</option>
-                </select>
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">
-                  Job Type
-                </label>
-                <select
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white"
-                  value={filters.jobType}
-                  onChange={(e) =>
-                    setFilters({ ...filters, jobType: e.target.value })
-                  }
-                >
-                  <option value="">All Types</option>
-                  <option value="Full-time">Full-time</option>
-                  <option value="Contract">Contract</option>
-                  <option value="Part-time">Part-time</option>
-                </select>
-              </div>
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="featured-mobile"
-                  className="h-4 w-4 text-primary-600 border-gray-300 rounded"
-                  checked={filters.featured}
-                  onChange={(e) =>
-                    setFilters({ ...filters, featured: e.target.checked })
-                  }
-                />
-                <label
-                  htmlFor="featured-mobile"
-                  className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-                >
-                  Featured jobs only
-                </label>
-              </div>
-              <div className="pt-4">
-                <button className="w-full bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors">
-                  Apply Filters
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Search and filters section */}
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               <div className="md:col-span-2">
                 <div className="relative">
                   <input
@@ -313,7 +222,7 @@ export function Jobs() {
             {filteredJobs.map((job) => (
               <div
                 key={job.id}
-                className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transition-all duration-200 ${
+                className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-all duration-200 ${
                   job.featured ? "border-l-4 border-primary-500" : ""
                 } ${expandedJob === job.id ? "ring-2 ring-primary-500" : ""}`}
               >
@@ -401,12 +310,16 @@ export function Jobs() {
                         {job.description}
                       </p>
                       <div className="flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0">
-                        <button className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40">
-                          View Company Profile
-                        </button>
-                        <button className="inline-flex items-center justify-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 dark:bg-primary-500 hover:bg-primary-700 dark:hover:bg-primary-600">
+                        <a href={job.company.website || `https://www.google.com/search?q=${job.company.name}`} target="_blank" className="inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40">
+                          View Company
+                        </a>
+                        <a
+                          href={job.externalLink}
+                          target="_blank"
+                          className="inline-flex items-center justify-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 dark:bg-primary-500 hover:bg-primary-700 dark:hover:bg-primary-600"
+                        >
                           Easy Apply
-                        </button>
+                        </a>
                       </div>
                     </div>
                   )}
@@ -426,17 +339,62 @@ export function Jobs() {
                   </button>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-750 px-6 py-3 flex justify-between items-center">
+                <div className="bg-gray-50 dark:bg-gray-800 px-6 py-3 flex justify-between items-center relative mt-0 max-h-14">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Be an early applicant
                   </div>
-                  <a
-                    href={job.externalLink}
-                    target="_blank"
-                    className="bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors"
-                  >
-                    Apply Now
-                  </a>
+                  <div className="flex flex-row">
+                    {" "}
+                    <div className="bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors">
+                      {" "}
+                      <a href={job.externalLink} target="_blank">
+                        Apply Now
+                      </a>{" "}
+                    </div>
+                    {job.applyOptions && job.applyOptions.length > 0 && (
+                      <div className="ml-2 relative">
+                        {/* Dropdown Trigger Button */}
+                        <button
+                          onClick={() => toggleApplyDropdown(job.id)}
+                          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
+                          aria-haspopup="true" // Accessibility
+                          aria-expanded={openApplyDropdownJobId === job.id}
+                          aria-label="Show other apply options"
+                        >
+                          <ChevronDown />
+                        </button>
+                        {openApplyDropdownJobId === job.id && (
+                          <ul className="min-w-[150px] px-4 py-2 text-sm text-gray-600 dark:text-gray-100 space-y-1 absolute bg-white dark:bg-gray-800 shadow-lg rounded-lg z-10 right-0 top-full mt-2 border border-gray-200 dark:border-gray-700">
+                            {" "}
+                            {/* Added min-width, border, text color */}
+                            {job.applyOptions.map((option, index) => (
+                              <li
+                                key={index}
+                                className="flex items-center justify-between space-x-4 py-1" // Adjusted spacing/padding
+                              >
+                                <span className="text-gray-500 dark:text-gray-400 whitespace-nowrap">
+                                  {" "}
+                                  {/* Prevent wrap */}
+                                  {option.publisher}
+                                </span>
+                                <a
+                                  href={option.apply_link}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap" // Added font-medium, prevent wrap
+                                  onClick={() =>
+                                    setOpenApplyDropdownJobId(null)
+                                  } // Optional: Close dropdown on click
+                                >
+                                  Apply
+                                </a>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
