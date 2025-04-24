@@ -12,6 +12,7 @@ import {
   Star,
   ChevronDown,
 } from "lucide-react";
+import ProtectedRoute  from "../Context/ProtectedRoute";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 const url = import.meta.env.VITE_API_URL;
@@ -142,7 +143,7 @@ export function Jobs() {
           </div>
         </div>
       </header>
-
+<ProtectedRoute>
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Search and filters section */}
@@ -339,7 +340,7 @@ export function Jobs() {
                   </button>
                 </div>
 
-                <div className="bg-gray-50 dark:bg-gray-800 px-6 py-3 flex justify-between items-center relative mt-0 max-h-14">
+                <div className="bg-gray-50 dark:bg-gray-800 px-6 py-2 flex justify-between items-center relative mt-0">
                   <div className="text-sm text-gray-500 dark:text-gray-400">
                     Be an early applicant
                   </div>
@@ -356,10 +357,7 @@ export function Jobs() {
                         {/* Dropdown Trigger Button */}
                         <button
                           onClick={() => toggleApplyDropdown(job.id)}
-                          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600"
-                          aria-haspopup="true" // Accessibility
-                          aria-expanded={openApplyDropdownJobId === job.id}
-                          aria-label="Show other apply options"
+                          className="p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white"
                         >
                           <ChevronDown />
                         </button>
@@ -450,6 +448,8 @@ export function Jobs() {
           )}
         </div>
       </div>
+      </ProtectedRoute>
+      {/* Footer */}
     </div>
   );
 }

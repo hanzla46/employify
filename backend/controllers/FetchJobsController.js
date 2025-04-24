@@ -5,8 +5,8 @@ const fetchJobsJSearch = async (req, res) => {
     method: "GET",
     url: "https://jsearch.p.rapidapi.com/search",
     params: {
-      query: "AI Engineer jobs",
-      page: "2",
+      query: " jobs",
+      page: "4",
       num_pages: "2",
       country: "pk",
       date_posted: "week", //all, today, 3days, week, month
@@ -38,7 +38,7 @@ const fetchJobsJSearch = async (req, res) => {
       applyOptions: job.apply_options,
       isRemote: job.job_is_remote,
     }));
-    console.log(jobs);
+    console.log(response.data.data);
     //save to database
     await Job.insertMany(jobs, { ordered: false });
     res.status(200).json({ message: "fetched", jobs:jobs });
