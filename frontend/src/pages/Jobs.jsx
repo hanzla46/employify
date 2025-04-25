@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import {
   Briefcase,
   MapPin,
@@ -13,11 +13,20 @@ import {
   ChevronDown,
 } from "lucide-react";
 import ProtectedRoute from "../Context/ProtectedRoute";
+import { JobsContext } from "../Context/JobsContext";
 import { useSearchParams } from "react-router-dom";
 import axios from "axios";
 const url = import.meta.env.VITE_API_URL;
 export function Jobs() {
-  const [jobs, setJobs] = useState([]);
+  const {
+    jobs,
+    setJobs,
+    savedJobs,
+    setSavedJobs,
+    filteredJobs,
+    setFilteredJobs,
+  } = useContext(JobsContext);
+  // const [jobs, setJobs] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: "",
@@ -27,9 +36,9 @@ export function Jobs() {
   });
   const [uniqueLocations, setUniqueLocations] = useState(["All locations"]);
   const [uniqueJobTypes, setUniqueJobTypes] = useState(["All types"]);
-  const [savedJobs, setSavedJobs] = useState([]);
+  // const [savedJobs, setSavedJobs] = useState([]);
   const [expandedJob, setExpandedJob] = useState(null);
-  const [filteredJobs, setFilteredJobs] = useState(jobs);
+  // const [filteredJobs, setFilteredJobs] = useState(jobs);
   const [openApplyDropdownJobId, setOpenApplyDropdownJobId] = useState(null);
 
   useEffect(() => {
@@ -53,25 +62,6 @@ export function Jobs() {
 
   useEffect(() => {
     document.title = "Jobs | Employify AI";
-    async function fetchJobs() {
-      try {
-        const response = await axios.get(url + "/jobs/getJobs", {
-          withCredentials: true,
-          headers: {
-            Accept: "application/json",
-            "Content-Type": "application/json",
-          },
-        });
-        const data = response.data;
-        console.log(data);
-        setJobs(data.jobs);
-        setFilteredJobs(data.jobs);
-        console.log(jobs);
-      } catch (err) {
-        console.error("Failed to fetch jobs 😵", err);
-      }
-    }
-    fetchJobs();
   }, []);
 
   useEffect(() => {

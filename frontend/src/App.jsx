@@ -5,7 +5,7 @@ import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import { Home } from "./pages/Home";
 import { Interview } from "./pages/Interview";
-import { Roadmap} from "./pages/Roadmap";
+import { Roadmap } from "./pages/Roadmap";
 import { Jobs } from "./pages/Jobs";
 import { Pricing } from "./pages/Pricing";
 import { About } from "./pages/About";
@@ -17,6 +17,7 @@ import { AuthProvider } from "./Context/AuthContext.jsx";
 import { SkillsProvider } from "./Context/SkillsContext.jsx";
 import { ToastContainer } from "./utils.js";
 import { ScrollToTop } from "./components/ScrollToTop";
+import { JobsProvider } from "./Context/JobsContext.jsx";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -40,26 +41,28 @@ function App() {
       <ToastContainer />
       <AuthProvider>
         <SkillsProvider>
-          <Router>
-            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
-              <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-              <ScrollToTop />
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/account" element={<Account />} />
-                <Route path="/home" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/interview" element={<Interview />} />
-                <Route path="/roadmap" element={<Roadmap />} />
-                <Route path="/jobs" element={<Jobs />} />
-                <Route path="/pricing" element={<Pricing />} />
-                <Route path="/about" element={<About />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-              <Footer />
-            </div>
-          </Router>
+          <JobsProvider>
+            <Router>
+              <div className="min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200">
+                <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+                <ScrollToTop />
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/account" element={<Account />} />
+                  <Route path="/home" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/signup" element={<Signup />} />
+                  <Route path="/interview" element={<Interview />} />
+                  <Route path="/roadmap" element={<Roadmap />} />
+                  <Route path="/jobs" element={<Jobs />} />
+                  <Route path="/pricing" element={<Pricing />} />
+                  <Route path="/about" element={<About />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+                <Footer />
+              </div>
+            </Router>
+          </JobsProvider>
         </SkillsProvider>
       </AuthProvider>
     </>
