@@ -20,7 +20,6 @@ const fetchJobsJSearch = async (req, res) => {
   };
   try {
     const response = await axios.request(options);
-    // console.log(response.data.data);
     const jobs = response.data.data.map((job) => ({
       title: job.job_title,
       id: job.job_id,
@@ -33,9 +32,8 @@ const fetchJobsJSearch = async (req, res) => {
       salary: job.salary_min
         ? `${job.job_min_salary} - ${job.job_max_salary}`
         : 0,
-      //   skills: job.job_skills.split(",").map((skill) => skill.trim()),
       description: job.job_description,
-      location: job.job_location,
+      location: job.job_city,
       postedAt: new Date(job.job_posted_at_datetime_utc),
       source: "jsearch",
       externalLink: job.job_apply_link,

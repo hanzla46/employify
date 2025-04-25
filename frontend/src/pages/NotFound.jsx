@@ -16,12 +16,16 @@ export function NotFound() {
         Bruhhh... what you lookin' for ain't here. Maybe it never was. Maybe
         it’s hiding in the upside down. 👻
       </p>
-      <Link
-        to="/"
-        className="bg-red-600 hover:bg-red-700 transition-all px-6 py-3 rounded-full text-white font-bold"
-      >
-        🏃‍♂️⬅️ Go Home Before It's Too Late
-      </Link>
+      <div className="group">
+          <Link
+            to="/"
+            className="bg-gradient-to-r from-red-600 via-purple-600 to-blue-600 hover:from-green-400 hover:via-pink-500 hover:to-yellow-500 transition-all duration-500 px-8 py-4 rounded-full text-white font-bold text-lg shadow-lg hover:shadow-pink-500/50 transform hover:scale-110 group-hover:animate-bounce"
+          >
+            <span className="mr-2">🏃‍♂️💨</span>
+            GO HOME BEFORE IT'S TOO LATE
+            <span className="ml-2">⚡🔥</span>
+          </Link>
+        </div>
       <p className="text-sm mt-10 text-gray-600 italic">
         Or keep wandering... risk is yours, legend.
       </p>
