@@ -93,6 +93,7 @@ export function Interview() {
         if (document.activeElement === textareaRef.current) {
           return;
         }
+        if(loading) return;
         sendResponse();
       }
     };

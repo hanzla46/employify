@@ -14,21 +14,16 @@ import {
 } from "lucide-react";
 import ProtectedRoute from "../Context/ProtectedRoute";
 import { JobsContext } from "../Context/JobsContext";
-import { useSearchParams } from "react-router-dom";
+import { useSearchParams, useLocation } from "react-router-dom";
+import { handleSuccess } from "../utils";
 export function Jobs() {
-  const {
-    jobs,
-    savedJobs,
-    setSavedJobs,
-    filteredJobs,
-    setFilteredJobs,
-  } = useContext(JobsContext);
+  const { jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } =
+    useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: "",
     location: "",
     jobType: "",
-    featured: false,
   });
   const [uniqueLocations, setUniqueLocations] = useState(["All locations"]);
   const [uniqueJobTypes, setUniqueJobTypes] = useState(["All types"]);
@@ -40,16 +35,23 @@ export function Jobs() {
       search: searchParams.get("search") || "",
       location: searchParams.get("location") || "All",
       jobType: searchParams.get("jobType") || "All",
-      featured: searchParams.get("featured") === "true",
     };
     setFilters(urlFilters);
   }, []);
+  // url for job sharing
+  const [currentUrl, setCurrentUrl] = useState('');
+  useEffect(() => {
+    setCurrentUrl(window.location.origin);
+  }, []);
+  const shareJob = async (jobId) => {
+    await navigator.clipboard.writeText(currentUrl + "/job" + "?jobId=" + jobId);
+    handleSuccess("Job link copied to clipboard!");
+  };
   useEffect(() => {
     const params = {
       ...(filters.search && { search: filters.search }),
       ...(filters.location !== "All" && { location: filters.location }),
       ...(filters.jobType !== "All" && { jobType: filters.jobType }),
-      ...(filters.featured && { featured: "true" }),
     };
     setSearchParams(params);
   }, [filters]);
@@ -82,8 +84,7 @@ export function Jobs() {
           job.location === filters.location) &&
         (filters.jobType === "" ||
           filters.jobType === "All" ||
-          job.type === filters.jobType) &&
-        (!filters.featured || job.featured)
+          job.type === filters.jobType)
       );
     });
     setFilteredJobs(filtered);
@@ -113,12 +114,6 @@ export function Jobs() {
               Personalized Job Matching
             </h1>
             <div className="hidden md:flex space-x-4">
-              <button className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                Jobs
-              </button>
-              <button className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
-                Companies
-              </button>
               <button className="text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400">
                 Saved ({savedJobs.length})
               </button>
@@ -177,24 +172,7 @@ export function Jobs() {
                   </select>
                 </div>
               </div>
-              <div className="mt-4 flex justify-between items-center">
-                <div className="flex items-center">
-                  <input
-                    type="checkbox"
-                    id="featured"
-                    className="h-4 w-4 text-primary-600 border-gray-300 rounded"
-                    checked={filters.featured}
-                    onChange={(e) =>
-                      setFilters({ ...filters, featured: e.target.checked })
-                    }
-                  />
-                  <label
-                    htmlFor="featured"
-                    className="ml-2 text-sm text-gray-700 dark:text-gray-300"
-                  >
-                    Featured jobs only
-                  </label>
-                </div>
+              <div className="mt-4 flex justify-end items-center">
                 <div className="text-sm text-gray-600 dark:text-gray-300">
                   Found {filteredJobs.length} jobs
                 </div>
@@ -260,7 +238,10 @@ export function Jobs() {
                         >
                           <BookmarkPlus className="h-5 w-5" />
                         </button>
-                        <button className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300">
+                        <button
+                          onClick={() => shareJob(job.id)}
+                          className="p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                        >
                           <Share2 className="h-5 w-5" />
                         </button>
                       </div>
