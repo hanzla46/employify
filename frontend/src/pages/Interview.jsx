@@ -84,6 +84,24 @@ export function Interview() {
     };
     handleBlob();
   }, [mediaBlobUrl]);
+  //key event 
+  const textareaRef = useRef(null);
+  useEffect(() => {
+    if(!isStarted) return;
+    const handleKeyPress = (event) => {
+      if (event.key === 'Enter') {
+        if (document.activeElement === textareaRef.current) {
+          return;
+        }
+        sendResponse();
+      }
+    };
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [isStarted]);
+
   const startInterview = async () => {
     try {
       const response = await axios.post(
@@ -341,6 +359,7 @@ export function Interview() {
                       setWritten={setWritten}
                       transcript={transcript}
                       resetTranscript={resetTranscript}
+                      textareaRef={textareaRef}
                     />
                   </div>
                   <div className="md:col-span-3 md:float-left">
@@ -596,8 +615,8 @@ function ResponsesComponent({
   setWritten,
   transcript,
   resetTranscript,
+  textareaRef,
 }) {
-  const textareaRef = useRef(null);
 
   const adjustHeight = () => {
     if (!textareaRef.current) return;
