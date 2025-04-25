@@ -1,5 +1,6 @@
 const Profile = require("../models/ProfileModel.js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const {getKeywords} = require("../Services/JobKeywords.js");
 const add = async (req, res) => {
   try {
     const userId = req.user._id;
@@ -18,6 +19,13 @@ const add = async (req, res) => {
     });
     console.log("Profile data:", profile);
     await profile.save();
+    const keywordsArray = await getKeywords(hardSkills);
+    const updatedProfile = await Profile.findOneAndUpdate(
+      { userId: userId },
+      { $set: { jobKeywords: keywordsArray } },
+      { new: true }
+    );
+   console.log("Updated profile with keywords:", updatedProfile);
     res.status(200).json({ message: "profile added", success: true });
   } catch (error) {
     console.error("Error adding profile:", error);
