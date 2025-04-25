@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const JobSchema = new mongoose.Schema({
   title: { type: String, required: true },
@@ -6,31 +6,30 @@ const JobSchema = new mongoose.Schema({
   company: {
     name: String,
     logo: String,
-    website: String
+    website: String,
   },
   location: String,
-  type: { type: String, default: 'Full-time' },
-  salary: String,
+  type: { type: String, default: "Full-time" },
+  salary: Number,
   skills: [String],
   description: String,
-  postedAt: { type: String, default: "" },
-  source: { type: String, enum: ['jsearch', 'fantastic_jobs', 'manual'], required: true },
+  postedAt: { type: Date, default: Date.now },
+  source: {
+    type: String,
+    enum: ["jsearch", "fantastic_jobs", "manual"],
+    required: true,
+  },
   externalLink: String,
   isRemote: { type: Boolean, default: false },
-  applyOptions: [{
-    publisher: { type: String },
-    apply_link: String,
-    is_direct: { type: Boolean, default: false },
-  }],
-
-
-  // AI Meta Fields (for future matching engine)
-  score: Number,
-  relevanceTags: [String],
-  aiNotes: String,
-
-  // Raw payload from public APIs for logging/debugging
-  rawData: { type: Object }
+  applyOptions: [
+    {
+      publisher: { type: String },
+      apply_link: String,
+      is_direct: { type: Boolean, default: false },
+    },
+  ],
+  qualifications: [String],
+  responsibilities: [String],
 });
 
-module.exports = mongoose.model('Job', JobSchema);
+module.exports = mongoose.model("Job", JobSchema);

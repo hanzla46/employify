@@ -7,10 +7,10 @@ const fetchJobsJSearch = async (req, res) => {
     method: "GET",
     url: "https://jsearch.p.rapidapi.com/search",
     params: {
-      query: " jobs",
-      page: "4",
+      query: "frontend developer jobs",
+      page: "18",
       num_pages: "2",
-      country: "pk",
+      country: "us",
       date_posted: "week", //all, today, 3days, week, month
     },
     headers: {
@@ -32,20 +32,22 @@ const fetchJobsJSearch = async (req, res) => {
       type: job.job_employment_type,
       salary: job.salary_min
         ? `${job.job_min_salary} - ${job.job_max_salary}`
-        : "Not specified",
+        : 0,
       //   skills: job.job_skills.split(",").map((skill) => skill.trim()),
       description: job.job_description,
       location: job.job_location,
-      postedAt: job.job_posted_at_datetime_utc,
+      postedAt: new Date(job.job_posted_at_datetime_utc),
       source: "jsearch",
       externalLink: job.job_apply_link,
       applyOptions: job.apply_options,
       isRemote: job.job_is_remote,
+      qualifications: job.job_highlights?.Qualifications || [],
+      responsibilities: job.job_highlights?.Responsibilities || [],
     }));
     console.log(response.data.data);
     //save to database
     await Job.insertMany(jobs, { ordered: false });
-    res.status(200).json({ message: "fetched", jobs: jobs });
+    res.status(200).json({ message: "fetched", jobs: response.data.data });
   } catch (error) {
     console.error(error);
     res

@@ -39,12 +39,8 @@ export function Jobs() {
     setFilters(urlFilters);
   }, []);
   // url for job sharing
-  const [currentUrl, setCurrentUrl] = useState('');
-  useEffect(() => {
-    setCurrentUrl(window.location.origin);
-  }, []);
   const shareJob = async (jobId) => {
-    await navigator.clipboard.writeText(currentUrl + "/job" + "?jobId=" + jobId);
+    await navigator.clipboard.writeText(window.location.origin + "/job" + "?jobId=" + jobId);
     handleSuccess("Job link copied to clipboard!");
   };
   useEffect(() => {
@@ -59,7 +55,15 @@ export function Jobs() {
   useEffect(() => {
     document.title = "Jobs | Employify AI";
   }, []);
-
+  const timeAgo = (postedAt) => {
+    const diffMs = Date.now() - new Date(postedAt).getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+    if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+    return new Date(postedAt).toLocaleDateString();
+  };
   useEffect(() => {
     if (!Array.isArray(jobs)) return;
     setUniqueLocations([
@@ -223,7 +227,7 @@ export function Jobs() {
                             <span className="text-gray-300 dark:text-gray-600 mx-1">
                               •
                             </span>
-                            <span>{job.postedAt}</span>
+                            <span>{timeAgo(job.postedAt)}</span>
                           </div>
                         </div>
                       </div>
@@ -254,7 +258,13 @@ export function Jobs() {
                       </div>
                       <div className="flex items-center text-gray-600 dark:text-gray-300">
                         <DollarSign className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" />
-                        {job.salary}
+                        {job.salary == 0 || job.salary == "Not specified" ? (
+                          "Not Specified"
+                        ) : (
+                          <span>
+                            {job.salary}
+                          </span>
+                        )}
                       </div>
                       <div className="flex items-center text-gray-600 dark:text-gray-300">
                         <Briefcase className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" />
@@ -262,7 +272,7 @@ export function Jobs() {
                       </div>
                       <div className="flex items-center text-gray-600 dark:text-gray-300">
                         <Clock className="h-5 w-5 mr-2 text-gray-500 dark:text-gray-400" />
-                        {job.postedAt}
+                        {timeAgo(job.postedAt)}
                       </div>
                     </div>
 
