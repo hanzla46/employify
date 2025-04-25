@@ -11,6 +11,7 @@ export const SkillsProvider = ({ children }) => {
   const [roadmap, setRoadmap] = useState([]);
   const [profile, setProfile] = useState([]);
   const [hasProfile, setHasProfile] = useState(false);
+  const [evaluated, setEvaluated] = useState(false);
   const url = import.meta.env.VITE_API_URL;
   console.log(url);
   useEffect(() => {
@@ -18,12 +19,23 @@ export const SkillsProvider = ({ children }) => {
       try {
         if (!user) {
           setHasProfile(false);
+          setRoadmap([]);
+          setEvaluated(false);
           return;
         }
         const response = await axios.get(url + "/profile/check");
         if (response.data.profile) {
           setHasProfile(true);
           console.log("profile found");
+          const getRoadmap = await axios.get(url + "/roadmap/get");
+          if (getRoadmap.data.success) {
+            console.log("Roadmap found:", getRoadmap.data.data);
+            setRoadmap(getRoadmap.data.data.tasks);
+            console.log("Roadmap:",roadmap);
+          } else {
+            console.log("No roadmap found");
+            setRoadmap([]);
+          }
         } else {
           setHasProfile(false);
           console.log("profile not found");
@@ -35,6 +47,9 @@ export const SkillsProvider = ({ children }) => {
     };
     checkProfile();
   }, [user]);
+  useEffect(() => {
+    console.log(roadmap);
+  },[roadmap]);
   // const addSkill = async (skill) => {
   //   try {
   //     const response = await axios.post(url + "/skills", skill);
@@ -74,6 +89,8 @@ export const SkillsProvider = ({ children }) => {
       value={{
         roadmap,
         setRoadmap,
+        evaluated,
+        setEvaluated,
         hasProfile,
         setHasProfile,
         profile,

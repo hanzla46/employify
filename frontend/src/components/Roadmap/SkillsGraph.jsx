@@ -141,9 +141,11 @@ const SkillsGraphInternal = ({
   useEffect(() => {
     const fetchRoadmap = async () => {
       try {
-        if (localStorage.getItem("roadmap")) {
+        if (roadmap && roadmap && roadmap.length > 0) {
           console.log("Using cached roadmap data from localStorage.");
-          setGraphData(JSON.parse(localStorage.getItem("roadmap")));
+          setGraphData({
+            tasks: roadmap,
+          });
           setLoading(false);
           return;
         }
@@ -157,13 +159,16 @@ const SkillsGraphInternal = ({
         formData.append("evaluationForm", JSON.stringify(evaluationForm)); // Append evaluationForm to formData
         formData.append("questions", JSON.stringify(questions)); // Append questions to formData
         if (!evaluationForm.taskFile1 || !evaluationForm.taskFile2) {
-          console.error("Task files are missing in evaluationForm:", evaluationForm);
+          console.error(
+            "Task files are missing in evaluationForm:",
+            evaluationForm
+          );
           return;
         }
         formData.append("file1", evaluationForm.taskFile1); // Append file1 to formData
         formData.append("file2", evaluationForm.taskFile2); // Append file2 to formData
         console.log(formData);
-        const result = await axios.post(url + "/roadmap/get", formData, {
+        const result = await axios.post(url + "/roadmap/generate", formData, {
           withCredentials: true,
           headers: {
             Accept: "application/json",
@@ -181,7 +186,7 @@ const SkillsGraphInternal = ({
             result.data.data.tasks.length > 0
           ) {
             setGraphData(result.data.data); // Store raw data
-            setRoadmap(result.data.data); // Update context
+            setRoadmap(result.data.data.tasks); // Update context
           } else {
             console.warn("No roadmap tasks found in API response.");
             setError("No roadmap data found. Please generate a roadmap first.");

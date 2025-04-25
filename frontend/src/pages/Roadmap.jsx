@@ -16,8 +16,10 @@ export function Roadmap() {
     setRoadmap,
     profile,
     setProfile,
+    evaluated,
+    setEvaluated,
   } = useContext(SkillsContext);
-  const [evaluated, setEvaluated] = useState(false);
+
   const [evaluationForm, setEvaluationForm] = useState({
     taskFile1: null,
     taskFile2: null,

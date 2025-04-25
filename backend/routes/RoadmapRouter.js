@@ -1,4 +1,4 @@
-const {generateRoadmap} = require("../controllers/RoadmapController");
+const {generateRoadmap, get} = require("../controllers/RoadmapController");
 // const upload = require("../middlewares/uploadMulter");
 const fileUpload = require("../middlewares/multiple.uploadMulter");
 const uploadFields = fileUpload.fields([
@@ -7,5 +7,6 @@ const uploadFields = fileUpload.fields([
 ]);
 const router = require("express").Router();
 const ensureAuthenticated = require("../middlewares/Auth");
-router.post("/get", ensureAuthenticated, uploadFields, generateRoadmap);
+router.post("/generate", ensureAuthenticated, uploadFields, generateRoadmap);
+router.get("/get", ensureAuthenticated, get);
 module.exports = router;

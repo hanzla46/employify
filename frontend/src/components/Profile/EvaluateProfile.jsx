@@ -1,4 +1,6 @@
 import { useEffect, useState } from "react";
+import { useContext } from "react";
+import { SkillsContext } from "../../Context/SkillsContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import FancyButton from "@/components/Button";
@@ -14,16 +16,14 @@ export default function EvaluateProfile({
   questions,
   setQuestions,
 }) {
-  useEffect(() => {
-    if (localStorage.getItem("roadmap")) {
-      setEvaluated(true);
-      return;
-    }
-  }, []);
-
+  const { roadmap } = useContext(SkillsContext);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    if (roadmap && roadmap.length > 0) {
+      setEvaluated(true);
+      return;
+    }
     const fetchQuetions = async () => {
       setLoading(true);
       console.log("Fetching questions...");
@@ -37,7 +37,7 @@ export default function EvaluateProfile({
       }
     };
     fetchQuetions();
-  }, []);
+  }, [roadmap]);
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -79,7 +79,7 @@ export default function EvaluateProfile({
                 <Input
                   type="file"
                   onChange={(e) => handleChange("taskFile2", e.target.files[0])}
-                  className="text-black dark:text-white mb-3" 
+                  className="text-black dark:text-white mb-3"
                 />
               </div>
               <label className="font-medium text-black dark:text-white">
@@ -104,22 +104,22 @@ export default function EvaluateProfile({
                 🧠 Soft Skills
               </h2>
               <div>
-              <Textarea
-                placeholder={questions.softSkillsQuestion1}
-                value={formData.softSkillsResponse1}
-                onChange={(e) =>
-                  handleChange("softSkillsResponse1", e.target.value)
-                }
-              />
+                <Textarea
+                  placeholder={questions.softSkillsQuestion1}
+                  value={formData.softSkillsResponse1}
+                  onChange={(e) =>
+                    handleChange("softSkillsResponse1", e.target.value)
+                  }
+                />
               </div>
               <div className="mt-3">
-              <Textarea
-                placeholder={questions.softSkillsQuestion2}
-                value={formData.softSkillsResponse2}
-                onChange={(e) =>
-                  handleChange("softSkillsResponse2", e.target.value)
-                }
-              />
+                <Textarea
+                  placeholder={questions.softSkillsQuestion2}
+                  value={formData.softSkillsResponse2}
+                  onChange={(e) =>
+                    handleChange("softSkillsResponse2", e.target.value)
+                  }
+                />
               </div>
               <div className="flex gap-3 flex-col">
                 <h2 className="text-xl font-bold pt-6 text-black dark:text-white">
