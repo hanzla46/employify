@@ -15,18 +15,14 @@ import {
 import ProtectedRoute from "../Context/ProtectedRoute";
 import { JobsContext } from "../Context/JobsContext";
 import { useSearchParams } from "react-router-dom";
-import axios from "axios";
-const url = import.meta.env.VITE_API_URL;
 export function Jobs() {
   const {
     jobs,
-    setJobs,
     savedJobs,
     setSavedJobs,
     filteredJobs,
     setFilteredJobs,
   } = useContext(JobsContext);
-  // const [jobs, setJobs] = useState([]);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: "",
@@ -36,9 +32,7 @@ export function Jobs() {
   });
   const [uniqueLocations, setUniqueLocations] = useState(["All locations"]);
   const [uniqueJobTypes, setUniqueJobTypes] = useState(["All types"]);
-  // const [savedJobs, setSavedJobs] = useState([]);
   const [expandedJob, setExpandedJob] = useState(null);
-  // const [filteredJobs, setFilteredJobs] = useState(jobs);
   const [openApplyDropdownJobId, setOpenApplyDropdownJobId] = useState(null);
 
   useEffect(() => {
