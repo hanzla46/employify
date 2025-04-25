@@ -9,7 +9,6 @@ export const SkillsContext = createContext();
 export const SkillsProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [roadmap, setRoadmap] = useState([]);
-  const [profile, setProfile] = useState([]);
   const [hasProfile, setHasProfile] = useState(false);
   const [evaluated, setEvaluated] = useState(false);
   const url = import.meta.env.VITE_API_URL;
@@ -50,40 +49,7 @@ export const SkillsProvider = ({ children }) => {
   useEffect(() => {
     console.log(roadmap);
   },[roadmap]);
-  // const addSkill = async (skill) => {
-  //   try {
-  //     const response = await axios.post(url + "/skills", skill);
-  //     setProfile([...profile, response.data.data]);
-  //     handleSuccess(response.data.message);
-  //   } catch (error) {
-  //     console.error("Failed to add skill:", error.message);
-  //     handleError(error.message);
-  //   }
-  // };
-  // const updateSkill = async (id, skill) => {
-  //   try {
-  //     const response = await axios.put(url + "/skills/" + id, skill);
-  //     const updatedProfile = profile.map((s) =>
-  //       s.id === id ? response.data.data : s
-  //     );
-  //     setProfile(updatedProfile);
-  //     handleSuccess(response.data.message);
-  //   } catch (error) {
-  //     console.error("Failed to update skill:", error.message);
-  //     handleError(error.message);
-  //   }
-  // };
-  // const deleteSkill = async (id) => {
-  //   try {
-  //     const response = await axios.delete(url + "/skills/" + id);
-  //     const updatedProfile = profile.filter((s) => s.id !== id);
-  //     setProfile(updatedProfile);
-  //     handleSuccess(response.data.message);
-  //   } catch (error) {
-  //     console.error("Failed to delete skill:", error.message);
-  //     handleError(error.message);
-  //   }
-  // };
+
   return (
     <SkillsContext.Provider
       value={{
@@ -93,8 +59,6 @@ export const SkillsProvider = ({ children }) => {
         setEvaluated,
         hasProfile,
         setHasProfile,
-        profile,
-        setProfile,
       }}
     >
       {children}

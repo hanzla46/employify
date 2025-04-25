@@ -12,10 +12,6 @@ export function Roadmap() {
   const {
     hasProfile,
     setHasProfile,
-    roadmap,
-    setRoadmap,
-    profile,
-    setProfile,
     evaluated,
     setEvaluated,
   } = useContext(SkillsContext);
@@ -51,7 +47,6 @@ export function Roadmap() {
           <ProtectedRoute>
             {!hasProfile && !evaluated ? (
               <ProfileForm
-                setProfile={setProfile}
                 setHasProfile={setHasProfile}
               />
             ) : (

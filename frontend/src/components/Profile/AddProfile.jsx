@@ -11,7 +11,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-const ProfileForm = ({ setProfile, setHasProfile }) => {
+const ProfileForm = ({ setHasProfile }) => {
   const url = import.meta.env.VITE_API_URL;
   const [activeTab, setActiveTab] = useState("hard");
   const [hardSkills, setHardSkills] = useState([
@@ -140,7 +140,7 @@ const ProfileForm = ({ setProfile, setHasProfile }) => {
     );
     if (result.data.success) {
       setHasProfile(true);
-      setProfile([...hardSkills, ...softSkills, ...jobs, ...projects]);
+      // setProfile([...hardSkills, ...softSkills, ...jobs, ...projects]);
       handleSuccess("Information submitted successfully!");
     } else if (result.data.success == false) {
       handleError(result.data.message);
