@@ -36,6 +36,7 @@ const ProfileSchema = new mongoose.Schema({
     city: { type: String, required: true },
     country: { type: String, required: true },
   },
+  summary: { type: String },
 });
 
 const Profile = mongoose.model("Profile", ProfileSchema);

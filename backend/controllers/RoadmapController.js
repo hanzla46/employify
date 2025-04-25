@@ -59,10 +59,19 @@ const generateRoadmap = async (req, res) => {
     const content = result.response.candidates[0].content.parts[0].text;
     const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
     const roadmapData = JSON.parse(jsonString);
+    const { tasks, summary } = roadmapData;
+    profile.summary = summary;
+    await profile.save();
     console.log(roadmapData);
-    const roadmap = new Roadmap({ userId: user._id, tasks: roadmapData.tasks });
+    const roadmap = new Roadmap({ userId: user._id, tasks: tasks });
     await roadmap.save();
-    return res.status(200).json({ success: true, data: roadmapData, prompt });
+    return res.status(200).json({
+      success: true,
+      data: {
+        tasks: tasks,
+      },
+      prompt,
+    });
   } catch (error) {
     console.error("Failed to generate roadmap:", error.message);
     return res.status(500).json({ success: false, message: error.message });
@@ -77,12 +86,11 @@ const get = async (req, res) => {
       message: "Roadmap already exists",
       data: existingRoadmap,
     });
-  }
-  else {
+  } else {
     return res.status(404).json({
       success: false,
       message: "No roadmap found",
     });
   }
-}
-module.exports = { generateRoadmap,get };
+};
+module.exports = { generateRoadmap, get };

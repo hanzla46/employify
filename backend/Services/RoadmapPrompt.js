@@ -121,6 +121,9 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
     *   **End Goal Focus:** The final stages of the roadmap MUST directly address the user's stated career goal with specific tasks (e.g., targeted job application strategy, freelance proposal writing, MVP development and testing, investor pitch practice).
     *   **Realism & Iteration:** Include tasks related to seeking feedback (e.g., from mentors, peers, potential clients/employers), iterating on work (projects, resume, strategy), and explicitly stating the need to potentially adjust the plan based on outcomes and market shifts.
     *   **Soft Skill Development:** Integrate soft skill practice *within* relevant tasks (e.g., a "Present Project Findings" subtask under a Portfolio project) OR create dedicated 'Soft Skill Enhancement' tasks with specific practice methods (e.g., "Practice STAR method for interviews," "Run mock client negotiation," "Join Toastmasters/public speaking group").
+    
+3. **User Profile Summary:**
+At the end generate summary of uer's profile in one paragraph. This summary should be a concise overview of the user's skills, experiences, and aspirations, highlighting their strengths and areas for growth.
 
 3.  **Output Format (Strict JSON):** Adhere strictly to the following JSON structure. Ensure the entire output is a single valid JSON object.
 
@@ -146,13 +149,14 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
           "ai_impact": "While AI can handle basic [Skill X] tasks, integrating it effectively requires deeper understanding. This skill is crucial for roles managing AI-augmented workflows and provides a competitive edge over those relying solely on automated outputs."
         }
         // ... more task objects ...
-      ]
+      ],
+      "summary": "[one paragraph summary]",
     }
     \`\`\`
 
 ### **Instruction:**
 
-Generate the JSON roadmap now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${
+Generate the JSON roadmap and summary now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${
       profile.careerGoal || "their career goal"
     }** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
     return prompt;
