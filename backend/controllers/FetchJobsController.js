@@ -3,15 +3,17 @@ const Profile = require("../models/ProfileModel.js");
 const Job = require("../models/JobModel");
 const { CalculateRelevancyScores } = require("../Services/JobScores.js");
 const fetchJobsJSearch = async (req, res) => {
+  const { page, country, work_from_home, query } = req.query;
   const options = {
     method: "GET",
     url: "https://jsearch.p.rapidapi.com/search",
     params: {
-      query: "frontend developer jobs",
-      page: "18",
-      num_pages: "2",
-      country: "us",
-      date_posted: "week", //all, today, 3days, week, month
+      query: query + " jobs",
+      page: page,
+      num_pages: "10",
+      country: country,
+      date_posted: "week",
+      work_from_home: work_from_home,
     },
     headers: {
       "x-rapidapi-key": "ff82a3cb34msh70d1e319df0556bp1011c1jsnf3a797ae2c39",
@@ -110,7 +112,10 @@ const getJobs = async (req, res) => {
     let profileSummary =
       profile.summary ||
       "Full Stack Developer with 2 years of hands-on experience in building and deploying scalable web applications. Proficient in React, Next.js, Tailwind, Node.js, and MongoDB, with a strong foundation in REST APIs and authentication systems. Successfully completed multiple projects, including a career development platform with AI-driven resume analysis and interview simulations. Previously worked at a fast-paced startup, leading development of key features such as role-based access control and third-party integrations (Stripe, Google OAuth). Skilled in Git, Docker, and deploying apps via Vercel and DigitalOcean";
-    const relevancyScores = await CalculateRelevancyScores(matchingJobs, profileSummary);
+    const relevancyScores = await CalculateRelevancyScores(
+      matchingJobs,
+      profileSummary
+    );
     const scoreMap = new Map(
       relevancyScores.map((item) => [item.id, item.score])
     );
