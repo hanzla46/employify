@@ -63,8 +63,8 @@ const getJobs = async (req, res) => {
     }
     let skillRegex = null;
     if (profile.hardSkills && profile.hardSkills.length > 0) {
-      const skillWords = profile.hardSkills.map((s) =>
-        s.name.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+      const skillWords = profile.jobKeywords.map((s) =>
+        s.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       );
       const pattern = skillWords.join("|");
       skillRegex = new RegExp(pattern, "i");

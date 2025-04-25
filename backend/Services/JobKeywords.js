@@ -2,10 +2,8 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 const getKeywords = async (skills) => {
   try {
-    // Extract the skill names and join them into a string
     const skillsList = skills.map(skill => skill.name).join(", ");
 
-    // Build the prompt dynamically
     const prompt = `
 You are an intelligent job keyword expander optimized for career platforms and recruitment engines.
 
@@ -33,21 +31,16 @@ actual keywords are:
 ${skillsList}
     `;
     
-    // Initialize Google Generative AI API client
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
 
-    // Make the API call to generate content
     const result = await model.generateContent(prompt);
 
-    // Debugging: Log the raw response
     console.log("Generated Content Response:", result);
 
-    // Extract the job keywords JSON from the generated content
     const content = result.response.candidates[0].content.parts[0].text;
     const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
 
-    // Parse the extracted JSON and return the jobKeywords array
     const parsedResult = JSON.parse(jsonString);
     return parsedResult.jobKeywords;
     
