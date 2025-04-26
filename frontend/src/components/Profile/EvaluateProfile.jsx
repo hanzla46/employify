@@ -45,7 +45,31 @@ export default function EvaluateProfile({
   const handleSubmit = (e) => {
     e.preventDefault();
     console.log("Form Data:", formData);
-    setEvaluated(true);
+    const formDataToSend = new FormData();
+    formDataToSend.append("file1", formData.taskFile1);
+    formDataToSend.append("file2", formData.taskFile2);
+    formDataToSend.append("questions", JSON.stringify(questions));
+    formDataToSend.append("evaluationForm",JSON.stringify(formData));
+    setLoading(true);
+    axios
+      .post(url + "/profile/evaluate", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then((response) => {
+        setLoading(false);
+        if (response.status === 200) {
+          console.log("Evaluation response:", response.data);
+          setEvaluated(true);
+        } else {
+          console.error("Failed to evaluate profile:", response.message);
+        }
+      })
+      .catch((error) => {
+        setLoading(false);
+        console.error("Error during evaluation:", error);
+      });
   };
 
   return (

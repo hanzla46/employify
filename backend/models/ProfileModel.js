@@ -38,6 +38,8 @@ const ProfileSchema = new mongoose.Schema({
   },
   summary: { type: String },
   jobKeywords: [String],
+  evaluationResult: String,
+  profileSummary: String,
 });
 
 const Profile = mongoose.model("Profile", ProfileSchema);

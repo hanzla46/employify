@@ -1,8 +1,14 @@
-const { add, check, getQuestions} = require("../controllers/ProfileController");
+const fileUpload = require("../middlewares/multiple.uploadMulter");
+const { add, check, getQuestions, evaluateProfile} = require("../controllers/ProfileController");
 const ensureAuthenticated = require("../middlewares/Auth");
+const uploadFields = fileUpload.fields([
+    { name: 'file1', maxCount: 1 },
+    { name: 'file2', maxCount: 1 }
+]);
 const router = require("express").Router();
 router.post("/add", ensureAuthenticated, add);
 router.get("/check", ensureAuthenticated, check);
 router.get("/getQuestions", ensureAuthenticated, getQuestions);
+router.post("/evaluate", ensureAuthenticated, uploadFields, evaluateProfile);
 
 module.exports = router;
