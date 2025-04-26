@@ -1,6 +1,6 @@
 const Profile = require("../models/ProfileModel.js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { getKeywords } = require("../Services/JobKeywords.js");
+const { getKeywords } = require("../Services/JobPrompts.js");
 const mime = require("mime-types");
 const add = async (req, res) => {
   try {

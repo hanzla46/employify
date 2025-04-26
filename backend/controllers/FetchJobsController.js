@@ -1,7 +1,7 @@
 const axios = require("axios");
 const Profile = require("../models/ProfileModel.js");
 const Job = require("../models/JobModel");
-const { CalculateRelevancyScores } = require("../Services/JobScores.js");
+const { CalculateRelevancyScores } = require("../Services/JobPrompts.js");
 const fetchJobsJSearch = async (req, res) => {
   const { page, country, work_from_home, query } = req.query;
   const options = {
