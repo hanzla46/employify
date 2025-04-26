@@ -41,7 +41,7 @@ const check = async (req, res) => {
     const existing = await Profile.findOne({ userId });
     if (existing) {
       console.log("Profile exists for user:", userId);
-      return res.status(200).json({ profile: true, success: true });
+      return res.status(200).json({ profile: true, success: true, isEvaluated: existing.isEvaluated });
     } else {
       console.log("No profile found for user:", userId);
       return res.status(200).json({ profile: false, success: true });
@@ -215,6 +215,7 @@ console.log("Prompt for Gemini:", prompt);
     console.log("Evaluation Result:", evaluation);
     profile.profileSummary = summary;
     profile.evaluationResult = evaluation;
+    profile.isEvaluated = true;
     await profile.save();
     res
       .status(200)

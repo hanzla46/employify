@@ -3,43 +3,9 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const mime = require("mime-types");
 const getRoadmapPrompt = async (
   profile,
-  questions,
-  evaluationForm,
-  file1,
-  file2
 ) => {
-  const evaluate = async (question, file) => {
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
-    function fileToGenerativePart(fileData, filename) {
-      const mimeType = mime.lookup(filename) || "text/plain"; // Default to text/plain if type is unknown
-      return {
-        inlineData: {
-          data: fileData, // The Base64 encoded data
-          mimeType: mimeType,
-        },
-      };
-    }
-    try {
-      const name = file.originalname || "file.txt"; // Fallback name if originalname is not available
-      const data = file.buffer.toString("base64");
-      const filePart = fileToGenerativePart(data, name);
-      const prompt = `Analyze this task and its response and provide insights about the user's performance. Give your response in one paragraph without formatting and extra special characters. Task is: ${question} and the user's response is attached: `;
-      const result = await model.generateContent([prompt, filePart]);
-      const response = await result.response;
-      const text = response.text();
-      console.log("Gemini Response:", text);
-          return text;
-    } catch (error) {
-      console.error("Error in evaluate function:", error);
-      return { error: error.message };
-    }
-  };
+
   try {
-    const taskEvaluation1 = "User did good";
-    const taskEvaluation2 = "Need improvements";
-    const projectEvaluation =
-      "user lack a bit in this project, but overall good";
     const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
       profile.careerGoal || "Being Backend Developer and getting remote job"
     }**, considering their unique background and the transformative impact of AI on their target field.
@@ -70,24 +36,10 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
       .join(", ")}
 
 ### User Profile Evaluation:
-*   **Hard Skills Task 1:** ${questions.hardSkillsTask1}
-*   **Hard Skills Task 1 Evaluation:** ${taskEvaluation1}
-*   **Hard Skills Task 2:** ${questions.hardSkillsTask2}
-*   **Hard Skills Task 2 Evaluation:** ${taskEvaluation2}
-*   **user's Skills Rating (self claimed):** ${
-      evaluationForm.hardSkillRating
-    } /100
-*   **Soft Skills Question 1:** ${questions.softSkillsQuestion1}
-*   **Soft Skills 1 Response:** ${evaluationForm.softSkillsResponse1}
-*   **Soft Skills Question 2:** ${questions.softSkillsQuestion2}
-*   **Soft Skills 2 Response:** ${evaluationForm.softSkillsResponse2}
-*   **Project Link question:** ${questions.projectLink}
-*   **Evaluation of project of Project Link provided by user:** ${projectEvaluation}
-*   **Project Contribution:** ${evaluationForm.projectContribution}
-*   **Project Improvement:** ${evaluationForm.projectImprovement}
-*   **Job Experience:** ${evaluationForm.jobExperience}
-
-
+${profile.isEvaluated ?
+  profile.evaluationResult
+  : "Not evaluated!"
+}
 
 ### **Roadmap Generation Rules:**
 

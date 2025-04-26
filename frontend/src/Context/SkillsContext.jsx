@@ -25,17 +25,20 @@ export const SkillsProvider = ({ children }) => {
         const response = await axios.get(url + "/profile/check");
         if (response.data.profile) {
           setHasProfile(true);
+          setEvaluated(response.data.isEvaluated);
           console.log("profile found");
-          const getRoadmap = await axios.get(url + "/roadmap/get");
-          if (getRoadmap.data.success) {
-            console.log("Roadmap found:", getRoadmap.data.data);
-            setEvaluated(true);
-            handleSuccess("Roadmap found!");
-            setRoadmap(getRoadmap.data.data.tasks);
-            console.log("Roadmap:",roadmap);
-          } else {
-            console.log("No roadmap found");
-            setRoadmap([]);
+          if (response.data.isEvaluated) {
+            const getRoadmap = await axios.get(url + "/roadmap/get");
+            if (getRoadmap.data.success) {
+              console.log("Roadmap found:", getRoadmap.data.data);
+              setEvaluated(true);
+              handleSuccess("Roadmap found!");
+              setRoadmap(getRoadmap.data.data.tasks);
+              console.log("Roadmap:", roadmap);
+            } else {
+              console.log("No roadmap found");
+              setRoadmap([]);
+            }
           }
         } else {
           setHasProfile(false);
@@ -51,7 +54,7 @@ export const SkillsProvider = ({ children }) => {
   useEffect(() => {
     console.log(roadmap);
     localStorage.setItem("roadmap", JSON.stringify(roadmap));
-  },[roadmap]);
+  }, [roadmap]);
 
   return (
     <SkillsContext.Provider
