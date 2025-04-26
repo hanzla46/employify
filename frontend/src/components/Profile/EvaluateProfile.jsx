@@ -11,19 +11,30 @@ import { Textarea } from "@/components/ui/textarea";
 const url = import.meta.env.VITE_API_URL;
 export default function EvaluateProfile({
   setEvaluated,
-  formData,
-  setFormData,
-  questions,
-  setQuestions,
 }) {
-  const { roadmap } = useContext(SkillsContext);
   const [loading, setLoading] = useState(false);
-
+  const [formData, setFormData] = useState({
+    taskFile1: null,
+    taskFile2: null,
+    hardSkillRating: 40,
+    softSkillsResponse1: "",
+    softSkillsResponse2: "",
+    projectLink: "",
+    projectContribution: "",
+    projectImprovement: "",
+    jobExperience: "",
+  });
+  const [questions, setQuestions] = useState({
+    hardSkillsTask1: "",
+    hardSkillsTask2: "",
+    softSkillsQuestion1: "",
+    softSkillsQuestion2: "",
+    projectLink: "",
+    projectContribution: "",
+    projectImprovement: "",
+    jobExperience: "",
+  });
   useEffect(() => {
-    if (roadmap && roadmap.length > 0) {
-      setEvaluated(true);
-      return;
-    }
     const fetchQuetions = async () => {
       setLoading(true);
       console.log("Fetching questions...");
@@ -37,7 +48,7 @@ export default function EvaluateProfile({
       }
     };
     fetchQuetions();
-  }, [roadmap]);
+  }, []);
   const handleChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };

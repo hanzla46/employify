@@ -13,6 +13,7 @@ import axios from "axios";
 import dagre from "dagre"; // Import dagre
 import { SkillsContext } from "../../Context/SkillsContext";
 import { Atom } from "react-loading-indicators";
+import { handleSuccess } from "../../utils";
 
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -87,21 +88,24 @@ const TaskNode = ({ data }) => {
               className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded"
             >
               <div className="text-sm mr-2">{subtask.label}</div>
-              <button
-                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150"
-                onClick={() => data.onSubtaskAction(subtask.id)}
-              >
-                {subtask.buttonText || "Action"}
-              </button>
-              <button
-                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150"
-                onClick={() => {
-                  console.log("Sources:", subtask.sources);
-                  data.showSources(subtask.sources);
-                }}
-              >
-                Sources
-              </button>
+              <div className="flex flex-col justify-center">
+                {" "}
+                <button
+                  className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 mb-2"
+                  onClick={() => data.onSubtaskAction(subtask.id)}
+                >
+                  {subtask.buttonText || "Action"}
+                </button>
+                <button
+                  className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 w-16 m-auto"
+                  onClick={() => {
+                    console.log("Sources:", subtask.sources);
+                    data.showSources(subtask.sources);
+                  }}
+                >
+                  Sources
+                </button>
+              </div>
             </div>
           ))}
         </div>
@@ -126,12 +130,7 @@ const nodeTypes = {
 };
 
 // --- Main Graph Component ---
-const SkillsGraphInternal = ({
-  evaluationForm,
-  questions,
-  setSources,
-  setShowSourcesModal,
-}) => {
+const SkillsGraphInternal = ({ setSources, setShowSourcesModal }) => {
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -160,7 +159,7 @@ const SkillsGraphInternal = ({
     const fetchRoadmap = async () => {
       try {
         if (roadmap && roadmap && roadmap.length > 0) {
-          console.log("Using cached roadmap data from localStorage.");
+          handleSuccess("Using cached roadmap data from localStorage.");
           setGraphData({
             tasks: roadmap,
           });
@@ -218,7 +217,7 @@ const SkillsGraphInternal = ({
       setGraphData(roadmap);
       setLoading(false);
     }
-  }, [url, roadmap, setRoadmap]); // Dependencies for fetching
+  }, []);
 
   // Process data and transform to ReactFlow format using Dagre layout
   useEffect(() => {
@@ -388,15 +387,13 @@ const SkillsGraphInternal = ({
 
 // --- Wrapper Component with Provider ---
 // React Flow hooks like useNodesState require being inside a ReactFlowProvider
-const SkillsGraph = ({ evaluationForm, setEvaluationForm, questions }) => {
+const SkillsGraph = () => {
   const [showSourcesModal, setShowSourcesModal] = useState(false);
   const [sources, setSources] = useState("");
   return (
     <>
       <ReactFlowProvider>
         <SkillsGraphInternal
-          evaluationForm={evaluationForm}
-          questions={questions}
           setShowSourcesModal={setShowSourcesModal}
           setSources={setSources}
         />
