@@ -1,9 +1,14 @@
-const fileUpload = require("../middlewares/multiple.uploadMulter");
-const { add, check, getQuestions, evaluateProfile} = require("../controllers/ProfileController");
+const { fileUpload } = require("../middlewares/uploadMulter");
+const {
+  add,
+  check,
+  getQuestions,
+  evaluateProfile,
+} = require("../controllers/ProfileController");
 const ensureAuthenticated = require("../middlewares/Auth");
 const uploadFields = fileUpload.fields([
-    { name: 'file1', maxCount: 1 },
-    { name: 'file2', maxCount: 1 }
+  { name: "file1", maxCount: 1 },
+  { name: "file2", maxCount: 1 },
 ]);
 const router = require("express").Router();
 router.post("/add", ensureAuthenticated, add);
