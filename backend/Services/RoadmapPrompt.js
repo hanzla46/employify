@@ -75,9 +75,6 @@ ${profile.isEvaluated ?
     *   **Realism & Iteration:** Include tasks related to seeking feedback (e.g., from mentors, peers, potential clients/employers), iterating on work (projects, resume, strategy), and explicitly stating the need to potentially adjust the plan based on outcomes and market shifts.
     *   **Soft Skill Development:** Integrate soft skill practice *within* relevant tasks (e.g., a "Present Project Findings" subtask under a Portfolio project) OR create dedicated 'Soft Skill Enhancement' tasks with specific practice methods (e.g., "Practice STAR method for interviews," "Run mock client negotiation," "Join Toastmasters/public speaking group").
     
-3. **User Profile Summary:**
-At the end generate summary of uer's profile in one paragraph. This summary should be a concise overview of the user's skills, experiences, and aspirations, highlighting their strengths and areas for growth.
-
 3.  **Output Format (Strict JSON):** Adhere strictly to the following JSON structure. Ensure the entire output is a single valid JSON object.
 
     \`\`\`json
@@ -103,7 +100,6 @@ At the end generate summary of uer's profile in one paragraph. This summary shou
         }
         // ... more task objects ...
       ],
-      "summary": "[one paragraph summary]",
     }
     \`\`\`
 

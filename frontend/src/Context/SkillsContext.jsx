@@ -31,7 +31,6 @@ export const SkillsProvider = ({ children }) => {
             if (getRoadmap.data.success) {
               console.log("Roadmap found:", getRoadmap.data.data);
               setEvaluated(true);
-              handleSuccess("Roadmap found!");
               setRoadmap(getRoadmap.data.data.tasks);
               console.log("Roadmap:", roadmap);
             } else {
@@ -46,7 +45,6 @@ export const SkillsProvider = ({ children }) => {
         }
       } catch (error) {
         console.error("Failed to check Profile:", error.message);
-        handleError(error.message);
       }
     };
     checkProfile();

@@ -59,7 +59,7 @@ const getJobs = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await Profile.findOne({ userId });
-    if (!profile) {
+    if (!profile || !profile.isEvaluated) {
       const jobs = await Job.find();
       return res.status(200).json({ message: "fetched all jobs", jobs: jobs });
     }
@@ -110,7 +110,7 @@ const getJobs = async (req, res) => {
       `Found ${matchingJobs.length} matching jobs for user ${userId}.`
     );
     let profileSummary =
-      profile.summary ||
+      profile.profileSummary ||
       "Full Stack Developer with 2 years of hands-on experience in building and deploying scalable web applications. Proficient in React, Next.js, Tailwind, Node.js, and MongoDB, with a strong foundation in REST APIs and authentication systems. Successfully completed multiple projects, including a career development platform with AI-driven resume analysis and interview simulations. Previously worked at a fast-paced startup, leading development of key features such as role-based access control and third-party integrations (Stripe, Google OAuth). Skilled in Git, Docker, and deploying apps via Vercel and DigitalOcean";
     const relevancyScores = await CalculateRelevancyScores(
       matchingJobs,
