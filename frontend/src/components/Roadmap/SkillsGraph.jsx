@@ -93,6 +93,15 @@ const TaskNode = ({ data }) => {
               >
                 {subtask.buttonText || "Action"}
               </button>
+              <button
+                className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150"
+                onClick={() => {
+                  console.log("Sources:", subtask.sources);
+                  data.showSources(subtask.sources);
+                }}
+              >
+                Sources
+              </button>
             </div>
           ))}
         </div>
@@ -119,8 +128,9 @@ const nodeTypes = {
 // --- Main Graph Component ---
 const SkillsGraphInternal = ({
   evaluationForm,
-  setEvaluationForm,
   questions,
+  setSources,
+  setShowSourcesModal,
 }) => {
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -135,7 +145,15 @@ const SkillsGraphInternal = ({
   const handleSubtaskAction = useCallback((taskId, subtaskId) => {
     console.log(`Action triggered on subtask ${subtaskId} of task ${taskId}`);
     // Implement your action logic here (e.g., mark as complete, open modal)
-  }, []); // Add dependencies if needed
+  }, []);
+  const handleShowSourcesModal = useCallback(
+    (sources) => {
+      console.log(`Sources: ${sources}`);
+      setSources(sources);
+      setShowSourcesModal(true);
+    },
+    [setSources, setShowSourcesModal]
+  ); // Added dependencies
 
   // Fetch data from API
   useEffect(() => {
@@ -262,6 +280,7 @@ const SkillsGraphInternal = ({
           id: st.id != null ? st.id : `${task.id}-sub-${index}`,
           label: st.name || "Unnamed Subtask",
           buttonText: st.buttonText || "Complete",
+          sources: st.sources || "",
         })),
         onSubtaskAction: (subtaskId) => handleSubtaskAction(task.id, subtaskId),
         // Pass other data for display in the node
@@ -269,6 +288,7 @@ const SkillsGraphInternal = ({
         difficulty: task.difficulty,
         estimated_time: task.estimated_time,
         ai_impact: task.ai_impact,
+        showSources: (sources) => handleShowSourcesModal(sources),
       },
     }));
 
@@ -387,14 +407,33 @@ const SkillsGraphInternal = ({
 // --- Wrapper Component with Provider ---
 // React Flow hooks like useNodesState require being inside a ReactFlowProvider
 const SkillsGraph = ({ evaluationForm, setEvaluationForm, questions }) => {
+  const [showSourcesModal, setShowSourcesModal] = useState(false);
+  const [sources, setSources] = useState("");
   return (
-    <ReactFlowProvider>
-      <SkillsGraphInternal
-        evaluationForm={evaluationForm}
-        setEvaluationForm={setEvaluationForm}
-        questions={questions}
-      />
-    </ReactFlowProvider>
+    <>
+      <ReactFlowProvider>
+        <SkillsGraphInternal
+          evaluationForm={evaluationForm}
+          questions={questions}
+          setShowSourcesModal={setShowSourcesModal}
+          setSources={setSources}
+        />
+      </ReactFlowProvider>
+      {/*modal for sources*/}
+      {showSourcesModal && (
+        <div className="w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6">
+          <button
+            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+            onClick={() => setShowSourcesModal(false)}
+          >
+            ❌
+          </button>
+          <div className="overflow-y-auto max-h-[60vh] p-4">
+            <div dangerouslySetInnerHTML={{ __html: sources }}></div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

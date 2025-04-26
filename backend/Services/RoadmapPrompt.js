@@ -100,6 +100,7 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
         *   'id': Unique identifier within the task (e.g., 101, 102).
         *   'name': A concrete action (e.g., "Implement feature X using library Y," "Draft outreach message using template Z," "Analyze top 5 competitor strategies"). Include specific tools/techniques where relevant (e.g., "Use [AI Tool Name] for initial draft").
         *   'buttonText': Action-oriented text reflecting the subtask (e.g., "Start Course Module", "Build Prototype", "Find Mentors", "Analyze Competitors", "Practice Pitch").
+        *  'sources': You MUST generate an HTML string listing AT LEAST 3 *unique, practical, actionable* resources or hidden strategies the user would NOT easily find by Googling. DO NOT suggest official documentation, basic tutorials, or general advice. Focus on rare tools, emerging platforms, underrated blogs, real-world case studies, or powerful niche techniques that give the user a real unfair advantage. EACH resource must be wrapped in a styled <div> using inline CSS (margin, font-size, color). Example structure: <div style='margin-bottom:8px;'><a href='https://example.com' target='_blank' style='color:#3b82f6;font-weight:bold;'>Hidden Gem Title</a><p style='font-size:12px;color:gray;'>1-line why this resource is critical for the user's goal</p></div>. Avoid any generic suggestions. Sources should feel like insider secrets, not school assignments.
     *   'dependencies': Array of task IDs that are prerequisites.
     *   'category': **[Strategic Planning, Foundational Skills, Advanced Specialization, Portfolio Building, Networking & Visibility, Application & Interview Prep, Freelance Client Acquisition, Startup Validation & Launch, Soft Skill Enhancement, AI Integration & Augmentation]**. (Choose the MOST relevant).
     *   'difficulty': **Beginner / Intermediate / Advanced / Expert** (relative to the user's likely starting point for *this task*).
@@ -137,10 +138,10 @@ At the end generate summary of uer's profile in one paragraph. This summary shou
           "description": "Deepen expertise in [Skill X] by applying it to solve problems where AI tools are prevalent. This demonstrates adaptability and higher-order thinking beyond basic automation.",
           "position": { "x": 50, "y": 100 },
           "subtasks": [
-            { "id": 101, "name": "Identify 3 industry problems solvable by Skill X + AI Tool Y", "buttonText": "Research Problems" },
-            { "id": 102, "name": "Build a small proof-of-concept integrating Skill X & AI Tool Y", "buttonText": "Build PoC" },
-            { "id": 103, "name": "Document process & results for portfolio", "buttonText": "Document Project" },
-            { "id": 104, "name": "Use AI writing assistant [e.g., Grammarly Pro, ChatGPT] to refine documentation", "buttonText": "Refine Docs w/ AI"}
+            { "id": 101, "name": "Identify 3 industry problems solvable by Skill X + AI Tool Y", "buttonText": "Research Problems", "sources": "<div><h2> a tip</h2></div>" },
+            { "id": 102, "name": "Build a small proof-of-concept integrating Skill X & AI Tool Y", "buttonText": "Build PoC", "sources": "<div><a>link to a tool</a></div>" },
+            { "id": 103, "name": "Document process & results for portfolio", "buttonText": "Document Project", "sources": "<div><p>Document your project</p></div>" },
+            { "id": 104, "name": "Use AI writing assistant [e.g., Grammarly Pro, ChatGPT] to refine documentation", "buttonText": "Refine Docs w/ AI", "sources":"<div> <a> link to a learning resource</a></div>" },
           ],
           "dependencies": [], // Example: might depend on foundational Skill X task if not already proficient
           "category": "AI Integration & Augmentation",
@@ -162,6 +163,7 @@ Generate the JSON roadmap and summary now based *specifically* on the user profi
     return prompt;
   } catch (error) {
     console.error("Error generating roadmap prompt:", error);
+    return prompt;
     throw error;
   }
 };

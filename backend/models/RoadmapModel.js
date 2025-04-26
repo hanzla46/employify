@@ -3,7 +3,8 @@ const mongoose = require('mongoose');
 const SubtaskSchema = new mongoose.Schema({
   id: Number,
   name: String,
-  buttonText: String
+  buttonText: String,
+  sources: String,
 }, { _id: false });
 
 const PositionSchema = new mongoose.Schema({

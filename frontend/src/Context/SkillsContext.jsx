@@ -29,6 +29,8 @@ export const SkillsProvider = ({ children }) => {
           const getRoadmap = await axios.get(url + "/roadmap/get");
           if (getRoadmap.data.success) {
             console.log("Roadmap found:", getRoadmap.data.data);
+            setEvaluated(true);
+            handleSuccess("Roadmap found!");
             setRoadmap(getRoadmap.data.data.tasks);
             console.log("Roadmap:",roadmap);
           } else {
@@ -48,6 +50,7 @@ export const SkillsProvider = ({ children }) => {
   }, [user]);
   useEffect(() => {
     console.log(roadmap);
+    localStorage.setItem("roadmap", JSON.stringify(roadmap));
   },[roadmap]);
 
   return (
