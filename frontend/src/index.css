@@ -1,18 +1,10 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* globals.css */
-@font-face {
-  font-family: "Public Sans", sans-serif;
-  src: url("https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,100..900;1,100..900&display=swap")
-    format("opentype");
-  /* url("./assets/Dalbine-Regular.ttf") format("truetype"); */
-  font-weight: normal;
-  font-style: oblique;
-}
 body {
-  font-family: "Public Sans", sans-serif;
+  font-family: 'DM Sans', sans-serif;
 }
 
 :root {
