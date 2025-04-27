@@ -2,7 +2,7 @@ const Profile = require("../models/ProfileModel.js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { getKeywords } = require("../Services/JobPrompts.js");
 const mime = require("mime-types");
-const { evaluationPrompt } = require("../Services/ProfilePrompts.js");
+const { evaluationPrompt,questionsPrompt } = require("../Services/ProfilePrompts.js");
 const add = async (req, res) => {
   try {
     const userId = req.user._id;
