@@ -24,21 +24,19 @@ export const SkillsProvider = ({ children }) => {
         }
         const profileResponse = await axios.get(url + "/profile/check");
         if (profileResponse.data.profile) {
-          setHasProfile(true);          
+          setHasProfile(true);
           console.log("profile found");
-          if (profileResponse.data.isEvaluated) {
-            const getRoadmap = await axios.get(url + "/roadmap/get");
-            if (getRoadmap.data.success) {
-              console.log("Roadmap found:", getRoadmap.data.data);
-              setEvaluated(true);
-              setRoadmap(getRoadmap.data.data.tasks);
-              console.log("Roadmap:", roadmap);
-            } else {
-              console.log("No roadmap found");
-              setRoadmap([]);
-            }           
-          }
           setEvaluated(profileResponse.data.isEvaluated);
+          const getRoadmap = await axios.get(url + "/roadmap/get");
+          if (getRoadmap.data.success) {
+            console.log("Roadmap found:", getRoadmap.data.data);
+            setEvaluated(true);
+            setRoadmap(getRoadmap.data.data.tasks);
+            console.log("Roadmap:", roadmap);
+          } else {
+            console.log("No roadmap found");
+            setRoadmap([]);
+          }
         } else {
           setHasProfile(false);
           console.log("profile not found");

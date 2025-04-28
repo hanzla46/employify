@@ -36,7 +36,7 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
       .join(", ")}
 
 ### User Profile Evaluation:
-${profile.isEvaluated ?
+${profile.profileSummary ?
   profile.evaluationResult
   : "Not evaluated!"
 }

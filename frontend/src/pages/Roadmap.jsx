@@ -24,22 +24,14 @@ export function Roadmap() {
             Personalized Roadmap
           </h1>
           <ProtectedRoute>
-            {!hasProfile && !evaluated ? (
+            {!hasProfile ? (
               <ProfileForm
                 setHasProfile={setHasProfile}
               />
             ) : (
               ""
             )}
-
-            {hasProfile && !evaluated ? (
-              <EvaluateProfile
-                setEvaluated={setEvaluated}
-              />
-            ) : (
-              ""
-            )}
-            {evaluated ? <SkillsGraph /> : ""}
+            {hasProfile ? <SkillsGraph /> : ""}
           </ProtectedRoute>
         </div>
       </div>

@@ -59,7 +59,7 @@ const getJobs = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await Profile.findOne({ userId });
-    if (!profile || !profile.isEvaluated) {
+    if (!profile) {
       const jobs = await Job.find();
       return res.status(200).json({ message: "fetched all jobs", jobs: jobs });
     }

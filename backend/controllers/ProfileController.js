@@ -1,6 +1,6 @@
 const Profile = require("../models/ProfileModel.js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { getKeywords } = require("../Services/JobPrompts.js");
+const { getKeywordsAndSummary } = require("../Services/JobPrompts.js");
 const mime = require("mime-types");
 const { evaluationPrompt,questionsPrompt } = require("../Services/ProfilePrompts.js");
 const add = async (req, res) => {
@@ -21,10 +21,11 @@ const add = async (req, res) => {
     });
     console.log("Profile data:", profile);
     await profile.save();
-    const keywordsArray = await getKeywords(hardSkills);
+    const keywordsAndSummary = await getKeywordsAndSummary(profile);
+    const {summary, jobKeywords} = keywordsAndSummary;
     const updatedProfile = await Profile.findOneAndUpdate(
       { userId: userId },
-      { $set: { jobKeywords: keywordsArray } },
+      { $set: { jobKeywords: jobKeywords, profileSummary: summary} },
       { new: true }
     );
     console.log("Updated profile with keywords:", updatedProfile);
