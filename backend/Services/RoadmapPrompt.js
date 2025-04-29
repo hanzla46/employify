@@ -2,12 +2,12 @@ const moment = require("moment");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const mime = require("mime-types");
 const getRoadmapPrompt = async (
-  profile,
+  profile, selectedPath
 ) => {
 
   try {
     const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
-      profile.careerGoal || "Being Backend Developer and getting remote job"
+      selectedPath.Path_name || "Being Backend Developer and getting remote job"
     }**, considering their unique background and the transformative impact of AI on their target field.
 
 The roadmap should be intensely practical, focusing on high-impact actions that differentiate the user in a competitive market. It must go beyond basic skill acquisition and provide concrete steps for networking effectively, building a compelling portfolio/presence, and navigating the specific path to their desired outcome (e.g., landing a specific job role, securing freelance clients, launching a startup, obtaining funding).
@@ -40,6 +40,14 @@ ${profile.profileSummary ?
   profile.evaluationResult
   : "Not evaluated!"
 }
+
+
+### Most Important
+**User's desired Carrer Path:**
+Path Name: ${selectedPath.Path_name} 
+Stages: ${selectedPath.Stages} 
+Required Skills: ${selectedPath.Required_skills} 
+Accelerators: ${selectedPath.Accelerators} \n
 
 ### **Roadmap Generation Rules:**
 
@@ -106,7 +114,7 @@ ${profile.profileSummary ?
 ### **Instruction:**
 
 Generate the JSON roadmap and summary now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${
-      profile.careerGoal || "their career goal"
+  selectedPath.Path_name || "their career goal"
     }** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
     return prompt;
   } catch (error) {
@@ -115,4 +123,56 @@ Generate the JSON roadmap and summary now based *specifically* on the user profi
     throw error;
   }
 };
-module.exports = { getRoadmapPrompt };
+const getCareerPathPrompt = (profile)=>{
+  return `You are an expert career strategist and market analyst. 
+Given a user's current profile (hard skills, soft skills, past experience, education, interests, career goals), 
+your job is to simulate **all realistic possible career paths** they could take, 
+ranging from conventional to unconventional, from high-risk/high-reward to stable/safe options.
+
+- Generate at least 10-20 possible career paths.
+- For each path, describe:
+  - Job Titles at each major stage (entry → mid → senior → expert level).
+  - Estimated timeline for promotions (in years).
+  - Expected salary range at each stage.
+  - Industries and companies where this path is common.
+  - Risk level (Low, Medium, High) and notes about market volatility.
+  - AI Impact (how likely AI will disrupt this path).
+  - Suggested skills the user must learn to maximize success.
+  - Alternative shortcuts, certifications, or side projects that could accelerate progress.
+
+Rules:
+- Don't assume the user wants only "safe" options. Include bold, ambitious, startup, freelance, and global remote career paths.
+- Clearly differentiate technical, managerial, entrepreneurial, and academic routes.
+- Be brutally honest about risks and rewards; avoid sugar-coating.
+- Assume the user is willing to pivot industries if opportunities make sense.
+- Include new/emerging careers that are not yet mainstream.
+
+**User data:**
+Hard Skills: ${profile.hardSkills} \n\n
+SoftSkills: ${profile.softSkills} \n\n
+Work Expeirence: ${profile.jobs} \n\n
+Projects: ${profile.projects} \n\n
+Location: ${profile.location} \n\n\n
+Output format:
+\`\`\`json
+{
+"paths": [
+{
+"Path_name": "Example - AI Engineer → AI Product Manager",
+"Stages": ["AI Intern", "Junior AI Developer", "Senior AI Developer", "AI Product Manager"],
+"Timeline": "1 → 3 → 5 → 8 years",
+"Salary_range": "$70k → $120k → $180k → $220k",
+"Industries": ["Tech", "Healthcare", "Fintech"],
+"Risk_level": "Medium",
+"AI_impact": "Low (building AI > replacing by AI)",
+"Required_skills": ["Deep Learning", "Prompt Engineering", "Product Management"],
+"Accelerators": ["Tensorflow Certification", "Build AI SaaS Startup MVP"],
+"Notes": "Pivoting to AI Product Management requires strong communication skills and product intuition."
+},
+// more career paths
+]
+}
+\`\`\`
+`;
+}
+module.exports = { getRoadmapPrompt ,getCareerPathPrompt};

@@ -11,6 +11,7 @@ export const SkillsProvider = ({ children }) => {
   const [roadmap, setRoadmap] = useState([]);
   const [hasProfile, setHasProfile] = useState(false);
   const [evaluated, setEvaluated] = useState(false);
+  const [isPathSelected, setIsPathSelected] = useState(false);
   const url = import.meta.env.VITE_API_URL;
   console.log(url);
   useEffect(() => {
@@ -32,6 +33,7 @@ export const SkillsProvider = ({ children }) => {
             console.log("Roadmap found:", getRoadmap.data.data);
             setEvaluated(true);
             setRoadmap(getRoadmap.data.data.tasks);
+            setIsPathSelected(true);
             console.log("Roadmap:", roadmap);
           } else {
             console.log("No roadmap found");
@@ -61,6 +63,8 @@ export const SkillsProvider = ({ children }) => {
         setEvaluated,
         hasProfile,
         setHasProfile,
+        setIsPathSelected,
+        isPathSelected,
       }}
     >
       {children}

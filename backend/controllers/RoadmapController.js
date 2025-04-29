@@ -1,31 +1,39 @@
 const Profile = require("../models/ProfileModel");
 const Roadmap = require("../models/RoadmapModel");
-const { getRoadmapPrompt } = require("../Services/RoadmapPrompt");
+const {
+  getRoadmapPrompt,
+  getCareerPathPrompt,
+} = require("../Services/RoadmapPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { parse, repair } = require('jsonrepair');
+const { parse, repair } = require("jsonrepair");
 
 async function safeJsonParse(rawContent) {
   try {
-      // Attempt normal parse first
-      return JSON.parse(rawContent);
+    // Attempt normal parse first
+    return JSON.parse(rawContent);
   } catch (err) {
-      console.warn('⚠️ Normal JSON parse failed. Trying to REPAIR broken JSON...');
-      try {
-          // Try to repair broken JSON
-          const repaired = repair(rawContent);
-          console.log('🛠️ Successfully repaired JSON.');
-          return JSON.parse(repaired);
-      } catch (repairErr) {
-          console.error('💀 JSON Repair also failed.');
-          throw new Error('Completely invalid JSON, bro. LLM needs chittar therapy.');
-      }
+    console.warn(
+      "⚠️ Normal JSON parse failed. Trying to REPAIR broken JSON..."
+    );
+    try {
+      // Try to repair broken JSON
+      const repaired = repair(rawContent);
+      console.log("🛠️ Successfully repaired JSON.");
+      return JSON.parse(repaired);
+    } catch (repairErr) {
+      console.error("💀 JSON Repair also failed.");
+      throw new Error(
+        "Completely invalid JSON, bro. LLM needs chittar therapy."
+      );
+    }
   }
 }
 const generateRoadmap = async (req, res) => {
   try {
     const user = req.user;
     console.log("Generating roadmap...");
-   
+    const selectedPath = req.body.selectedPath;
+    console.log(selectedPath);
     const profile = await Profile.findOne({ userId: user._id });
     if (!profile) {
       return res
@@ -33,9 +41,7 @@ const generateRoadmap = async (req, res) => {
         .json({ success: false, message: "Profile not found" });
     }
 
-    const prompt = await getRoadmapPrompt(
-      profile,
-    );
+    const prompt = await getRoadmapPrompt(profile, selectedPath);
     console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
@@ -50,11 +56,11 @@ const generateRoadmap = async (req, res) => {
     console.log("Generated content:", content);
     const match = content.match(/```json\n([\s\S]*?)\n```/);
     if (!match) {
-        throw new Error('💥 No valid JSON block found.');
+      throw new Error("💥 No valid JSON block found.");
     }
     const extractedJson = match[1];
     const roadmapData = await safeJsonParse(extractedJson);
-    const { tasks} = roadmapData;
+    const { tasks } = roadmapData;
     console.log(roadmapData);
     const roadmap = new Roadmap({ userId: user._id, tasks: tasks });
     await roadmap.save();
@@ -68,7 +74,7 @@ const generateRoadmap = async (req, res) => {
     });
   } catch (error) {
     console.error("Failed to generate roadmap:", error.message);
-    return res.status(500).json({ success: false, message: error.message, });
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
 const get = async (req, res) => {
@@ -87,4 +93,36 @@ const get = async (req, res) => {
     });
   }
 };
-module.exports = { generateRoadmap, get };
+const getAllCareerPaths = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    console.log("userid" + userId);
+    const profile = await Profile.findOne({ userId: userId });
+    console.log(profile);
+    const prompt = getCareerPathPrompt(profile);
+    console.log(prompt);
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-preview-04-17",
+      generation_config: {
+        temperature: 2,
+        response_mime_type: "application/json",
+      },
+    });
+    const result = await model.generateContent(prompt);
+    const content = result.response.candidates[0].content.parts[0].text;
+    console.log("Generated content:", content);
+    const match = content.match(/```json\n([\s\S]*?)\n```/);
+    if (!match) {
+      throw new Error("💥 No valid JSON block found.");
+    }
+    const extractedJson = match[1];
+    const CareerPaths = await safeJsonParse(extractedJson);
+    const { paths } = CareerPaths;
+    console.log(paths);
+    res.status(200).json({ data: { paths } });
+  } catch (error) {
+    console.log(error);
+  }
+};
+module.exports = { generateRoadmap, get, getAllCareerPaths };

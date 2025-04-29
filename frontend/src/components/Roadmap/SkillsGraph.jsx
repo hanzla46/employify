@@ -130,7 +130,7 @@ const nodeTypes = {
 };
 
 // --- Main Graph Component ---
-const SkillsGraphInternal = ({ setSources, setShowSourcesModal }) => {
+const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) => {
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -168,7 +168,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal }) => {
         }
         setLoading(true);
         setError(null); // Reset error state
-        const result = await axios.get(url + "/roadmap/generate", {
+        const result = await axios.post(url + "/roadmap/generate",{selectedPath}, {
           withCredentials: true,
           headers: {
             Accept: "application/json",
@@ -384,32 +384,68 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal }) => {
     </div>
   );
 };
-
+import CareerPathSelector from "./CareerPathSelector";
+// import { useContext } from "react";
+// import { SkillsContext } from "../../Context/SkillsContext";
 // --- Wrapper Component with Provider ---
 // React Flow hooks like useNodesState require being inside a ReactFlowProvider
 const SkillsGraph = () => {
   const [showSourcesModal, setShowSourcesModal] = useState(false);
   const [sources, setSources] = useState("");
+  const [selectedPath, setSelectedPath] = useState(null);
+  const handlePathSelection = (pathObject) => {
+    console.log("Selected Path Object:", pathObject);
+    setSelectedPath(pathObject);
+  };
+  const { setIsPathSelected, isPathSelected, roadmap } = useContext(SkillsContext);
+  const [careerData, setCareerData] = useState({});
+  const url = import.meta.env.VITE_API_URL;
+  useEffect(() => {
+    if (roadmap && roadmap.length > 0) {
+      return;
+    }
+    const fetchPaths = async () => {
+      const result = await axios.get(url + "/roadmap/career-paths", {
+        withCredentials: true,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      setCareerData(result.data.data);
+    };
+    fetchPaths();
+  }, [roadmap]);
   return (
     <>
-      <ReactFlowProvider>
-        <SkillsGraphInternal
-          setShowSourcesModal={setShowSourcesModal}
-          setSources={setSources}
+      {!isPathSelected ? (
+        <CareerPathSelector
+          setIsPathSelected={setIsPathSelected}
+          pathsData={careerData}
+          selectedPathName={selectedPath ? selectedPath.Path_name : null}
+          onPathSelect={handlePathSelection}
         />
-      </ReactFlowProvider>
-      {/*modal for sources*/}
-      {showSourcesModal && (
-        <div className="w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6">
-          <button
-            className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-            onClick={() => setShowSourcesModal(false)}
-          >
-            ❌
-          </button>
-          <div className="overflow-y-auto max-h-[60vh] p-4">
-            <div dangerouslySetInnerHTML={{ __html: sources }}></div>
-          </div>
+      ) : (
+        <div>
+          <ReactFlowProvider>
+            <SkillsGraphInternal
+              setShowSourcesModal={setShowSourcesModal}
+              setSources={setSources}
+              selectedPath={selectedPath}
+            />
+          </ReactFlowProvider>
+          {showSourcesModal && (
+            <div className="w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6">
+              <button
+                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
+                onClick={() => setShowSourcesModal(false)}
+              >
+                ❌
+              </button>
+              <div className="overflow-y-auto max-h-[60vh] p-4">
+                <div dangerouslySetInnerHTML={{ __html: sources }}></div>
+              </div>
+            </div>
+          )}
         </div>
       )}
     </>

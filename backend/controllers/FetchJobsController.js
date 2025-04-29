@@ -59,12 +59,12 @@ const getJobs = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await Profile.findOne({ userId });
-    if (!profile) {
+    // if (!profile) {
       const jobs = await Job.find();
       return res.status(200).json({ message: "fetched all jobs", jobs: jobs });
-    }
+    // }
     let skillRegex = null;
-    if (profile.hardSkills && profile.hardSkills.length > 0) {
+    if (profile.jobKeywords && profile.jobKeywords.length > 0) {
       const skillWords = profile.jobKeywords.map((s) =>
         s.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
       );
