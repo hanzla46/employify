@@ -1,7 +1,7 @@
 import React from "react";
 import PropTypes from "prop-types"; // Optional, but good practice
 import FancyButton from "../Button";
-
+import { Spinner } from "../../lib/Spinner";
 function CareerPathSelector({
   pathsData,
   selectedPathName,
@@ -10,7 +10,7 @@ function CareerPathSelector({
 }) {
   if (!pathsData || !pathsData.paths || pathsData.paths.length === 0) {
     return (
-      <p className="text-center text-gray-500">No career paths available.</p>
+      <p className="text-center text-gray-500"><Spinner />Loading career paths available.</p>
     );
   }
 

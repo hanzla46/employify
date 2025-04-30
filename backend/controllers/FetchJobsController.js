@@ -59,10 +59,12 @@ const getJobs = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await Profile.findOne({ userId });
-    // if (!profile) {
+    console.log("profile for jobs"+profile);
+    if (!profile || profile.jobKeywords.length <= 0 || profile.profileSummary.length <= 0) {
+      console.log("sending all jobs");
       const jobs = await Job.find();
       return res.status(200).json({ message: "fetched all jobs", jobs: jobs });
-    // }
+    }
     let skillRegex = null;
     if (profile.jobKeywords && profile.jobKeywords.length > 0) {
       const skillWords = profile.jobKeywords.map((s) =>

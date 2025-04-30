@@ -1,6 +1,6 @@
 import "regenerator-runtime/runtime";
 import Webcam from "react-webcam";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useContext } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
 import {
@@ -19,17 +19,37 @@ import SpeechRecognition, {
   useSpeechRecognition,
 } from "react-speech-recognition";
 import ProtectedRoute from "../Context/ProtectedRoute";
+import { JobsContext } from "../Context/JobsContext";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";
-
+import { useSearchParams } from "react-router-dom";
 const url = import.meta.env.VITE_API_URL;
 console.log("API URL:", url);
 
 export function Interview() {
   useEffect(() => {
-      document.title = "Interview | Employify AI";
-    }, []);
+    document.title = "Interview | Employify AI";
+  }, []);
+  const [jobOrMock, setJobOrMock] = useState("mock");
+  const { jobs } = useContext(JobsContext);
+  const [jobId, setJobId] = useState("");
+  const [job, setJob] = useState(null);
+  const [searchParams] = useSearchParams();
+  useEffect(() => {
+    setJobId(searchParams.get("jobId") || "");
+  }, [searchParams]);
+  useEffect(() => {
+    if (jobId) {
+      console.log("job id from url: " +jobId);
+      const matchingJob = jobs.filter(item => item['id'] === jobId);
+      console.log("matching jobs: "+ matchingJob)
+      if (matchingJob.length > 0) {
+        setJobOrMock("job");
+        setJob(matchingJob[0]);
+      }
+    }
+  }, [jobId]);
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isAudioRecording, setIsAudioRecording] = useState(false);
@@ -87,13 +107,13 @@ export function Interview() {
   //key event 
   const textareaRef = useRef(null);
   useEffect(() => {
-    if(!isStarted) return;
+    if (!isStarted) return;
     const handleKeyPress = (event) => {
       if (event.key === 'Enter') {
         if (document.activeElement === textareaRef.current) {
           return;
         }
-        if(loading) return;
+        if (loading) return;
         sendResponse();
       }
     };
@@ -273,11 +293,10 @@ export function Interview() {
             {isStarted && (
               <div className="px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-md border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 font-medium flex items-center">
                 <div
-                  className={`w-3 h-3 rounded-full mr-2 ${
-                    isAudioRecording
-                      ? "bg-green-500 animate-pulse"
-                      : "bg-red-500"
-                  }`}
+                  className={`w-3 h-3 rounded-full mr-2 ${isAudioRecording
+                    ? "bg-green-500 animate-pulse"
+                    : "bg-red-500"
+                    }`}
                 ></div>
                 {isAudioRecording || isVideoRecording ? "Recording" : "Paused"}
               </div>
@@ -326,6 +345,9 @@ export function Interview() {
                           start={start}
                           setInterviewData={setInterviewData}
                           interviewData={interviewData}
+                          job={job}
+                          jobOrMock={jobOrMock}
+                          setJobOrMock={setJobOrMock}
                         />
                       </div>
                     </div>
@@ -435,11 +457,10 @@ function InterviewHeader({
             <button
               disabled={loading}
               aria-label="Toggle microphone"
-              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
-                isAudioRecording
-                  ? "bg-green-500 text-white hover:bg-green-600"
-                  : "bg-red-500 text-white hover:bg-red-600"
-              }`}
+              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${isAudioRecording
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-red-500 text-white hover:bg-red-600"
+                }`}
               onClick={RecordAudio}
             >
               <Mic className="h-5 w-5" />
@@ -449,11 +470,10 @@ function InterviewHeader({
               disabled={loading}
               aria-label="Toggle video"
               onClick={handleVideoRecord}
-              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
-                videoRecording
-                  ? "bg-green-500 text-white hover:bg-green-600"
-                  : "bg-red-500 text-white hover:bg-red-600"
-              }`}
+              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${videoRecording
+                ? "bg-green-500 text-white hover:bg-green-600"
+                : "bg-red-500 text-white hover:bg-red-600"
+                }`}
             >
               <Video className="h-5 w-5" />
             </button>

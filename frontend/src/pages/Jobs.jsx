@@ -14,8 +14,9 @@ import {
 } from "lucide-react";
 import ProtectedRoute from "../Context/ProtectedRoute";
 import { JobsContext } from "../Context/JobsContext";
-import { useSearchParams, useLocation } from "react-router-dom";
+import { useSearchParams, useLocation, Navigate, useNavigate, Link } from "react-router-dom";
 import { handleSuccess } from "../utils";
+import FancyButton from "../components/Button";
 export function Jobs() {
   const { jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } =
     useContext(JobsContext);
@@ -101,7 +102,8 @@ export function Jobs() {
       setSavedJobs([...savedJobs, jobId]);
     }
   };
-
+  //interview navigator
+  const navigate = useNavigate();
   // Function to toggle the dropdown for a specific job ID
   const toggleApplyDropdown = (jobId) => {
     setOpenApplyDropdownJobId((prevOpenId) =>
@@ -188,9 +190,8 @@ export function Jobs() {
               {filteredJobs.map((job) => (
                 <div
                   key={job.id}
-                  className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-all duration-200 ${
-                    job.featured ? "border-l-4 border-primary-500" : ""
-                  } ${expandedJob === job.id ? "ring-2 ring-primary-500" : ""}`}
+                  className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-all duration-200 ${job.featured ? "border-l-4 border-primary-500" : ""
+                    } ${expandedJob === job.id ? "ring-2 ring-primary-500" : ""}`}
                 >
                   <div className="p-6">
                     <div className="flex items-start justify-between mb-4">
@@ -234,11 +235,10 @@ export function Jobs() {
                       <div className="flex space-x-2">
                         <button
                           onClick={() => toggleSaveJob(job.id)}
-                          className={`p-2 rounded-full ${
-                            savedJobs.includes(job.id)
-                              ? "bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400"
-                              : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                          }`}
+                          className={`p-2 rounded-full ${savedJobs.includes(job.id)
+                            ? "bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400"
+                            : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
+                            }`}
                         >
                           <BookmarkPlus className="h-5 w-5" />
                         </button>
@@ -314,16 +314,16 @@ export function Jobs() {
                     >
                       {expandedJob === job.id ? "Show less" : "Show more"}
                       <ChevronRight
-                        className={`h-4 w-4 ml-1 transition-transform ${
-                          expandedJob === job.id ? "rotate-90" : ""
-                        }`}
+                        className={`h-4 w-4 ml-1 transition-transform ${expandedJob === job.id ? "rotate-90" : ""
+                          }`}
                       />
                     </button>
                   </div>
 
                   <div className="bg-gray-50 dark:bg-gray-800 px-6 py-2 flex justify-between items-center relative mt-0">
                     <div className="text-sm text-gray-500 dark:text-gray-400">
-                      Be an early applicant
+                      <Link to={"/interview?jobId=" + job.id} ><FancyButton text={"Practice Interview"} />
+                      </Link>
                     </div>
                     <div className="flex flex-row">
                       {" "}

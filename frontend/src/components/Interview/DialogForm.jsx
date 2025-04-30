@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Select,
   SelectContent,
@@ -38,18 +38,50 @@ const options = {
   experience: ["0-1", "1-2", "2-3", "4-6", "6+"],
 };
 
-export default function DialogForm({ start, setInterviewData, interviewData }) {
+export default function DialogForm({ start, setInterviewData, interviewData, job, jobOrMock, setJobOrMock }) {
+  useEffect(() => {
+    console.log("job" + job);
+    console.log("mock or job" + jobOrMock);
+  }, [job, jobOrMock])
   const [loading, setLoading] = useState(false);
   const startIt = () => {
-    if(interviewData.position === "" || interviewData.company === "" || interviewData.industry === "" || interviewData.experience === ""){
-        handleError("Please fill all the fields");
-        return;
+    if (interviewData.position === "" || interviewData.company === "" || interviewData.industry === "" || interviewData.experience === "") {
+      handleError("Please fill all the fields");
+      return;
     }
     setLoading(true);
     start();
     setLoading(false);
   }
-  
+
+  return (
+    <>
+      <div>
+        <button onClick={() => setJobOrMock("mock")}>Mock Interview</button>
+        <button onClick={() => setJobOrMock("job")}>Job Interview</button>
+      </div>
+      {jobOrMock === "mock" ? (
+        <MockInterviewCard interviewData={interviewData} setInterviewData={setInterviewData} />) : ""}
+      {jobOrMock === "job" ? (<JobDataCard job={job} />) : ""}
+
+      <div className="pt-4">
+        <button
+          onClick={startIt}
+          className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center"
+        >
+          {loading ? (
+            <Spinner />
+          )
+            : ("")
+          }
+          Start Interview
+        </button>
+      </div>
+    </>
+  );
+}
+
+function MockInterviewCard({ interviewData, setInterviewData }) {
   return (
     <Card className="border-0 shadow-none bg-transparent">
       <CardContent className="space-y-5 p-0">
@@ -139,21 +171,15 @@ export default function DialogForm({ start, setInterviewData, interviewData }) {
             </SelectContent>
           </Select>
         </div>
-
-        <div className="pt-4">
-          <button
-            onClick={startIt}
-            className="w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center"
-          >
-            {loading ? (
-              <Spinner />
-            )
-            : ("")
-          }
-            Start Interview
-          </button>
-        </div>
       </CardContent>
     </Card>
   );
+}
+function JobDataCard({ job }) {
+  return (
+    <>
+      <h2>{job.title ? job.title : "title"}</h2>
+      <h2>{job.company ? job.company : "company"}</h2>
+    </>
+  )
 }
