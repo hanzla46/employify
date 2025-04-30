@@ -10,6 +10,7 @@ import { Card, CardContent } from "../ui/card";
 import { Input } from "../ui/input";
 import { handleError } from "../../utils";
 import { Briefcase, Building, BookOpen, Clock } from "lucide-react";
+import { Link } from "react-router-dom";
 import { Spinner } from "../../lib/Spinner";
 const options = {
   company: [
@@ -56,13 +57,19 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
 
   return (
     <>
-      <div>
-        <button onClick={() => setJobOrMock("mock")}>Mock Interview</button>
-        <button onClick={() => setJobOrMock("job")}>Job Interview</button>
+      <div className="flex justify-center align-middle mb-3">
+        <button className={`py-2 px-4 font-medium text-sm focus:outline-none ${jobOrMock === "mock"
+          ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
+          : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`} onClick={() => setJobOrMock("mock")}>Mock Interview</button>
+        <button className={`py-2 px-4 font-medium text-sm focus:outline-none ${jobOrMock === "job"
+          ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
+          : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+          }`} onClick={() => setJobOrMock("job")}>Job Interview</button>
       </div>
       {jobOrMock === "mock" ? (
         <MockInterviewCard interviewData={interviewData} setInterviewData={setInterviewData} />) : ""}
-      {jobOrMock === "job" ? (<JobDataCard job={job} />) : ""}
+      {jobOrMock === "job" && job ? (<JobDataCard job={job} />) : ""}
 
       <div className="pt-4">
         <button
@@ -176,10 +183,30 @@ function MockInterviewCard({ interviewData, setInterviewData }) {
   );
 }
 function JobDataCard({ job }) {
+  useEffect(() => { console.log("in job card") }, []);
+  const timeAgo = (postedAt) => {
+    const diffMs = Date.now() - new Date(postedAt).getTime();
+    const diffSec = Math.floor(diffMs / 1000);
+    if (diffSec < 60) return `${diffSec}s ago`;
+    if (diffSec < 3600) return `${Math.floor(diffSec / 60)}m ago`;
+    if (diffSec < 86400) return `${Math.floor(diffSec / 3600)}h ago`;
+    if (diffSec < 604800) return `${Math.floor(diffSec / 86400)}d ago`;
+    return new Date(postedAt).toLocaleDateString();
+  };
   return (
     <>
-      <h2>{job.title ? job.title : "title"}</h2>
-      <h2>{job.company ? job.company : "company"}</h2>
+      {job ? (
+        <div className="text-black dark:text-white">
+          <div className="flex flex-row p-2"> <h3 className="mr-2">Job Title: </h3> {" "} <h2>{job.title ? job.title : "title"}</h2></div>
+          <div className="flex flex-row p-2"> <h3 className="mr-2">Company: </h3> {" "}<a href={job.company.website} target="_blank"><h2>{job.company ? job.company.name : "company"}</h2></a></div>
+          <div className="flex flex-row p-2"> <h3 className="mr-2">Posted: </h3>{" "} <h2>{timeAgo(job.postedAt)}</h2></div>
+        </div>
+      ) : (
+        <div>
+          <h2>no job</h2>
+          <Link to={"/jobs"}><h2 className="text-black dark:text-white">Find Jobs to practice interview</h2></Link>
+        </div>
+      )}
     </>
   )
 }

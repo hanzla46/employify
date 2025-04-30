@@ -40,16 +40,21 @@ export function Interview() {
     setJobId(searchParams.get("jobId") || "");
   }, [searchParams]);
   useEffect(() => {
+    console.log("all jobs"+ jobs);
     if (jobId) {
       console.log("job id from url: " +jobId);
-      const matchingJob = jobs.filter(item => item['id'] === jobId);
+      const matchingJob = jobs.find(item => item['id'] === jobId);
       console.log("matching jobs: "+ matchingJob)
-      if (matchingJob.length > 0) {
+      if (matchingJob) {
         setJobOrMock("job");
-        setJob(matchingJob[0]);
+        setJob(matchingJob);
+        console.log("job set");
       }
     }
-  }, [jobId]);
+  }, [jobId, jobs]);
+  useEffect(()=>{
+    console.log("sett job: "+job);
+  },[job])
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } =
     useSpeechRecognition();
   const [isAudioRecording, setIsAudioRecording] = useState(false);
