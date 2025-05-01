@@ -11,6 +11,7 @@ import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";
 import { useSearchParams } from "react-router-dom";
+import FancyButton from "../components/Button";
 const url = import.meta.env.VITE_API_URL;
 console.log("API URL:", url);
 
@@ -36,12 +37,11 @@ export function Interview() {
         setJobOrMock("job");
         setJob(matchingJob);
         console.log("job set");
+      } else {
+        setJob(null);
       }
     }
   }, [jobId, jobs]);
-  useEffect(() => {
-    console.log("sett job: " + job);
-  }, [job]);
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const [isAudioRecording, setIsAudioRecording] = useState(false);
   const [question, setQuestion] = useState("");
@@ -53,11 +53,14 @@ export function Interview() {
   const [isVideoRecording, setIsVideoRecording] = useState(false);
   const [recordedBlob, setRecordedBlob] = useState(null);
   const [summary, setSummary] = useState("");
+  const [overallAnalysis, setOverallAnalysis] = useState("");
   const [interviewData, setInterviewData] = useState({
     position: "",
     company: "",
-    industry: "",
     experience: "",
+    focusArea: "",
+    intensity: "",
+    feedbackStyle: "",
   });
   const [infoBox, setInfoBox] = useState(true);
   const [loading, setLoading] = useState(false);
@@ -118,7 +121,7 @@ export function Interview() {
     try {
       const response = await axios.post(
         url + "/interview/start",
-        { interviewData }, // Send interviewData correctly
+        { interviewData, jobOrMock, job },
         {
           withCredentials: true,
           headers: {
@@ -190,6 +193,7 @@ export function Interview() {
         setCategory(response.data.category);
         setScore(response.data.score);
         setSummary(response.data.aiSummary);
+        setOverallAnalysis(response.data.overallAnalysis);
         resetTranscript();
         setWritten("");
         clearBlobUrl();
@@ -257,27 +261,12 @@ export function Interview() {
   };
   return (
     <div className='min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-800 dark:via-indigo-950/30 dark:to-gray-700'>
-      <div className='container mx-auto px-4 py-10 pb-2'>
+      <div className='container mx-auto px-4 py-10 pb-2 pt-16'>
         <div className='w-full max-w-full mx-auto'>
           <div className='flex items-center justify-between mb-2'>
-            <div className='flex items-center space-x-3 mt-6'>
-              <div className='bg-gradient-to-br from-indigo-600 to-purple-600 p-3 rounded-2xl shadow-lg'>
-                <Sparkles className='h-7 w-7 text-white' />
-              </div>
-              <div>
-                <h1 className='text-3xl font-bold bg-gradient-to-r from-[var(--color-primary-700)] to-purple-400 bg-clip-text text-transparent'>
-                  AI Mock Interview
-                </h1>
-                <p className='text-gray-600 dark:text-gray-400'>Perfect your interview skills with AI feedback</p>
-              </div>
-            </div>
-
             {isStarted && (
               <div className='px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-md border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 font-medium flex items-center'>
-                <div
-                  className={`w-3 h-3 rounded-full mr-2 ${
-                    isAudioRecording ? "bg-green-500 animate-pulse" : "bg-red-500"
-                  }`}></div>
+                <div className={`w-3 h-3 rounded-full mr-2 ${isAudioRecording ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
                 {isAudioRecording || isVideoRecording ? "Recording" : "Paused"}
               </div>
             )}
@@ -299,21 +288,23 @@ export function Interview() {
               />
 
               {infoBox && (
-                <div className='p-8'>
-                  <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-                    <InstructionsCard
-                      title='Interview Best Practices'
-                      icon={<BarChart className='h-5 w-5 text-indigo-500' />}
-                      items={[
-                        "Be Professional & Confident",
-                        "Understand the Role",
-                        "Use the STAR Method",
-                        "Demonstrate Problem-Solving",
-                        "Manage Your Time",
-                      ]}
-                    />
-
-                    <div className='col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden'>
+                <div className='p-3'>
+                  <div className='grid grid-cols-1 md:grid-cols-19 gap-2'>
+                    <div className='md:col-span-6'>
+                      {" "}
+                      <InstructionsCard
+                        title='Interview Best Practices'
+                        icon={<BarChart className='h-5 w-5 text-indigo-500' />}
+                        items={[
+                          "Be Professional & Confident",
+                          "Understand the Role",
+                          "Use the STAR Method",
+                          "Demonstrate Problem-Solving",
+                          "Manage Your Time",
+                        ]}
+                      />
+                    </div>
+                    <div className='col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden md:col-span-7'>
                       <div className='bg-gradient-to-r from-indigo-600 to-[var(--color-primary-400)] p-4'>
                         <h3 className='text-xl font-semibold text-white text-center'>Interview Setup</h3>
                       </div>
@@ -329,17 +320,20 @@ export function Interview() {
                       </div>
                     </div>
 
-                    <InstructionsCard
-                      title='Prepare for Common Questions'
-                      icon={<AlertCircle className='h-5 w-5 text-indigo-500' />}
-                      items={[
-                        "Your background & experience",
-                        "Strengths & weaknesses",
-                        "Conflict resolution",
-                        "Leadership & teamwork",
-                        "Career goals & aspirations",
-                      ]}
-                    />
+                    <div className='md:col-span-6'>
+                      {" "}
+                      <InstructionsCard
+                        title='Prepare for Common Questions'
+                        icon={<AlertCircle className='h-5 w-5 text-indigo-500' />}
+                        items={[
+                          "Your background & experience",
+                          "Strengths & weaknesses",
+                          "Conflict resolution",
+                          "Leadership & teamwork",
+                          "Career goals & aspirations",
+                        ]}
+                      />
+                    </div>
                   </div>
                 </div>
               )}
@@ -358,8 +352,16 @@ export function Interview() {
                       textareaRef={textareaRef}
                     />
                   </div>
-                  <div className='md:col-span-3 md:float-left'>
+                  <div className='md:col-span-3 md:float-left flex flex-col justify-normal'>
                     <VideoComponent stream={previewStream} isVideoRecording={isVideoRecording} />
+                    <div
+                      className='mt-5'
+                      onClick={() => {
+                        setIsCompleted(true);
+                        setIsStarted(false);
+                      }}>
+                      <FancyButton text={"End Interview"} />{" "}
+                    </div>
                   </div>
                 </div>
               )}
@@ -373,8 +375,8 @@ export function Interview() {
                     Interview Completed
                   </h1>
                   <p className='text-gray-600 dark:text-gray-300 text-center max-w-md text-lg'>
-                    Congratulations! You've successfully completed your mock interview. Review your performance and
-                    feedback: {summary}
+                    Congratulations! You've successfully completed your mock interview. Review your performance and feedback:{" "}
+                    <div dangerouslySetInnerHTML={{ __html: overallAnalysis }}></div>
                   </p>
                   <button
                     onClick={() => {
@@ -423,9 +425,7 @@ function InterviewHeader({
               disabled={loading}
               aria-label='Toggle microphone'
               className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
-                isAudioRecording
-                  ? "bg-green-500 text-white hover:bg-green-600"
-                  : "bg-red-500 text-white hover:bg-red-600"
+                isAudioRecording ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"
               }`}
               onClick={RecordAudio}>
               <Mic className='h-5 w-5' />
@@ -460,7 +460,7 @@ function InterviewHeader({
 
 function InstructionsCard({ title, items, icon }) {
   return (
-    <div className='col-span-1 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden'>
+    <div className='min-h-72 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden'>
       <div className='bg-gradient-to-r from-[var(--color-primary-600)] to-purple-600 p-4'>
         <div className='flex items-center justify-center'>
           {icon}
@@ -468,7 +468,7 @@ function InstructionsCard({ title, items, icon }) {
         </div>
       </div>
       <div className='p-6'>
-        <ul className='space-y-4'>
+        <ul className='space-y-4 h-72'>
           {items.map((item, index) => (
             <li key={index} className='flex items-center'>
               <div className='h-2 w-2 rounded-full bg-indigo-500 mr-3'></div>
@@ -539,7 +539,7 @@ function VideoComponent({ stream, isVideoRecording }) {
     }
   }, [stream]);
   return (
-    <div className='h-96 flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50'>
+    <div className='h-max flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50'>
       <div className='bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex items-center justify-between'>
         <h3 className='text-lg font-medium text-white flex items-center'>
           <Video className='h-5 w-5 mr-2' />
@@ -554,18 +554,7 @@ function VideoComponent({ stream, isVideoRecording }) {
       </div>
 
       <div className='relative flex-grow bg-gray-900 flex items-center justify-center'>
-        {stream ? (
-          <video
-            ref={videoRef}
-            autoPlay
-            muted
-            playsInline
-            className='w-full h-full object-cover transform -scale-x-100'
-            mirrored={true}
-          />
-        ) : (
-          ""
-        )}
+        {stream ? <video ref={videoRef} autoPlay muted playsInline className='w-full h-64 object-cover transform -scale-x-100' /> : ""}
         {!isVideoRecording && (
           <div className='absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm'>
             <div className='p-6 bg-black/60 rounded-full'>
@@ -575,7 +564,7 @@ function VideoComponent({ stream, isVideoRecording }) {
         )}
       </div>
 
-      <div className='p-4 bg-indigo-50 dark:bg-indigo-900/20 text-center border-t border-indigo-100 dark:border-indigo-900/50'>
+      <div className='p-1 bg-indigo-50 dark:bg-indigo-900/20 text-center border-t border-indigo-100 dark:border-indigo-900/50'>
         <p className='text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center'>
           <Info className='h-4 w-4 mr-2 text-indigo-500' />
           Make sure you're well lit and centered in frame
@@ -618,9 +607,7 @@ function ResponsesComponent({ written, setWritten, transcript, resetTranscript, 
           </div>
         </div>
         <div className='flex items-center justify-center mt-0 mb-1'>
-          <button
-            className='w-[50%] text-center rounded-xl bg-[var(--color-primary-500)]'
-            onClick={() => resetTranscript()}>
+          <button className='w-[50%] text-center rounded-xl bg-[var(--color-primary-500)]' onClick={() => resetTranscript()}>
             Reset
           </button>
         </div>

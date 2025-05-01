@@ -1,5 +1,5 @@
 const Interview = require("../models/InterviewModel");
-const { GeneratePrompt } = require("../Services/InterviewPrompt");
+const { GeneratePrompt, GetInterviewInfo } = require("../Services/InterviewPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { ProcessVideo } = require("../Services/ProcessVideo.Interview");
 const Profile = require("../models/ProfileModel");
@@ -7,30 +7,22 @@ const Profile = require("../models/ProfileModel");
 const startInterview = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { position, company, industry, experience } = req.body.interviewData;
-
-    // Update any existing ongoing interviews to 'completed'
-    await Interview.updateMany(
-      { userId, status: "ongoing" },
-      { $set: { status: "completed" } }
-    );
-
-    let profile = await Profile.findOne({ userId });
-    let userSkills = [];
-    if (profile) {
-      userSkills = profile.hardSkills;
-    }
-
+    await Interview.updateMany({ userId, status: "ongoing" }, { $set: { status: "completed" } });
+    const interviewData = req.body.interviewData;
+    const job = req.body.job;
+    const jobOrMock = req.body.jobOrMock;
+    const profile = await Profile.findOne({ userId });
+    const previousInterviews = await Interview.find({
+      userId,
+      status: "completed",
+    }).sort({ createdAt: -1 });
+    const infoSummary = await GetInterviewInfo(profile, jobOrMock, job, interviewData, previousInterviews);
     const newInterview = new Interview({
       userId,
       status: "ongoing",
-      position,
-      company,
-      industry,
-      experience,
+      infoSummary,
       questions: [],
       overallScore: 0,
-      skills: userSkills,
       aiSummary: "",
     });
 
@@ -60,17 +52,15 @@ const continueInterview = async (req, res) => {
     const userId = req.user._id;
     const { question, written, answer, category } = req.body;
     if (!req.file) {
-      console.log( "No video file uploaded.");
+      console.log("No video file uploaded.");
     }
-   
+
     const interview = await Interview.findOne({
       userId,
       status: "ongoing",
     }).sort({ createdAt: -1 });
     if (!interview) {
-      return res
-        .status(404)
-        .json({ message: "No ongoing interview found.", success: false });
+      return res.status(404).json({ message: "No ongoing interview found.", success: false });
     }
     interview.questions.push({
       question,
@@ -78,19 +68,15 @@ const continueInterview = async (req, res) => {
       category,
       score: null,
       facialAnalysis: { emotions: [], expressionAnalysis: "" },
-    }); 
+    });
     await interview.save();
-    const previousInterviews = await Interview.find({
-      userId,
-      status: "completed",
-    }).sort({ createdAt: -1 });
 
     const QId = interview.questions.length;
     if (req.file) {
       const videoFileBuffer = req.file.buffer;
       ProcessVideo(videoFileBuffer, QId, userId);
     }
-    const prompt = GeneratePrompt(interview, previousInterviews);
+    const prompt = GeneratePrompt(interview.infoSummary);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     const result = await model.generateContent(prompt);
@@ -99,7 +85,7 @@ const continueInterview = async (req, res) => {
     const parsedResult = JSON.parse(jsonString);
 
     const {
-      aiSummary,
+      overallAnalysis,
       currentAnalysis,
       generated_question,
       question_category,
@@ -107,6 +93,7 @@ const continueInterview = async (req, res) => {
       score,
       overallScore,
       completed,
+      weknesses,
     } = parsedResult;
 
     if (interview.questions.length > 1) {
@@ -114,11 +101,13 @@ const continueInterview = async (req, res) => {
       lastQuestion.score = score;
       lastQuestion.analysis = currentAnalysis;
     }
-    interview.aiSummary = aiSummary;
+    interview.weknesses = weknesses;
+    interview.aiSummary = overallAnalysis;
     await interview.save();
 
     res.status(200).json({
-      aiSummary,
+      aiSummary: currentAnalysis,
+      overallAnalysis,
       question: generated_question,
       category: question_category,
       hypotheticalResponse: hypothetical_response,

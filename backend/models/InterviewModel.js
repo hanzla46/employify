@@ -6,37 +6,27 @@ const questionSchema = new mongoose.Schema({
   category: { type: String, required: true },
   score: { type: String, default: "0" },
   analysis: { type: String, default: "" },
-  facialAnalysis:
-    { 
-      timestamp: { type: Date, default: Date.now },
-      emotions: [
-        {
-          emotion: { type: String, required: true },
-          intensity: { type: Number, default: 0 },
-        },
-      ],
-      expressionAnalysis: { type: String, default: "" },
-    },
+  facialAnalysis: {
+    timestamp: { type: Date, default: Date.now },
+    emotions: [
+      {
+        emotion: { type: String, required: true },
+        intensity: { type: Number, default: 0 },
+      },
+    ],
+    expressionAnalysis: { type: String, default: "" },
+  },
 });
 
 const interviewSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   status: { type: String, default: "" },
   startTime: { type: Date, default: Date.now },
-  position: { type: String, required: true },
-  company: { type: String, required: true },
-  experience: { type: String, required: true },
-  industry: { type: String, required: true },
+  infoSummary: { type: String, default: "" },
   questions: { type: [questionSchema], default: [] },
-  skills: [
-    {
-      id: { type: Number, required: true },
-      name: { type: String, required: true },
-      experience: { type: Number, required: true },
-    },
-  ],
   overallScore: { type: String, default: "0" },
   aiSummary: { type: String, default: "" },
+  weknesses: { type: String, default: "" },
 });
 
 module.exports = mongoose.model("Interview", interviewSchema);

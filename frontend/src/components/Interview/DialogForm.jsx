@@ -8,20 +8,6 @@ import { Link } from "react-router-dom";
 import { Spinner } from "../../lib/Spinner";
 const options = {
   company: ["Startup", "Small Business", "Mid-Sized Company", "Enterprise", "Freelance", "Agency", "Multinational Corporation"],
-  industry: [
-    "Technology & IT",
-    "Finance & Banking",
-    "Healthcare Admin & Research",
-    "Marketing & Advertising",
-    "Legal",
-    "Business & Management",
-    "Sales & E-Commerce",
-    "Government & Policy",
-    "Education & EdTech",
-    "Travel, Hospitality & Tourism",
-    "Real Estate",
-    "Other",
-  ],
   experience: ["0-1", "1-2", "2-3", "4-6", "6+"],
 };
 
@@ -32,9 +18,18 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
   }, [job, jobOrMock]);
   const [loading, setLoading] = useState(false);
   const startIt = () => {
-    if (interviewData.position === "" || interviewData.company === "" || interviewData.industry === "" || interviewData.experience === "") {
-      handleError("Please fill all the fields");
-      return;
+    if (jobOrMock === "mock") {
+      if (
+        interviewData.position === "" ||
+        interviewData.company === "" ||
+        interviewData.experience === "" ||
+        interviewData.focusArea === "" ||
+        interviewData.intensity === "" ||
+        interviewData.feedbackStyle === ""
+      ) {
+        handleError("Please fill all the fields");
+        return;
+      }
     }
     setLoading(true);
     start();
@@ -42,8 +37,8 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
   };
 
   return (
-    <>
-      <div className='flex justify-center align-middle mb-3'>
+    <div className='h-72 flex justify-between flex-col'>
+      <div className='flex justify-center align-middle mb-1'>
         <button
           className={`py-2 px-4 font-medium text-sm focus:outline-none ${
             jobOrMock === "mock"
@@ -66,23 +61,23 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
       {jobOrMock === "mock" ? <MockInterviewCard interviewData={interviewData} setInterviewData={setInterviewData} /> : ""}
       {jobOrMock === "job" && job ? <JobDataCard job={job} /> : ""}
 
-      <div className='pt-4'>
+      <div className='flex justify-center mt-0'>
         <button
           onClick={startIt}
-          className='w-full py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center'>
+          className='w-36 py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center'>
           {loading ? <Spinner /> : ""}
           Start Interview
         </button>
       </div>
-    </>
+    </div>
   );
 }
 
 function MockInterviewCard({ interviewData, setInterviewData }) {
   return (
     <Card className='border-0 shadow-none bg-transparent'>
-      <CardContent className='space-y-5 p-0'>
-        <div className='relative'>
+      <CardContent className='space-y-2 p-0 flex flex-wrap justify-center gap-1'>
+        <div className='relative w-[97%] mb-0'>
           <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>
             <Briefcase size={18} />
           </div>
@@ -100,7 +95,7 @@ function MockInterviewCard({ interviewData, setInterviewData }) {
           />
         </div>
 
-        <div className='relative'>
+        <div className='relative w-[48%]'>
           <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>
             <Building size={18} />
           </div>
@@ -118,25 +113,7 @@ function MockInterviewCard({ interviewData, setInterviewData }) {
           </Select>
         </div>
 
-        <div className='relative'>
-          <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>
-            <BookOpen size={18} />
-          </div>
-          <Select onValueChange={(val) => setInterviewData((prev) => ({ ...prev, industry: val }))}>
-            <SelectTrigger className='pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300'>
-              <SelectValue placeholder='Industry' />
-            </SelectTrigger>
-            <SelectContent className='bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800 max-h-60'>
-              {options.industry.map((item) => (
-                <SelectItem key={item} value={item} className='text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600'>
-                  {item}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className='relative'>
+        <div className='relative w-[48%]'>
           <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>
             <Clock size={18} />
           </div>
@@ -159,6 +136,53 @@ function MockInterviewCard({ interviewData, setInterviewData }) {
             </SelectContent>
           </Select>
         </div>
+        <div className='relative w-[48%]'>
+          <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>🎯</div>
+          <Select onValueChange={(val) => setInterviewData((prev) => ({ ...prev, focusArea: val }))}>
+            <SelectTrigger className='pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300'>
+              <SelectValue placeholder='Focus Area' />
+            </SelectTrigger>
+            <SelectContent className='bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800'>
+              {["Behavioral", "Soft Skills", "Problem Solving", "Communication", "AI Collaboration", "System Design"].map((item) => (
+                <SelectItem key={item} value={item} className='text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600'>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className='relative w-[48%]'>
+          <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>🔥</div>
+          <Select onValueChange={(val) => setInterviewData((prev) => ({ ...prev, intensity: val }))}>
+            <SelectTrigger className='pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300'>
+              <SelectValue placeholder='Intensity' />
+            </SelectTrigger>
+            <SelectContent className='bg-white dark:bg-gray-800'>
+              {["Chill", "Realistic", "Nightmare Mode"].map((item) => (
+                <SelectItem key={item} value={item} className='text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600'>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className='relative w-[48%]'>
+          <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>🧠</div>
+          <Select onValueChange={(val) => setInterviewData((prev) => ({ ...prev, feedbackStyle: val }))}>
+            <SelectTrigger className='pl-10 border-primary-200 dark:border-primary-800 bg-white dark:bg-gray-800 rounded-lg text-gray-700 dark:text-gray-300'>
+              <SelectValue placeholder='Feedback Style' />
+            </SelectTrigger>
+            <SelectContent className='bg-white dark:bg-gray-800'>
+              {["Raw", "Constructive", "Minimal"].map((item) => (
+                <SelectItem key={item} value={item} className='text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600'>
+                  {item}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </CardContent>
     </Card>
   );
@@ -166,6 +190,7 @@ function MockInterviewCard({ interviewData, setInterviewData }) {
 function JobDataCard({ job }) {
   useEffect(() => {
     console.log("in job card");
+    console.log(job);
   }, []);
   const timeAgo = (postedAt) => {
     const diffMs = Date.now() - new Date(postedAt).getTime();
@@ -177,33 +202,40 @@ function JobDataCard({ job }) {
     return new Date(postedAt).toLocaleDateString();
   };
   return (
-    <>
+    <div className='text-black dark:text-white'>
       {job ? (
-        <div className='text-black dark:text-white'>
-          <div className='flex flex-row p-2'>
-            {" "}
-            <h3 className='mr-2'>Job Title: </h3> <h2>{job.title ? job.title : "title"}</h2>
+        <>
+          <div className='flex flex-row p-2 items-center flex-wrap'>
+            <h3 className='mr-2 whitespace-nowrap'>Job Title:</h3>
+            <h2 className='truncate max-w-full'>{job.title || "title"}</h2>
           </div>
-          <div className='flex flex-row p-2'>
-            {" "}
-            <h3 className='mr-2'>Company: </h3>{" "}
-            <a href={job.company.website} target='_blank'>
-              <h2>{job.company ? job.company.name : "company"}</h2>
+
+          <div className='flex flex-row p-2 items-center flex-wrap'>
+            <h3 className='mr-2 whitespace-nowrap'>Company:</h3>
+            <a href={job.company?.website} target='_blank' className='truncate max-w-full'>
+              <h2 className='truncate'>{job.company?.name || "company"}</h2>
             </a>
           </div>
-          <div className='flex flex-row p-2'>
-            {" "}
-            <h3 className='mr-2'>Posted: </h3> <h2>{timeAgo(job.postedAt)}</h2>
+
+          <div className='flex flex-row p-2 items-center flex-wrap'>
+            <h3 className='mr-2 whitespace-nowrap'>Posted:</h3>
+            <h2 className='truncate'>{timeAgo(job.postedAt)}</h2>
           </div>
-        </div>
+
+          {job.score && (
+            <div className='flex flex-row p-2 items-center flex-wrap'>
+              <h3 className='mr-2 whitespace-nowrap'>Relevancy:</h3>
+              <h2 className='truncate'>{job.score}</h2>
+            </div>
+          )}
+        </>
       ) : (
-        <div>
-          <h2>no job</h2>
+        <div className='p-4 text-center'>
           <Link to={"/jobs"}>
-            <h2 className='text-black dark:text-white'>Find Jobs to practice interview</h2>
+            <h2 className='text-black dark:text-white font-semibold'>🚫 No job loaded. Find jobs to practice interviews!</h2>
           </Link>
         </div>
       )}
-    </>
+    </div>
   );
 }

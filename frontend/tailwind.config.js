@@ -4,6 +4,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      gridTemplateColumns: {
+        19: "repeat(19, minmax(0, 1fr))",
+      },
       colors: {
         primary: {
           50: "var(--color-primary-50)",

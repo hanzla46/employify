@@ -1,4 +1,5 @@
-const GeneratePrompt = (interview, previousInterviews) => {
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const GeneratePrompt = (interview) => {
   return `
   You are an advanced AI Interview Assistant, meticulously designed to enhance the interview process and provide insightful analysis of candidate performance. Your core responsibilities are:
 
@@ -40,46 +41,39 @@ const GeneratePrompt = (interview, previousInterviews) => {
   ---
 
   **Input Data:**
-
-  - **Candidate's Previous Interviews' score and summary:**
-${previousInterviews && previousInterviews.length > 0 ?
-      previousInterviews.map((interview, index) => 
-        `  ${index + 1}. **Interview Date:** ${interview.date || "N/A"}\n     **Position:** ${interview.position || "N/A"}\n     **Score:** ${interview.overallScore || "N/A"}\n     **Summary:** ${interview.aiSummary || "N/A"}`
-      ).join("\n") 
-      : "No previous interviews available."
-}
-
-  - **Current interview details:**
-    - *Position: * ${interview.position || "N/A"}
-    - *Company: * ${interview.company || "N/A"}
-    - *Experience Level (years) :* ${interview.experience || "N/A"}
-    - *Industry: * ${interview.industry || "N/A"}
+  Interview Information:
+  ${interview.infoSummary}
 
   - **Previous Questions and Answers from current interview:**
-  ${interview.questions && interview.questions.length > 0 ? 
-    interview.questions
-      .map((q, index) => `  ${index + 1}. **Q:** ${q.question}\n     **A:** ${q.answer} \n     **Category:** ${q.category || "General"}\n     **Score:** ${q.score || "0"}`)
-      .join("\n") 
-    : "No questions answered yet."
+  ${
+    interview.questions && interview.questions.length > 0
+      ? interview.questions
+          .map(
+            (q, index) =>
+              `  ${index + 1}. **Q:** ${q.question}\n     **A:** ${q.answer} \n     **Category:** ${
+                q.category || "General"
+              }\n     **Score:** ${q.score || "0"}`
+          )
+          .join("\n")
+      : "No questions answered yet."
   }
 
   - **Facial Expression Analysis:**  
-  ${interview.questions && interview.questions.length > 0 ? 
-    interview.questions.map((q, index) => 
-      ` ${index + 1}. **Question:** ${q.question}\n     **Facial Analysis:** ${
-        q.facialAnalysis?.emotions?.length > 0 
-    ? q.facialAnalysis.emotions.map(fa => 
-      `Expression: ${fa.emotion}, Intensity: ${fa.intensity}`
-      ).join("; ") + ` | Analysis: ${q.facialAnalysis.expressionAnalysis || "N/A"}`
-    : "No facial data" }`
-    ).join("\n") 
-    : "No facial data available."
-  }
-
-  - **Skills Being Assessed:**  
-  ${interview.skills && interview.skills.length > 0 ? 
-    interview.skills.map(skill => `  - ${skill.name || "Unknown Skill "}, Experience Years ${skill.experience || "2"}`).join("\n") 
-    : "No skills data available."
+  ${
+    interview.questions && interview.questions.length > 0
+      ? interview.questions
+          .map(
+            (q, index) =>
+              ` ${index + 1}. **Question:** ${q.question}\n     **Facial Analysis:** ${
+                q.facialAnalysis?.emotions?.length > 0
+                  ? q.facialAnalysis.emotions
+                      .map((fa) => `Expression: ${fa.emotion}, Intensity: ${fa.intensity}`)
+                      .join("; ") + ` | Analysis: ${q.facialAnalysis.expressionAnalysis || "N/A"}`
+                  : "No facial data"
+              }`
+          )
+          .join("\n")
+      : "No facial data available."
   }
 
   - **Current Overall Score (out of 100):** ${interview.overallScore || "N/A"}
@@ -91,13 +85,14 @@ ${previousInterviews && previousInterviews.length > 0 ?
 
   \`\`\`json
   {
-    "aiSummary": "[A concise summary of your assessment of the candidate's overall performance based on all previous questions, answers, and facial expressions, incorporating both verbal and nonverbal cues. This should include strengths, weaknesses, and any areas of concern. Provide constructive feedback and recommendations for improvement. WRITE it in the way that you are talking directly to the candidate. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point. when the interview is completed and it is last summary, then you can write a detailed summary, otherwise keep it short.]",
-    "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression results.",
+    "overallAnalysis": "[A concise summary of your assessment of the candidate's overall performance based on all previous questions, answers, and facial expressions, incorporating both verbal and nonverbal cues. This should include strengths, weaknesses, and any areas of concern. Provide constructive feedback and recommendations for improvement. WRITE it in the way that you are talking directly to the candidate. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else).",
+    "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression results. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point.].",
     "generated_question": "[Conversational question that naturally progresses the interview while implicitly addressing assessment needs, is concise (15-20 words max) while remaining meaningful.]",
     "question_category": "[Category of the question you generated.]",
     "hypothetical_response": "[A realistic example of how the candidate might answer the new question, considering their communication style, level of experience, and emotional cues.]",
     "score": "[scores of the latest question assessment. out of 10]",
     "overallScore": "[The updated overall score of the candidate's whole interview. out of 100]",
+    "weknesses": "[user weaknesses. keep it short]",
     "completed": "[true/false] when you have asked 11-12 questions, it should be true, otherwise false."
   }
   \`\`\`
@@ -105,5 +100,70 @@ ${previousInterviews && previousInterviews.length > 0 ?
   Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "hypothetical_response", "score", "completed") must be strings. Avoid including any introductory or concluding text outside of the JSON object.
   `;
 };
+const GetInterviewInfo = async (profile, jobOrMock, job, interviewData, previousInterviews) => {
+  const jobInfo = `
+### Job-Based Interview Context:
+- Role Title: ${job?.title}
+- Company Type: ${job?.company?.name}
+- Industry: ${job?.industry}
+- Required Experience: ${job?.experience}
+- Job Description Summary: ${job?.description}
+  `;
 
-module.exports = { GeneratePrompt };
+  const mockInfo = `
+### General Mock Interview Context:
+- Simulated Role: ${interviewData?.position}
+- Target Company Type: ${interviewData?.company}
+- Focus Area: ${interviewData?.focusArea}
+- Interview Intensity: ${interviewData?.intensity}
+- Candidate Experience: ${interviewData?.experience} years
+- Feedback Style Preference: ${interviewData?.feedbackStyle}
+  `;
+  //   const PreviousSummaries = `
+  //  ${previousInterviews.lenght > 0 && previousInterviews.map((item, index) => `${index + 1}. ${item.weknesses}`)}
+  //  `;
+
+  const prompt = `
+You are an AI interview assistant responsible for generating a detailed, high-signal summary of an upcoming interview session.
+
+Your output will be passed to another AI system that generates interview questions, so the description must include clear context, focus areas, skill level, and goals of the session.
+
+Use the following structured data to write a **1-paragraph, signal-rich summary** that clearly describes:
+
+- The type and purpose of the interview  
+- The role or simulation target  
+- Key skills or behavior to assess  
+- Expected challenge level (intensity)  
+- Relevant industry or company context (if job-based)
+
+---
+## 🔹 User Profile:
+- Skills: ${profile?.hardSkills}
+- Soft Skills: ${profile?.softSkills}
+- Work Experience: ${profile?.jobs}
+- Career Goal: ${profile?.careerGoal}
+- Industry Interest: ${profile?.industryInterest}
+
+---
+## 🔹 Interview Mode:
+- Selected Mode: ${jobOrMock.toUpperCase()} // "JOB" or "MOCK"
+
+${jobOrMock === "job" ? jobInfo : mockInfo}
+
+\n
+---
+📌 Format your output as a single professional paragraph (not a list).
+Avoid vague phrases like “various questions” — be specific.
+DO NOT ask the user any questions. Do not use filler words.
+
+Keep it direct, structured, and factual. Maximum ~100 words.
+  `;
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  console.log("Generated info summary:", content);
+  return content;
+};
+
+module.exports = { GeneratePrompt, GetInterviewInfo };
