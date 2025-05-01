@@ -63,46 +63,39 @@ const TaskNode = ({ data }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div
-      className="p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96 m-8"
-      style={{ minWidth: `${NODE_WIDTH - 16}px` }}
-    >
+    <div className='p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96 m-8' style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
       {/* Adjust width based on padding */}
-      <div className="font-bold text-lg mb-2">{data.label}</div>
-      <div className="text-sm text-gray-600 mb-3">{data.description}</div>
+      <div className='font-bold text-lg mb-2'>{data.label}</div>
+      <div className='text-sm text-gray-600 mb-3'>{data.description}</div>
       {data.subtasks && data.subtasks.length > 0 && (
         <button
-          className="bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mb-2 transition-colors duration-150"
-          onClick={() => setExpanded(!expanded)}
-        >
+          className='bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mb-2 transition-colors duration-150'
+          onClick={() => setExpanded(!expanded)}>
           {expanded ? "Hide Subtasks" : `Show ${data.subtasks.length} Subtasks`}
         </button>
       )}
       {expanded && (
-        <div className="mt-3 border-t pt-2">
-          <div className="text-sm font-semibold mb-1">Subtasks:</div>
+        <div className='mt-3 border-t pt-2'>
+          <div className='text-sm font-semibold mb-1'>Subtasks:</div>
           {data.subtasks.map((subtask, index) => (
             <div
               key={subtask.id || index} // Use subtask.id if available and unique
-              className="flex items-center justify-between mb-2 bg-gray-100 p-2 rounded"
-            >
-              <div className="text-sm mr-2">{subtask.label}</div>
-              <div className="flex flex-col justify-center">
+              className='flex items-center justify-between mb-2 bg-gray-100 p-2 rounded'>
+              <div className='text-sm mr-2'>{subtask.label}</div>
+              <div className='flex flex-col justify-center'>
                 {" "}
                 <button
-                  className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 mb-2"
-                  onClick={() => data.onSubtaskAction(subtask.id)}
-                >
+                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 mb-2'
+                  onClick={() => data.onSubtaskAction(subtask.id)}>
                   {subtask.buttonText || "Action"}
                 </button>
                 <button
-                  className="bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 w-16 m-auto"
+                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 w-16 m-auto'
                   onClick={() => {
                     console.log("Sources:", subtask.sources);
                     data.showSources(subtask.sources);
-                  }}
-                >
+                  }}>
                   Sources
                 </button>
               </div>
@@ -111,15 +104,10 @@ const TaskNode = ({ data }) => {
         </div>
       )}
       {/* Add other data points if needed */}
-      <div className="text-xs text-gray-500 mt-2 border-t pt-1">
-        Category: {data.category || "N/A"} | Diff: {data.difficulty || "N/A"} |
-        Est: {data.estimated_time || "N/A"}
+      <div className='text-xs text-gray-500 mt-2 border-t pt-1'>
+        Category: {data.category || "N/A"} | Diff: {data.difficulty || "N/A"} | Est: {data.estimated_time || "N/A"}
       </div>
-      {data.ai_impact && (
-        <div className="text-xs text-purple-700 mt-1 italic">
-          Importance: {data.ai_impact}
-        </div>
-      )}
+      {data.ai_impact && <div className='text-xs text-purple-700 mt-1 italic'>Importance: {data.ai_impact}</div>}
     </div>
   );
 };
@@ -130,7 +118,7 @@ const nodeTypes = {
 };
 
 // --- Main Graph Component ---
-const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) => {
+const SkillsGraphInternal = ({ setSources, setShowSourcesModal, selectedPath }) => {
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -168,12 +156,16 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
         }
         setLoading(true);
         setError(null); // Reset error state
-        const result = await axios.post(url + "/roadmap/generate",{selectedPath}, {
-          withCredentials: true,
-          headers: {
-            Accept: "application/json",
-          },
-        });
+        const result = await axios.post(
+          url + "/roadmap/generate",
+          { selectedPath },
+          {
+            withCredentials: true,
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
 
         if (result.data.success) {
           console.log("API Roadmap data:", result.data.data);
@@ -193,16 +185,12 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
           }
         } else {
           console.error("API call failed:", result.data.message);
-          setError(
-            result.data.message || "Failed to fetch roadmap (API error)."
-          );
+          setError(result.data.message || "Failed to fetch roadmap (API error).");
           setGraphData({ tasks: [] });
         }
       } catch (err) {
         console.error("Error fetching roadmap:", err);
-        setError(
-          "Failed to load roadmap. Please check connection or try again."
-        );
+        setError("Failed to load roadmap. Please check connection or try again.");
         setGraphData({ tasks: [] }); // Set empty tasks on error
       } finally {
         setLoading(false);
@@ -223,9 +211,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
   useEffect(() => {
     // Ensure graphData and tasks exist and are an array before processing
     if (!graphData || !Array.isArray(graphData.tasks)) {
-      console.log(
-        "Waiting for graph data or graphData.tasks is not an array..."
-      );
+      console.log("Waiting for graph data or graphData.tasks is not an array...");
       // Optionally set nodes/edges to empty if needed, depending on desired behavior
       // setNodes([]);
       // setEdges([]);
@@ -242,9 +228,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
     console.log("Processing graph data for ReactFlow layout...");
 
     // Validate and sanitize tasks (ensure IDs are present and unique)
-    const validTasks = graphData.tasks.filter(
-      (task) => task && task.id != null
-    );
+    const validTasks = graphData.tasks.filter((task) => task && task.id != null);
     const taskIds = new Set(validTasks.map((t) => t.id.toString()));
 
     // 1. Transform tasks into initial nodes
@@ -297,9 +281,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
               style: { stroke: "#60a5fa", strokeWidth: 2 }, // Example style
             });
           } else {
-            console.warn(
-              `Skipping edge from ${sourceId} to ${targetId}: Node not found in task list.`
-            );
+            console.warn(`Skipping edge from ${sourceId} to ${targetId}: Node not found in task list.`);
           }
         });
       }
@@ -308,15 +290,12 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
     // 3. Calculate layout using Dagre
     // Only run layout if there are nodes to prevent Dagre errors
     if (initialNodes.length > 0) {
-      console.log(
-        `Running Dagre layout for ${initialNodes.length} nodes and ${initialEdges.length} edges...`
+      console.log(`Running Dagre layout for ${initialNodes.length} nodes and ${initialEdges.length} edges...`);
+      const { nodes: layoutedNodes, edges: layoutedEdges } = getLayoutedElements(
+        initialNodes, // Pass the nodes *before* layout
+        initialEdges, // Pass the created edges
+        "LR" // Layout direction: LR (Left to Right) or TB (Top to Bottom)
       );
-      const { nodes: layoutedNodes, edges: layoutedEdges } =
-        getLayoutedElements(
-          initialNodes, // Pass the nodes *before* layout
-          initialEdges, // Pass the created edges
-          "LR" // Layout direction: LR (Left to Right) or TB (Top to Bottom)
-        );
 
       console.log("Layout complete. Setting nodes and edges.");
       setNodes(layoutedNodes);
@@ -329,31 +308,16 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
   }, [graphData, handleSubtaskAction]); // Rerun layout when graphData changes
 
   if (loading) {
-    return (
-      <Atom
-        color="#32cd32"
-        size="large"
-        text="Loading Roadmap Graph"
-        textColor="#17d83f"
-      />
-    );
+    return <Atom color='#32cd32' size='large' text='Loading Roadmap Graph' textColor='#17d83f' />;
   }
 
   if (error) {
-    return (
-      <div className="p-4 text-center text-red-600 dark:text-red-400">
-        {error}
-      </div>
-    );
+    return <div className='p-4 text-center text-red-600 dark:text-red-400'>{error}</div>;
   }
 
   // Handle case where graphData is loaded but tasks array is empty after filtering
   if (!nodes || nodes.length === 0) {
-    return (
-      <div className="p-4 text-center text-gray-600 dark:text-gray-300">
-        No roadmap tasks available to display.
-      </div>
-    );
+    return <div className='p-4 text-center text-gray-600 dark:text-gray-300'>No roadmap tasks available to display.</div>;
   }
 
   return (
@@ -372,14 +336,8 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal,selectedPath }) =
         minZoom={0.2} // Allow zooming out further
       >
         <Controls />
-        <MiniMap
-          nodeStrokeColor="#ccc"
-          nodeColor="#fff"
-          nodeBorderRadius={2}
-          pannable
-          zoomable
-        />
-        <Background variant="dots" gap={15} size={1} />
+        <MiniMap nodeStrokeColor='#ccc' nodeColor='#fff' nodeBorderRadius={2} pannable zoomable />
+        <Background variant='dots' gap={15} size={1} />
       </ReactFlow>
     </div>
   );
@@ -427,21 +385,14 @@ const SkillsGraph = () => {
       ) : (
         <div>
           <ReactFlowProvider>
-            <SkillsGraphInternal
-              setShowSourcesModal={setShowSourcesModal}
-              setSources={setSources}
-              selectedPath={selectedPath}
-            />
+            <SkillsGraphInternal setShowSourcesModal={setShowSourcesModal} setSources={setSources} selectedPath={selectedPath} />
           </ReactFlowProvider>
           {showSourcesModal && (
-            <div className="w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6">
-              <button
-                className="absolute top-2 right-2 text-gray-500 hover:text-gray-700"
-                onClick={() => setShowSourcesModal(false)}
-              >
+            <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
+              <button className='absolute top-2 right-2 text-gray-500 hover:text-gray-700' onClick={() => setShowSourcesModal(false)}>
                 ❌
               </button>
-              <div className="overflow-y-auto max-h-[60vh] p-4">
+              <div className='overflow-y-auto max-h-[60vh] p-4'>
                 <div dangerouslySetInnerHTML={{ __html: sources }}></div>
               </div>
             </div>

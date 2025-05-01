@@ -1,20 +1,20 @@
 import React, { useState, useContext, useEffect } from "react";
-import { Link, useNavigate,useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
 
 export function Signup() {
   useEffect(() => {
-      document.title = "Signup | Employify AI";
-    }, []);
+    document.title = "Signup | Employify AI";
+  }, []);
   const location = useLocation();
 
-  const redirectPath = new URLSearchParams(location.search).get('redirect') || '/';
+  const redirectPath = new URLSearchParams(location.search).get("redirect") || "/";
   const { user, loading, setUser } = useContext(AuthContext);
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
-  useEffect(() => { 
+  useEffect(() => {
     if (user) {
       handleSuccess("Already loggedin \n Redirecting to account page...");
       setTimeout(() => {
@@ -133,10 +133,7 @@ export function Signup() {
     const nameValid = validateField("name", signupInfo.name);
     const emailValid = validateField("email", signupInfo.email);
     const passwordValid = validateField("password", signupInfo.password);
-    const confirmPasswordValid = validateField(
-      "confirmPassword",
-      signupInfo.confirmPassword
-    );
+    const confirmPasswordValid = validateField("confirmPassword", signupInfo.confirmPassword);
 
     // Mark all fields as touched
     setTouched({
@@ -185,167 +182,120 @@ export function Signup() {
   };
 
   return (
-    <div className="flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4">
-      <div className="w-4/5 md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 mt-11">
-        <h1 className="text-2xl md:text-3xl font-bold mb-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400">
+    <div className='flex flex-col justify-center items-center min-h-screen bg-gray-50 dark:bg-gray-900 p-4'>
+      <div className='w-4/5 md:w-1/3 bg-white dark:bg-gray-800 rounded-xl shadow-lg p-2 mt-11'>
+        <h1 className='text-2xl md:text-3xl font-bold mb-1 text-center bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-purple-600 dark:from-primary-400 dark:to-purple-400'>
           Create Account
         </h1>
-        <p className="text-gray-500 dark:text-gray-400 text-center mb-3">
-          Join our community today
-        </p>
+        <p className='text-gray-500 dark:text-gray-400 text-center mb-3'>Join our community today</p>
 
-        <form className="space-y-3" onSubmit={handleSignup}>
+        <form className='space-y-3' onSubmit={handleSignup}>
           <div>
-            <label
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5"
-              htmlFor="name"
-            >
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-0.5' htmlFor='name'>
               Full Name
             </label>
             <input
               onChange={handleChange}
               onBlur={handleBlur}
-              type="text"
-              name="name"
+              type='text'
+              name='name'
               value={signupInfo.name}
-              placeholder="John Doe"
+              placeholder='John Doe'
               className={`w-full p-3 border ${
-                errors.name && touched.name
-                  ? "border-red-500"
-                  : "border-gray-300 dark:border-gray-600"
+                errors.name && touched.name ? "border-red-500" : "border-gray-300 dark:border-gray-600"
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition bg-white dark:bg-gray-700 dark:text-white`}
             />
-            {errors.name && touched.name && (
-              <p className="mt-0.5 text-sm text-red-500">{errors.name}</p>
-            )}
+            {errors.name && touched.name && <p className='mt-0.5 text-sm text-red-500'>{errors.name}</p>}
           </div>
 
           <div>
-            <label
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              htmlFor="email"
-            >
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1' htmlFor='email'>
               Email
             </label>
             <input
               onChange={handleChange}
               onBlur={handleBlur}
-              type="email"
-              name="email"
+              type='email'
+              name='email'
               value={signupInfo.email}
-              placeholder="you@example.com"
+              placeholder='you@example.com'
               className={`w-full p-3 border ${
-                errors.email && touched.email
-                  ? "border-red-500"
-                  : "border-gray-300 dark:border-gray-600"
+                errors.email && touched.email ? "border-red-500" : "border-gray-300 dark:border-gray-600"
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition bg-white dark:bg-gray-700 dark:text-white`}
             />
-            {errors.email && touched.email && (
-              <p className="mt-1 text-sm text-red-500">{errors.email}</p>
-            )}
+            {errors.email && touched.email && <p className='mt-1 text-sm text-red-500'>{errors.email}</p>}
           </div>
 
           <div>
-            <label
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              htmlFor="password"
-            >
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1' htmlFor='password'>
               Password
             </label>
             <input
               onChange={handleChange}
               onBlur={handleBlur}
-              type="password"
-              name="password"
+              type='password'
+              name='password'
               value={signupInfo.password}
-              placeholder="••••••••"
+              placeholder='••••••••'
               className={`w-full p-3 border ${
-                errors.password && touched.password
-                  ? "border-red-500"
-                  : "border-gray-300 dark:border-gray-600"
+                errors.password && touched.password ? "border-red-500" : "border-gray-300 dark:border-gray-600"
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition bg-white dark:bg-gray-700 dark:text-white`}
             />
             {signupInfo.password && (
-              <div className="mt-2">
-                <div className="flex justify-between mb-1">
-                  <div className="flex space-x-1 w-full">
+              <div className='mt-2'>
+                <div className='flex justify-between mb-1'>
+                  <div className='flex space-x-1 w-full'>
                     {[1, 2, 3, 4, 5].map((index) => (
                       <div
                         key={index}
                         className={`h-1 w-full rounded-full ${
-                          index <= passwordStrength.score
-                            ? getStrengthColor()
-                            : "bg-gray-200 dark:bg-gray-600"
-                        }`}
-                      ></div>
+                          index <= passwordStrength.score ? getStrengthColor() : "bg-gray-200 dark:bg-gray-600"
+                        }`}></div>
                     ))}
                   </div>
                   {passwordStrength.message && (
-                    <span className="text-xs ml-2 text-gray-500 dark:text-gray-400">
-                      {passwordStrength.message}
-                    </span>
+                    <span className='text-xs ml-2 text-gray-500 dark:text-gray-400'>{passwordStrength.message}</span>
                   )}
                 </div>
               </div>
             )}
-            {errors.password && touched.password && (
-              <p className="mt-1 text-sm text-red-500">{errors.password}</p>
-            )}
+            {errors.password && touched.password && <p className='mt-1 text-sm text-red-500'>{errors.password}</p>}
           </div>
 
           <div>
-            <label
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-              htmlFor="confirmPassword"
-            >
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1' htmlFor='confirmPassword'>
               Confirm Password
             </label>
             <input
               onChange={handleChange}
               onBlur={handleBlur}
-              type="password"
-              name="confirmPassword"
+              type='password'
+              name='confirmPassword'
               value={signupInfo.confirmPassword}
-              placeholder="••••••••"
+              placeholder='••••••••'
               className={`w-full p-3 border ${
-                errors.confirmPassword && touched.confirmPassword
-                  ? "border-red-500"
-                  : "border-gray-300 dark:border-gray-600"
+                errors.confirmPassword && touched.confirmPassword ? "border-red-500" : "border-gray-300 dark:border-gray-600"
               } rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition bg-white dark:bg-gray-700 dark:text-white`}
             />
-            {errors.confirmPassword && touched.confirmPassword && (
-              <p className="mt-1 text-sm text-red-500">
-                {errors.confirmPassword}
-              </p>
-            )}
+            {errors.confirmPassword && touched.confirmPassword && <p className='mt-1 text-sm text-red-500'>{errors.confirmPassword}</p>}
           </div>
 
           <button
-            type="submit"
+            type='submit'
             disabled={isLoading}
-            className="w-full bg-primary-500 text-white p-3 rounded-lg hover:bg-primary-600 transition focus:ring-4 focus:ring-primary-300 focus:outline-none font-medium text-center flex items-center justify-center mt-6"
-          >
+            className='w-full bg-primary-500 text-white p-3 rounded-lg hover:bg-primary-600 transition focus:ring-4 focus:ring-primary-300 focus:outline-none font-medium text-center flex items-center justify-center mt-6'>
             {isLoading ? (
               <>
                 <svg
-                  className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-                  xmlns="http://www.w3.org/2000/svg"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                >
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  ></circle>
+                  className='animate-spin -ml-1 mr-3 h-5 w-5 text-white'
+                  xmlns='http://www.w3.org/2000/svg'
+                  fill='none'
+                  viewBox='0 0 24 24'>
+                  <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4'></circle>
                   <path
-                    className="opacity-75"
-                    fill="currentColor"
-                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                    className='opacity-75'
+                    fill='currentColor'
+                    d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
                 </svg>
                 Creating account...
               </>
@@ -355,13 +305,10 @@ export function Signup() {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
-          <p className="text-sm text-gray-600 dark:text-gray-400">
+        <div className='mt-6 text-center'>
+          <p className='text-sm text-gray-600 dark:text-gray-400'>
             Already have an account?{" "}
-            <Link
-              to={`/login?redirect=${redirectPath}`}
-              className="text-primary-600 hover:text-primary-500 font-medium"
-            >
+            <Link to={`/login?redirect=${redirectPath}`} className='text-primary-600 hover:text-primary-500 font-medium'>
               Sign in
             </Link>
           </p>

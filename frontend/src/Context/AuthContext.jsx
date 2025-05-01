@@ -1,7 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
-import { handleError, handleSuccess } from "../utils";
-axios.defaults.withCredentials = true; // Force cookies to be sent
+axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Accept"] = "application/json";
 export const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
@@ -34,11 +33,7 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     try {
-      const res = await axios.post(
-        url + "/auth/login",
-        { email, password },
-        { withCredentials: true }
-      );
+      const res = await axios.post(url + "/auth/login", { email, password }, { withCredentials: true });
       setUser(res.data);
       console.log(res);
       return { success: true, message: res.message };
@@ -52,11 +47,7 @@ export const AuthProvider = ({ children }) => {
 
   const signup = async (name, email, password) => {
     try {
-      const res = await axios.post(
-        url + "/auth/signup",
-        { name, email, password },
-        { withCredentials: true }
-      );
+      const res = await axios.post(url + "/auth/signup", { name, email, password }, { withCredentials: true });
       console.log(res);
       setUser(res.data);
       return { success: true };
@@ -68,16 +59,11 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // Logout function
   const logout = async () => {
     await axios.post(url + "/auth/logout", {}, { withCredentials: true });
     setUser(null);
     return { success: true };
   };
 
-  return (
-    <AuthContext.Provider value={{ user, login, signup, logout, loading }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={{ user, login, signup, logout, loading }}>{children}</AuthContext.Provider>;
 };
