@@ -2,13 +2,12 @@ const Profile = require("../models/ProfileModel.js");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { getKeywordsAndSummary } = require("../Services/JobPrompts.js");
 const mime = require("mime-types");
-const { evaluationPrompt,questionsPrompt } = require("../Services/ProfilePrompts.js");
+const { evaluationPrompt, questionsPrompt } = require("../Services/ProfilePrompts.js");
 const add = async (req, res) => {
   try {
     const userId = req.user._id;
     console.log("checking existing profile");
-    const { hardSkills, softSkills, jobs, projects, careerGoal, location } =
-      req.body;
+    const { hardSkills, softSkills, jobs, projects, careerGoal, location } = req.body;
     console.log("Creating new profile");
     const profile = new Profile({
       userId,
@@ -22,10 +21,16 @@ const add = async (req, res) => {
     console.log("Profile data:", profile);
     await profile.save();
     const keywordsAndSummary = await getKeywordsAndSummary(profile);
-    const {summary, jobKeywords} = keywordsAndSummary;
+    if (keywordsAndSummary.startsWith("WRONG")) {
+      return res.status(401).json({ message: "Wrong data", success: false });
+    }
+    if (keywordsAndSummary.startsWith("LLM_ERROR")) {
+      return res.status(500).json({ message: "AI Engine error", success: false });
+    }
+    const { summary, jobKeywords } = keywordsAndSummary;
     const updatedProfile = await Profile.findOneAndUpdate(
       { userId: userId },
-      { $set: { jobKeywords: jobKeywords, profileSummary: summary} },
+      { $set: { jobKeywords: jobKeywords, profileSummary: summary } },
       { new: true }
     );
     console.log("Updated profile with keywords:", updatedProfile);
@@ -61,13 +66,11 @@ const getQuestions = async (req, res) => {
     const profile = await Profile.findOne({ userId });
     if (!profile) {
       console.error("No profile found for user:", userId);
-      return res
-        .status(404)
-        .json({ message: "Profile not found", success: false });
+      return res.status(404).json({ message: "Profile not found", success: false });
     }
     console.log("Profile data:", profile);
     const { hardSkills, softSkills, jobs, projects, careerGoal } = profile;
-    const prompt = questionsPrompt(hardSkills,softSkills, jobs, projects, careerGoal);
+    const prompt = questionsPrompt(hardSkills, softSkills, jobs, projects, careerGoal);
 
     console.log("Prompt for Gemini:", prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
@@ -112,7 +115,7 @@ const evaluateProfile = async (req, res) => {
   try {
     const userId = req.user._id;
     const { file1, file2 } = req.files;
-    if(!file1 || !file2) {
+    if (!file1 || !file2) {
       console.error("Files not provided in the request");
     }
     const firstFile = file1[0];
@@ -154,7 +157,7 @@ const evaluateProfile = async (req, res) => {
     };
     const hardSkillResponse1 = await evaluate(questions.hardSkillsTask1, firstFile);
     const hardSkillResponse2 = await evaluate(questions.hardSkillsTask2, secondFile);
-    const prompt = evaluationPrompt( profile, questions, evaluationForm, hardSkillResponse1, hardSkillResponse2);
+    const prompt = evaluationPrompt(profile, questions, evaluationForm, hardSkillResponse1, hardSkillResponse2);
     console.log("Prompt for Gemini:", prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
@@ -169,9 +172,7 @@ const evaluateProfile = async (req, res) => {
     profile.evaluationResult = evaluation;
     profile.isEvaluated = true;
     await profile.save();
-    res
-      .status(200)
-      .json({ message: "Profile evaluated successfully", success: true });
+    res.status(200).json({ message: "Profile evaluated successfully", success: true });
   } catch (error) {
     console.error("Error evaluating profile:", error);
     res.status(500).json({ message: "Internal server error", success: false });

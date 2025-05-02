@@ -16,7 +16,7 @@ const ProfileForm = ({ setHasProfile }) => {
       title: "",
       company: "",
       startDate: "",
-      endDate: "",
+      endDate: new Date().toISOString().split("T")[0],
     },
   ]);
   const [projects, setProjects] = useState([
@@ -49,7 +49,7 @@ const ProfileForm = ({ setHasProfile }) => {
         title: "",
         company: "",
         startDate: "",
-        endDate: "",
+        endDate: new Date().toISOString().split("T")[0],
       };
       setJobs([...jobs, newJob]);
     } else if (type === "project") {
@@ -120,7 +120,6 @@ const ProfileForm = ({ setHasProfile }) => {
       handleSuccess("Information submitted successfully!");
     } else if (result.data.success == false) {
       handleError(result.data.message);
-      alert(result.data.message);
     }
   };
 

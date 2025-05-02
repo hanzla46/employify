@@ -7,12 +7,7 @@ const CalculateRelevancyScores = async (jobs, profileSummary) => {
      
      All Jobs with their descriptions:
      ${jobs
-       .map(
-         (job, idx) =>
-           `Job #${idx + 1}:\nID: ${job._id.toString()}\nDescription: ${
-             job.description
-           }`
-       )
+       .map((job, idx) => `Job #${idx + 1}:\nID: ${job._id.toString()}\nDescription: ${job.description}`)
        .join("\n\n")}
      
      Respond in JSON like this:
@@ -77,7 +72,7 @@ ${profile}
     return parsedResult;
   } catch (error) {
     console.error("Error occurred while generating job keywords:", error);
-    throw new Error("Failed to generate job keywords.");
+    return "LLM_ERROR";
   }
 };
 module.exports = { CalculateRelevancyScores, getKeywordsAndSummary };
