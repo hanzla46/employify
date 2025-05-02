@@ -118,15 +118,12 @@ const nodeTypes = {
 };
 
 // --- Main Graph Component ---
-const SkillsGraphInternal = ({ setSources, setShowSourcesModal, selectedPath }) => {
+const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loading, error }) => {
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  const { roadmap, setRoadmap } = useContext(SkillsContext);
-  const url = import.meta.env.VITE_API_URL;
-  const [graphData, setGraphData] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  // const { roadmap, setRoadmap } = useContext(SkillsContext);
+  // const url = import.meta.env.VITE_API_URL;
 
   // Handle subtask button clicks
   const handleSubtaskAction = useCallback((taskId, subtaskId) => {
@@ -141,71 +138,6 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, selectedPath }) 
     },
     [setSources, setShowSourcesModal]
   ); // Added dependencies
-
-  // Fetch data from API
-  useEffect(() => {
-    const fetchRoadmap = async () => {
-      try {
-        if (roadmap && roadmap && roadmap.length > 0) {
-          handleSuccess("Using cached roadmap data from localStorage.");
-          setGraphData({
-            tasks: roadmap,
-          });
-          setLoading(false);
-          return;
-        }
-        setLoading(true);
-        setError(null); // Reset error state
-        const result = await axios.post(
-          url + "/roadmap/generate",
-          { selectedPath },
-          {
-            withCredentials: true,
-            headers: {
-              Accept: "application/json",
-            },
-          }
-        );
-
-        if (result.data.success) {
-          console.log("API Roadmap data:", result.data.data);
-          localStorage.setItem("roadmap", JSON.stringify(result.data.data)); // Store raw data in localStorage
-          if (
-            result.data.data &&
-            result.data.data.tasks &&
-            Array.isArray(result.data.data.tasks) && // Ensure it's an array
-            result.data.data.tasks.length > 0
-          ) {
-            setGraphData(result.data.data); // Store raw data
-            setRoadmap(result.data.data.tasks); // Update context
-          } else {
-            console.warn("No roadmap tasks found in API response.");
-            setError("No roadmap data found. Please generate a roadmap first.");
-            setGraphData({ tasks: [] }); // Set empty tasks to avoid breaking layout logic later
-          }
-        } else {
-          console.error("API call failed:", result.data.message);
-          setError(result.data.message || "Failed to fetch roadmap (API error).");
-          setGraphData({ tasks: [] });
-        }
-      } catch (err) {
-        console.error("Error fetching roadmap:", err);
-        setError("Failed to load roadmap. Please check connection or try again.");
-        setGraphData({ tasks: [] }); // Set empty tasks on error
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (!roadmap || !roadmap.tasks || roadmap.tasks.length === 0) {
-      console.log("No roadmap in context, fetching from API...");
-      fetchRoadmap();
-    } else {
-      console.log("Using roadmap data from context.");
-      setGraphData(roadmap);
-      setLoading(false);
-    }
-  }, []);
 
   // Process data and transform to ReactFlow format using Dagre layout
   useEffect(() => {
@@ -355,10 +287,11 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-  const { setIsPathSelected, isPathSelected, roadmap } = useContext(SkillsContext);
+  const { setIsPathSelected, isPathSelected, roadmap, setRoadmap } = useContext(SkillsContext);
   const [careerData, setCareerData] = useState({});
   const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
+    if (isPathSelected) return;
     if (roadmap && roadmap.length > 0) {
       return;
     }
@@ -372,7 +305,75 @@ const SkillsGraph = () => {
       setCareerData(result.data.data);
     };
     fetchPaths();
-  }, [roadmap]);
+  }, [roadmap, isPathSelected]);
+
+  const [graphData, setGraphData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  useEffect(() => {
+    const fetchRoadmap = async () => {
+      if (!isPathSelected) return;
+      try {
+        if (roadmap && roadmap && roadmap.length > 0) {
+          handleSuccess("Using cached roadmap data from localStorage.");
+          setGraphData({
+            tasks: roadmap,
+          });
+          setLoading(false);
+          return;
+        }
+        setLoading(true);
+        setError(null); // Reset error state
+        const result = await axios.post(
+          url + "/roadmap/generate",
+          { selectedPath },
+          {
+            withCredentials: true,
+            headers: {
+              Accept: "application/json",
+            },
+          }
+        );
+
+        if (result.data.success) {
+          console.log("API Roadmap data:", result.data.data);
+          localStorage.setItem("roadmap", JSON.stringify(result.data.data)); // Store raw data in localStorage
+          if (
+            result.data.data &&
+            result.data.data.tasks &&
+            Array.isArray(result.data.data.tasks) && // Ensure it's an array
+            result.data.data.tasks.length > 0
+          ) {
+            setGraphData(result.data.data); // Store raw data
+            setRoadmap(result.data.data.tasks); // Update context
+          } else {
+            console.warn("No roadmap tasks found in API response.");
+            setError("No roadmap data found. Please generate a roadmap first.");
+            setGraphData({ tasks: [] }); // Set empty tasks to avoid breaking layout logic later
+          }
+        } else {
+          console.error("API call failed:", result.data.message);
+          setError(result.data.message || "Failed to fetch roadmap (API error).");
+          setGraphData({ tasks: [] });
+        }
+      } catch (err) {
+        console.error("Error fetching roadmap:", err);
+        setError("Failed to load roadmap. Please check connection or try again.");
+        setGraphData({ tasks: [] }); // Set empty tasks on error
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (!roadmap || !roadmap.tasks || roadmap.tasks.length === 0) {
+      console.log("No roadmap in context, fetching from API...");
+      fetchRoadmap();
+    } else {
+      console.log("Using roadmap data from context.");
+      setGraphData({ tasks: roadmap });
+      setLoading(false);
+    }
+  }, [isPathSelected, roadmap]);
   return (
     <>
       {!isPathSelected ? (
@@ -385,7 +386,13 @@ const SkillsGraph = () => {
       ) : (
         <div>
           <ReactFlowProvider>
-            <SkillsGraphInternal setShowSourcesModal={setShowSourcesModal} setSources={setSources} selectedPath={selectedPath} />
+            <SkillsGraphInternal
+              setShowSourcesModal={setShowSourcesModal}
+              setSources={setSources}
+              graphData={graphData}
+              loading={loading}
+              error={error}
+            />
           </ReactFlowProvider>
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
