@@ -90,7 +90,7 @@ Accelerators: ${selectedPath.Accelerators} \n
           "category": "AI Integration & Augmentation",
           "difficulty": "Intermediate",
           "estimated_time": "2 weeks",
-          "ai_impact": "While AI can handle basic [Skill X] tasks, integrating it effectively requires deeper understanding. This skill is crucial for roles managing AI-augmented workflows and provides a competitive edge over those relying solely on automated outputs."
+          "ai_impact": "While AI can handle basic [Skill X] tasks, integrating it effectively requires deeper understanding. This skill is crucial for roles managing AI-augmented workflows and provides a competitive edge over those relying solely on automated outputs.(MAX 40 Words)"
         }
         // ... more task objects ...
       ],

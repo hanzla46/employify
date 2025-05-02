@@ -13,8 +13,8 @@ import axios from "axios";
 import dagre from "dagre"; // Import dagre
 import { SkillsContext } from "../../Context/SkillsContext";
 import { Atom } from "react-loading-indicators";
-import { handleSuccess } from "../../utils";
-
+import { handleError, handleSuccess } from "../../utils";
+import { Send, Mic, Smile } from "lucide-react";
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -63,7 +63,9 @@ const TaskNode = ({ data }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
-    <div className='p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-96 m-8' style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
+    <div
+      className='p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-[450px] m-8'
+      style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
       {/* Adjust width based on padding */}
       <div className='font-bold text-lg mb-2'>{data.label}</div>
@@ -81,17 +83,17 @@ const TaskNode = ({ data }) => {
           {data.subtasks.map((subtask, index) => (
             <div
               key={subtask.id || index} // Use subtask.id if available and unique
-              className='flex items-center justify-between mb-2 bg-gray-100 p-2 rounded'>
+              className='flex items-center justify-between flex-col mb-2 bg-gray-100 p-2 rounded'>
               <div className='text-sm mr-2'>{subtask.label}</div>
-              <div className='flex flex-col justify-center'>
+              <div className='flex flex-row justify-between mt-2'>
                 {" "}
                 <button
-                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 mb-2'
+                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150'
                   onClick={() => data.onSubtaskAction(subtask.id)}>
                   {subtask.buttonText || "Action"}
                 </button>
                 <button
-                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 rounded text-xs whitespace-nowrap transition-colors duration-150 w-16 m-auto'
+                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150 w-16'
                   onClick={() => {
                     console.log("Sources:", subtask.sources);
                     data.showSources(subtask.sources);
@@ -334,7 +336,6 @@ const SkillsGraph = () => {
             },
           }
         );
-
         if (result.data.success) {
           console.log("API Roadmap data:", result.data.data);
           localStorage.setItem("roadmap", JSON.stringify(result.data.data)); // Store raw data in localStorage
@@ -374,6 +375,31 @@ const SkillsGraph = () => {
       setLoading(false);
     }
   }, [isPathSelected, roadmap]);
+
+  const [modificationText, setModificationText] = useState("");
+  const [modifyLoading, setModifyLoading] = useState(false);
+  const modify = async () => {
+    if (!modificationText || modificationText.length < 4) return;
+    setModifyLoading(true);
+    try {
+      const result = await axios.get(url + `/roadmap/modify?text=${modificationText}`, {
+        withCredentials: true,
+        headers: {
+          Accept: "application/json",
+        },
+      });
+      if (result.data.success) {
+        setModificationText("");
+        setGraphData(result.data.data);
+        setRoadmap(result.data.data.tasks);
+      } else {
+        handleError("server error");
+      }
+    } catch (error) {
+      handleError("server error");
+    }
+    setModifyLoading(true);
+  };
   return (
     <>
       {!isPathSelected ? (
@@ -394,6 +420,22 @@ const SkillsGraph = () => {
               error={error}
             />
           </ReactFlowProvider>
+
+          <div className='fixed bottom-1 left-1/3 w-full max-w-2xl mx-auto flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 shadow-lg'>
+            <input
+              value={modificationText}
+              onChange={(e) => setModificationText(e.target.value)}
+              type='text'
+              placeholder='Need Modifications?'
+              className='flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none px-2 text-sm'
+            />
+            <button
+              onClick={modify}
+              disabled={modifyLoading}
+              className={`bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full transition shadow-md disabled:opacity-50`}>
+              <Send size={16} />
+            </button>
+          </div>
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
               <button className='absolute top-2 right-2 text-gray-500 hover:text-gray-700' onClick={() => setShowSourcesModal(false)}>
