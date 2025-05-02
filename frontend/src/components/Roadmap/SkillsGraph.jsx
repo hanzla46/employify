@@ -18,8 +18,8 @@ import { Send, Mic, Smile } from "lucide-react";
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-const NODE_WIDTH = 280; // Estimate width of your TaskNode + padding
-const NODE_HEIGHT = 180; // Estimate height (can vary with expansion, use an average)
+const NODE_WIDTH = 390; // Estimate width of your TaskNode + padding
+const NODE_HEIGHT = 280; // Estimate height (can vary with expansion, use an average)
 
 const getLayoutedElements = (nodes, edges, direction = "LR") => {
   dagreGraph.setGraph({ rankdir: direction, nodesep: 50, ranksep: 100 }); // Adjust spacing
@@ -64,26 +64,31 @@ const TaskNode = ({ data }) => {
 
   return (
     <div
-      className='p-4 rounded-lg border-2 border-gray-300 bg-white shadow-md max-w-[450px] m-8'
+      className={`p-4 rounded-lg border-2 border-gray-300 bg-white shadow-xl max-w-[450px] m-8 ${
+        data.priority == "low" ? "bg-zinc-300" : ""
+      } ${data.priority == "medium" ? "bg-sky-300" : ""} ${data.priority == "high" ? "bg-red-200" : ""}`}
       style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
       {/* Adjust width based on padding */}
       <div className='font-bold text-lg mb-2'>{data.label}</div>
       <div className='text-sm text-gray-600 mb-3'>{data.description}</div>
+      <div className='text-xs text-gray-500 mt-1 mb-1 border-t pt-1'>
+        Category: {data.category || "N/A"} | Diff: {data.difficulty || "N/A"} | Est: {data.estimated_time || "N/A"}
+      </div>
       {data.subtasks && data.subtasks.length > 0 && (
         <button
-          className='bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mb-2 transition-colors duration-150'
+          className='bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mb-1 mt-1 transition-colors duration-150'
           onClick={() => setExpanded(!expanded)}>
           {expanded ? "Hide Subtasks" : `Show ${data.subtasks.length} Subtasks`}
         </button>
       )}
       {expanded && (
-        <div className='mt-3 border-t pt-2'>
+        <div className='mt-1 border-t pt-2'>
           <div className='text-sm font-semibold mb-1'>Subtasks:</div>
           {data.subtasks.map((subtask, index) => (
             <div
               key={subtask.id || index} // Use subtask.id if available and unique
-              className='flex items-center justify-between flex-col mb-2 bg-gray-100 p-2 rounded'>
+              className='flex items-center justify-between flex-col mb-2 p-2 rounded border border-blue-300'>
               <div className='text-sm mr-2'>{subtask.label}</div>
               <div className='flex flex-row justify-between mt-2'>
                 {" "}
@@ -105,10 +110,6 @@ const TaskNode = ({ data }) => {
           ))}
         </div>
       )}
-      {/* Add other data points if needed */}
-      <div className='text-xs text-gray-500 mt-2 border-t pt-1'>
-        Category: {data.category || "N/A"} | Diff: {data.difficulty || "N/A"} | Est: {data.estimated_time || "N/A"}
-      </div>
       {data.ai_impact && <div className='text-xs text-purple-700 mt-1 italic'>Importance: {data.ai_impact}</div>}
     </div>
   );
@@ -174,6 +175,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       data: {
         label: task.name || "Unnamed Task",
         description: task.description || "",
+        priority: task.priority || "",
         subtasks: (task.subtasks || []).map((st, index) => ({
           // Ensure subtasks have unique IDs if possible, otherwise use index as fallback key
           id: st.id != null ? st.id : `${task.id}-sub-${index}`,
@@ -242,7 +244,11 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   }, [graphData, handleSubtaskAction]); // Rerun layout when graphData changes
 
   if (loading) {
-    return <Atom color='#32cd32' size='large' text='Loading Roadmap Graph' textColor='#17d83f' />;
+    return (
+      <div className='flex justify-center align-bottom'>
+        <Atom color='#32cd32' size='large' text='Loading Roadmap Graph' textColor='#17d83f' />;
+      </div>
+    );
   }
 
   if (error) {
@@ -298,12 +304,14 @@ const SkillsGraph = () => {
       return;
     }
     const fetchPaths = async () => {
+      setModifyLoading(true);
       const result = await axios.get(url + "/roadmap/career-paths", {
         withCredentials: true,
         headers: {
           Accept: "application/json",
         },
       });
+      setModifyLoading(false);
       setCareerData(result.data.data);
     };
     fetchPaths();
@@ -315,6 +323,7 @@ const SkillsGraph = () => {
   useEffect(() => {
     const fetchRoadmap = async () => {
       if (!isPathSelected) return;
+      setModifyLoading(true);
       try {
         if (roadmap && roadmap && roadmap.length > 0) {
           handleSuccess("Using cached roadmap data from localStorage.");
@@ -325,6 +334,7 @@ const SkillsGraph = () => {
           return;
         }
         setLoading(true);
+        setModifyLoading(true);
         setError(null);
         setCareerPath(selectedPath.Path_name);
         const result = await axios.post(
@@ -364,6 +374,7 @@ const SkillsGraph = () => {
         setGraphData({ tasks: [] }); // Set empty tasks on error
       } finally {
         setLoading(false);
+        setModifyLoading(false);
       }
     };
 
@@ -422,10 +433,11 @@ const SkillsGraph = () => {
             />
           </ReactFlowProvider>
 
-          <div className='fixed bottom-1 left-1/3 w-full max-w-2xl mx-auto flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 shadow-lg'>
+          <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 shadow-lg'>
             <input
               value={modificationText}
               onChange={(e) => setModificationText(e.target.value)}
+              disabled={modifyLoading}
               type='text'
               placeholder='Need Modifications?'
               className='flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none px-2 text-sm'

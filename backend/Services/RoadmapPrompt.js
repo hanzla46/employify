@@ -52,6 +52,7 @@ Accelerators: ${selectedPath.Accelerators} \n
     *   'difficulty': **Beginner / Intermediate / Advanced / Expert** (relative to the user's likely starting point for *this task*).
     *   'estimated_time': Realistic time estimate (e.g., "3 days," "2 weeks," "1 month intensive").
     *   'ai_impact': Explain specifically how AI is changing this area/skill, the opportunities/threats it presents, and how mastering this task helps navigate that (e.g., "AI can automate basic X, making proficiency in advanced Y crucial for differentiation"; "Leveraging AI tool Z can speed up this process by 40%, freeing up time for strategic analysis").
+    *   'priority': give each task a priority: low, high or medium. (keep it lowercase).
 
 2.  **Roadmap Structure & Strategy:**
     *   **Logical Flow & Layout:** Arrange nodes logically (left-to-right, top-to-bottom). Use dependencies to show clear progression. Consider parallel tracks for efficiency (e.g., learning a skill while networking).
@@ -90,7 +91,8 @@ Accelerators: ${selectedPath.Accelerators} \n
           "category": "AI Integration & Augmentation",
           "difficulty": "Intermediate",
           "estimated_time": "2 weeks",
-          "ai_impact": "While AI can handle basic [Skill X] tasks, integrating it effectively requires deeper understanding. This skill is crucial for roles managing AI-augmented workflows and provides a competitive edge over those relying solely on automated outputs.(MAX 40 Words)"
+          "ai_impact": "While AI can handle basic [Skill X] tasks, integrating it effectively requires deeper understanding. This skill is crucial for roles managing AI-augmented workflows and provides a competitive edge over those relying solely on automated outputs.(MAX 40 Words)",
+          "priority": "medium"
         }
         // ... more task objects ...
       ],

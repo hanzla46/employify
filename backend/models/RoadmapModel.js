@@ -29,6 +29,7 @@ const TaskSchema = new mongoose.Schema({
   difficulty: String,
   estimated_time: String,
   ai_impact: String,
+  priority: String,
 });
 
 const RoadmapSchema = new mongoose.Schema({
