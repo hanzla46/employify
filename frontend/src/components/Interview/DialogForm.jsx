@@ -11,12 +11,11 @@ const options = {
   experience: ["0-1", "1-2", "2-3", "4-6", "6+"],
 };
 
-export default function DialogForm({ start, setInterviewData, interviewData, job, jobOrMock, setJobOrMock }) {
+export default function DialogForm({ start, setInterviewData, interviewData, job, jobOrMock, setJobOrMock, loading, setLoading }) {
   useEffect(() => {
     console.log("job" + job);
     console.log("mock or job" + jobOrMock);
   }, [job, jobOrMock]);
-  const [loading, setLoading] = useState(false);
   const startIt = () => {
     if (jobOrMock === "mock") {
       if (
@@ -31,9 +30,12 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
         return;
       }
     }
+    if (jobOrMock === "job" && !job) {
+      handleError("No job selected");
+      return;
+    }
     setLoading(true);
     start();
-    setLoading(false);
   };
 
   return (
@@ -61,12 +63,12 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
       {jobOrMock === "mock" ? <MockInterviewCard interviewData={interviewData} setInterviewData={setInterviewData} /> : ""}
       {jobOrMock === "job" && job ? <JobDataCard job={job} /> : ""}
 
-      <div className='flex justify-center mt-0'>
+      <div className='flex justify-around mt-0'>
         <button
           onClick={startIt}
           className='w-36 py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center'>
           {loading ? <Spinner /> : ""}
-          Start Interview
+          <span> Start Interview</span>
         </button>
       </div>
     </div>

@@ -149,7 +149,6 @@ export function Interview() {
       }
     } catch (error) {
       console.error("Failed to start interview:", error.message);
-      //  Handle errors from axios more specifically
       if (error.response) {
         handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
       } else if (error.request) {
@@ -158,6 +157,7 @@ export function Interview() {
         handleError("Error setting up request: " + error.message);
       }
     }
+    setLoading(false);
   };
 
   const sendResponse = async () => {
@@ -316,6 +316,8 @@ export function Interview() {
                           job={job}
                           jobOrMock={jobOrMock}
                           setJobOrMock={setJobOrMock}
+                          loading={loading}
+                          setLoading={setLoading}
                         />
                       </div>
                     </div>

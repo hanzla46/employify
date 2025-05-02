@@ -17,6 +17,9 @@ const startInterview = async (req, res) => {
       status: "completed",
     }).sort({ createdAt: -1 });
     const infoSummary = await GetInterviewInfo(profile, jobOrMock, job, interviewData, previousInterviews);
+    if (infoSummary.startsWith("WRONG")) {
+      return res.status(401).json({ message: "fake input!!!", success: false });
+    }
     const newInterview = new Interview({
       userId,
       status: "ongoing",

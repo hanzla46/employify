@@ -155,8 +155,23 @@ ${jobOrMock === "job" ? jobInfo : mockInfo}
 📌 Format your output as a single professional paragraph (not a list).
 Avoid vague phrases like “various questions” — be specific.
 DO NOT ask the user any questions. Do not use filler words.
+Generate summary if input is right and recognizable.
+Keep it direct, structured, and factual. Maximum ~150 words.
 
-Keep it direct, structured, and factual. Maximum ~100 words.
+---
+⚠️ IMPORTANT RULE:
+If **any** of the inputs contain:
+- Random letters (e.g., "asdf", "qwerty", "xxxx"),
+- Incomplete or nonsense data (e.g., “1234”, “!@#”, “random nonsense”),
+- Invalid roles (e.g., "mango hunter", "banana king"), 
+- Fake/illogical companies (e.g., "madeupcompany.xyz", "superfakecorp") 
+- Or any clearly irrelevant or fake data that doesn’t belong in a professional context...
+You must **ONLY respond with:**
+👉 'WRONG' (uppercase, no punctuation).
+DO NOT generate any summaries, even partial ones. If the data is recognizable, generate a professional interview summary with relevant context, skills, and goals. If it’s questionable or doesn’t fit into a recognizable job role or mock interview setup, **you have to reject it outright** and return 'WRONG' only.
+--- 
+
+Format your output as a clear, concise, professional summary in **one paragraph**. Make sure all the data provided in the summary fits logically and contextually into an interview preparation scenario.
   `;
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
