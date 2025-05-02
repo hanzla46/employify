@@ -289,7 +289,7 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-  const { setIsPathSelected, isPathSelected, roadmap, setRoadmap } = useContext(SkillsContext);
+  const { setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath } = useContext(SkillsContext);
   const [careerData, setCareerData] = useState({});
   const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
@@ -325,7 +325,8 @@ const SkillsGraph = () => {
           return;
         }
         setLoading(true);
-        setError(null); // Reset error state
+        setError(null);
+        setCareerPath(selectedPath.Path_name);
         const result = await axios.post(
           url + "/roadmap/generate",
           { selectedPath },

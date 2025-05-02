@@ -37,9 +37,9 @@ const ProfileSchema = new mongoose.Schema({
     country: { type: String, required: true },
   },
   jobKeywords: [String],
-  evaluationResult: {type: String, default:""},
+  evaluationResult: { type: String, default: "" },
   profileSummary: String,
-  isEvaluated: {type:Boolean, default:false},
+  isEvaluated: { type: Boolean, default: false },
 });
 
 const Profile = mongoose.model("Profile", ProfileSchema);

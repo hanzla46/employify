@@ -12,6 +12,7 @@ export const SkillsProvider = ({ children }) => {
   const [hasProfile, setHasProfile] = useState(false);
   const [evaluated, setEvaluated] = useState(false);
   const [isPathSelected, setIsPathSelected] = useState(false);
+  const [careerPath, setCareerPath] = useState("");
   const url = import.meta.env.VITE_API_URL;
   console.log(url);
   useEffect(() => {
@@ -28,6 +29,7 @@ export const SkillsProvider = ({ children }) => {
           setHasProfile(true);
           console.log("profile found");
           setEvaluated(profileResponse.data.isEvaluated);
+          setCareerPath(profileResponse.data.careerPath);
           const getRoadmap = await axios.get(url + "/roadmap/get");
           if (getRoadmap.data.success) {
             console.log("Roadmap found:", getRoadmap.data.data);
@@ -65,8 +67,9 @@ export const SkillsProvider = ({ children }) => {
         setHasProfile,
         setIsPathSelected,
         isPathSelected,
-      }}
-    >
+        careerPath,
+        setCareerPath,
+      }}>
       {children}
     </SkillsContext.Provider>
   );

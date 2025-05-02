@@ -50,7 +50,9 @@ const check = async (req, res) => {
     const existing = await Profile.findOne({ userId });
     if (existing) {
       console.log("Profile exists for user:", userId);
-      return res.status(200).json({ profile: true, success: true, isEvaluated: existing.isEvaluated });
+      return res
+        .status(200)
+        .json({ profile: true, success: true, isEvaluated: existing.isEvaluated, careerPath: existing.careerGoal });
     } else {
       console.log("No profile found for user:", userId);
       return res.status(200).json({ profile: false, success: true });

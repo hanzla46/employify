@@ -31,7 +31,8 @@ const generateRoadmap = async (req, res) => {
     if (!profile) {
       return res.status(404).json({ success: false, message: "Profile not found" });
     }
-
+    profile.careerGoal = selectedPath.Path_name;
+    await profile.save();
     const prompt = await getRoadmapPrompt(profile, selectedPath);
     console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
