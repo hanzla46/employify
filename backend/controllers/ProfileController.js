@@ -21,11 +21,13 @@ const add = async (req, res) => {
     console.log("Profile data:", profile);
     await profile.save();
     const keywordsAndSummary = await getKeywordsAndSummary(profile);
-    if (keywordsAndSummary.startsWith("WRONG")) {
-      return res.status(401).json({ message: "Wrong data", success: false });
-    }
-    if (keywordsAndSummary.startsWith("LLM_ERROR")) {
-      return res.status(500).json({ message: "AI Engine error", success: false });
+    if (typeof keywordsAndSummary === "string") {
+      if (keywordsAndSummary.startsWith("WRONG")) {
+        return res.status(401).json({ message: "Wrong data", success: false });
+      }
+      if (keywordsAndSummary.startsWith("LLM_ERROR")) {
+        return res.status(500).json({ message: "AI Engine error", success: false });
+      }
     }
     const { summary, jobKeywords } = keywordsAndSummary;
     const updatedProfile = await Profile.findOneAndUpdate(

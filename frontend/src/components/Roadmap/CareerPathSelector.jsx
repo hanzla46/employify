@@ -28,7 +28,7 @@ function CareerPathSelector({ pathsData, selectedPathName, onPathSelect, setIsPa
             // --- Apply base, hover, selected, and dark mode styles ---
             className={`
               border rounded-lg p-3 flex items-start cursor-pointer
-              transition duration-200 ease-in-out text-gray-700 dark:text-gray-300 w-[47%] m-auto h-80
+              transition duration-200 ease-in-out text-gray-700 dark:text-gray-300 w-[47%] m-auto min-h-80
               ${
                 selectedPathName === path.Path_name
                   ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/50 dark:ring-blue-400/50 bg-blue-50 dark:bg-gray-700" // Selected: Light & Dark

@@ -1,10 +1,7 @@
 const moment = require("moment");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const mime = require("mime-types");
-const getRoadmapPrompt = async (
-  profile, selectedPath
-) => {
-
+const getRoadmapPrompt = async (profile, selectedPath) => {
   try {
     const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
       selectedPath.Path_name || "Being Backend Developer and getting remote job"
@@ -16,11 +13,7 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 
 ### **User Profile Snapshot:**
 
-*   **Career Goal:** ${
-      profile.careerGoal
-        ? profile.careerGoal
-        : "Being Backend Developer and getting remote job"
-    }
+*   **Career Goal:** ${profile.careerGoal ? profile.careerGoal : "Being Backend Developer and getting remote job"}
 *   **Current Skills:** 
     *   **Hard Skills:** ${profile.hardSkills
       .map((skill) => `${skill.name} (${skill.experience} years experience)`)
@@ -28,18 +21,11 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
     *   **Soft Skills:** ${profile.softSkills
       .map((skill) => `${skill.name} (${skill.proficiency} proficiency)`)
       .join(", ")}
-*   **Job Experience:** ${profile.jobs
-      .map((job) => `${job.title} at ${job.company} for 1 year`)
-      .join(", ")}
-*   **Projects Completed:** ${profile.projects
-      .map((project) => project.name)
-      .join(", ")}
+*   **Job Experience:** ${profile.jobs.map((job) => `${job.title} at ${job.company} for 1 year`).join(", ")}
+*   **Projects Completed:** ${profile.projects.map((project) => project.name).join(", ")}
 
 ### User Profile Evaluation:
-${profile.profileSummary ?
-  profile.evaluationResult
-  : "Not evaluated!"
-}
+${profile.profileSummary ? profile.evaluationResult : "Not evaluated!"}
 
 
 ### Most Important
@@ -114,7 +100,7 @@ Accelerators: ${selectedPath.Accelerators} \n
 ### **Instruction:**
 
 Generate the JSON roadmap and summary now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${
-  selectedPath.Path_name || "their career goal"
+      selectedPath.Path_name || "their career goal"
     }** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
     return prompt;
   } catch (error) {
@@ -123,36 +109,53 @@ Generate the JSON roadmap and summary now based *specifically* on the user profi
     throw error;
   }
 };
-const getCareerPathPrompt = (profile)=>{
-  return `You are an expert career strategist and market analyst. 
-Given a user's current profile (hard skills, soft skills, past experience, education, interests, career goals), 
-your job is to simulate **all realistic possible career paths** they could take, 
-ranging from conventional to unconventional, from high-risk/high-reward to stable/safe options.
+const getCareerPathPrompt = (profile) => {
+  return `You are an expert career strategist and global job market analyst.
 
-- Generate at least 10-20 possible career paths.
-- For each path, describe:
-  - Job Titles at each major stage (entry → mid → senior → expert level).
-  - Estimated timeline for promotions (in years).
-  - Expected salary range at each stage.
-  - Industries and companies where this path is common.
-  - Risk level (Low, Medium, High) and notes about market volatility.
-  - AI Impact (how likely AI will disrupt this path).
-  - Suggested skills the user must learn to maximize success.
-  - Alternative shortcuts, certifications, or side projects that could accelerate progress.
+Given a user's profile, simulate **ALL realistic and high-potential career paths** they can pursue — from safe jobs to bold moves, from stable employment to freelance/startup gigs. Tailor suggestions to their **current skill set, education, career goals, AND location**.
 
-Rules:
-- Don't assume the user wants only "safe" options. Include bold, ambitious, startup, freelance, and global remote career paths.
-- Clearly differentiate technical, managerial, entrepreneurial, and academic routes.
-- Be brutally honest about risks and rewards; avoid sugar-coating.
-- Assume the user is willing to pivot industries if opportunities make sense.
-- Include new/emerging careers that are not yet mainstream.
+📌 IMPORTANT:
+- The user may be a **complete beginner** with little or no real work experience.
+- They might be unsure what jobs to target — be a mentor, not just a calculator.
+- Use their **location** to determine salary ranges. Give **local currency** where possible, or USD with clear context (e.g., “USD, remote-friendly”).
+- Suggest beginner-friendly jobs and make no assumptions about prior knowledge.
+- Don’t repeat the same job paths with different titles — add variety (e.g., corporate vs. freelance vs. startup).
+- Include both conventional and non-traditional jobs, even emerging ones not yet mainstream.
 
-**User data:**
-Hard Skills: ${profile.hardSkills} \n\n
-SoftSkills: ${profile.softSkills} \n\n
-Work Expeirence: ${profile.jobs} \n\n
-Projects: ${profile.projects} \n\n
-Location: ${profile.location} \n\n\n
+🎯 For each path, describe:
+- Clear Job Titles from entry-level to expert (use simple terms where needed).
+- Estimated promotion timeline (in years).
+- Salary range at each level, **realistic for user’s location**.
+- Relevant industries and typical companies.
+- Risk level (Low, Medium, High) + honest market reality (e.g., over-saturated, niche).
+- AI Impact: Is this career at risk of automation?
+- Key skills the user needs to learn (list tools/skills. BE concise, only mention name. keep order of learning).
+- Shortcuts: Certifications, bootcamps, online projects, or freelancing hacks.
+- Include hybrid or cross-functional career paths that combine multiple fields if the user's skills suggest such overlap. 
+- Think creatively — mix roles like “AI + Product”, “Dev + Design”, “Tech + Business”, “Freelancer + Consultant”, “Engineer + Educator” etc. 
+- Emphasize how a mix of skills can open *unique* opportunities that are not available in traditional straight-line careers.
+
+
+📚 Don’t assume the user only wants “safe” jobs. Include:
+- Remote roles
+- Startup options
+- Freelance gigs
+- Emerging tech jobs
+- Academic/research routes
+- Managerial and leadership alternatives
+
+⚠️ Be brutally honest. Don’t overhype “dream jobs.” Some paths are long and hard. Say it.
+
+---  
+**User Data:**  
+Hard Skills: ${profile.hardSkills}  
+Soft Skills: ${profile.softSkills}  
+Work Experience: ${profile.jobs || "None / Beginner"}  
+Projects: ${profile.projects}  
+Career Goal: ${profile.careerGoal}  
+Location: ${profile.location}  
+
+---  
 Output format:
 \`\`\`json
 {
@@ -161,12 +164,12 @@ Output format:
 "Path_name": "Example - AI Engineer → AI Product Manager",
 "Stages": ["AI Intern", "Junior AI Developer", "Senior AI Developer", "AI Product Manager"],
 "Timeline": "1 → 3 → 5 → 8 years",
-"Salary_range": "$70k → $120k → $180k → $220k",
+"Salary_range": "$10k (PKR, Entry) → $22k → $40k → $60k (remote USD)",
 "Industries": ["Tech", "Healthcare", "Fintech"],
 "Risk_level": "Medium",
-"AI_impact": "Low (building AI > replacing by AI)",
+"AI_impact": "Low (building AI > replaced by AI)",
 "Required_skills": ["Deep Learning", "Prompt Engineering", "Product Management"],
-"Accelerators": ["Tensorflow Certification", "Build AI SaaS Startup MVP"],
+"Accelerators": ["Tensorflow Certification", "Build AI SaaS MVP"],
 "Notes": "Pivoting to AI Product Management requires strong communication skills and product intuition."
 },
 // more career paths
@@ -174,5 +177,6 @@ Output format:
 }
 \`\`\`
 `;
-}
-module.exports = { getRoadmapPrompt ,getCareerPathPrompt};
+};
+
+module.exports = { getRoadmapPrompt, getCareerPathPrompt };
