@@ -40,6 +40,9 @@ const generateRoadmap = async (req, res) => {
       model: "gemini-2.5-flash-preview-04-17",
       generation_config: {
         temperature: 2,
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
         response_mime_type: "application/json",
       },
     });
@@ -52,7 +55,7 @@ const generateRoadmap = async (req, res) => {
     }
     const extractedJson = match[1];
     const roadmapData = await safeJsonParse(extractedJson);
-    const { tasks } = roadmapData;
+    const { tasks, changes } = roadmapData;
     console.log(roadmapData);
     const roadmap = new Roadmap({ userId: user._id, tasks: tasks });
     await roadmap.save();
@@ -61,6 +64,7 @@ const generateRoadmap = async (req, res) => {
       data: {
         tasks: tasks,
       },
+      changes,
       prompt,
       result,
     });
@@ -93,7 +97,7 @@ const modify = async (req, res) => {
     console.log("roadmap" + roadmap);
     const prompt = `Improve this career roadmap. user want modifications: ${query} \n and roadmap task array is ${roadmap.tasks} \n\n\n
 ---
-Strictly Keep the schema same. you can add/remove/change the tasks or subtasks depending on the modifications requirements. if you changeany task/subtask change their other data accordingly.
+Strictly Keep the schema same. you can add/remove/change the tasks or subtasks depending on the modifications requirements. if you changeany task/subtask change their other data accordingly. Update tag of each task (new, updated etc).
 ---
 Strictly give json response like:
 \`\`\`json
@@ -108,6 +112,9 @@ tasks: [all updated tasks array with schema of existing tasks],
       model: "gemini-2.5-flash-preview-04-17",
       generation_config: {
         temperature: 2,
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
         response_mime_type: "application/json",
       },
     });

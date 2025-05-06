@@ -69,7 +69,9 @@ const TaskNode = ({ data }) => {
       } ${data.priority == "medium" ? "bg-sky-300" : ""} ${data.priority == "high" ? "bg-red-200" : ""}`}
       style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
-      {/* Adjust width based on padding */}
+      <div className={`${data.tag === "new" ? "text-green-500" : "text-blue-500"} ${data.tag === "existing" ? "hidden" : ""}`}>
+        {data.tag}
+      </div>
       <div className='font-bold text-lg mb-2'>{data.label}</div>
       <div className='text-sm text-gray-600 mb-3'>{data.description}</div>
       <div className='text-xs text-gray-500 mt-1 mb-1 border-t pt-1'>
@@ -246,7 +248,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   if (loading) {
     return (
       <div className='flex justify-center align-bottom'>
-        <Atom color='#32cd32' size='large' text='Loading Roadmap Graph' textColor='#17d83f' />;
+        <Atom color='#32cd32' size='large' text='Loading Roadmap Graph' textColor='#17d83f' />
       </div>
     );
   }
@@ -358,6 +360,7 @@ const SkillsGraph = () => {
           ) {
             setGraphData(result.data.data); // Store raw data
             setRoadmap(result.data.data.tasks); // Update context
+            setSuggestedChanges(result.data.changes);
           } else {
             console.warn("No roadmap tasks found in API response.");
             setError("No roadmap data found. Please generate a roadmap first.");
@@ -389,9 +392,19 @@ const SkillsGraph = () => {
   }, [isPathSelected, roadmap]);
 
   const [modificationText, setModificationText] = useState("");
+  const [suggestedChanges, setSuggestedChanges] = useState(["change1", "change2", "change3"]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const handleSuggestionClick = (suggestion) => {
+    setModificationText(suggestion);
+    setShowSuggestions(false);
+  };
+
   const [modifyLoading, setModifyLoading] = useState(false);
   const modify = async () => {
-    if (!modificationText || modificationText.length < 4) return;
+    if (!modificationText || modificationText.length < 4) {
+      handleError("What changes?");
+      return;
+    }
     setModifyLoading(true);
     try {
       const result = await axios.get(url + `/roadmap/modify?text=${modificationText}`, {
@@ -433,22 +446,38 @@ const SkillsGraph = () => {
             />
           </ReactFlowProvider>
 
-          <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 shadow-lg'>
-            <input
-              value={modificationText}
-              onChange={(e) => setModificationText(e.target.value)}
-              disabled={modifyLoading}
-              type='text'
-              placeholder='Need Modifications?'
-              className='flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none px-2 text-sm'
-            />
-            <button
-              onClick={modify}
-              disabled={modifyLoading}
-              className={`bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full transition shadow-md disabled:opacity-50`}>
-              <Send size={16} />
-            </button>
+          <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto px-4'>
+            <div className='relative'>
+              {showSuggestions && suggestedChanges.length > 0 && (
+                <ul className='absolute bottom-full mb-2 w-full bg-gray-300 dark:bg-slate-300 text-black rounded-md shadow-lg z-50'>
+                  {suggestedChanges.map((item, i) => (
+                    <li key={i} onClick={() => handleSuggestionClick(item)} className='cursor-pointer px-4 py-2 hover:bg-gray-200 text-sm'>
+                      {item}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              <div className='flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 shadow-lg'>
+                <input
+                  value={modificationText}
+                  onChange={(e) => setModificationText(e.target.value)}
+                  onFocus={() => setShowSuggestions(true)}
+                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+                  disabled={modifyLoading}
+                  type='text'
+                  placeholder='Need Modifications?'
+                  className='flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none px-2 text-sm'
+                />
+                <button
+                  onClick={modify}
+                  disabled={modifyLoading}
+                  className={`bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full transition shadow-md disabled:opacity-50`}>
+                  <Send size={16} />
+                </button>
+              </div>
+            </div>
           </div>
+
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
               <button className='absolute top-2 right-2 text-gray-500 hover:text-gray-700' onClick={() => setShowSourcesModal(false)}>

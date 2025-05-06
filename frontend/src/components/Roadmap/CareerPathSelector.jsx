@@ -7,7 +7,7 @@ function CareerPathSelector({ pathsData, selectedPathName, onPathSelect, setIsPa
     return (
       <p className='text-center text-gray-500'>
         <Spinner />
-        Loading career paths available.
+        Loading career paths.
       </p>
     );
   }

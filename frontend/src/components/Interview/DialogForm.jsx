@@ -63,7 +63,7 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
         <button
           onClick={startIt}
           disabled={loading}
-          className='w-36 py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center disabled:opacity-40'>
+          className='w-36 py-3 px-2 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center disabled:opacity-40'>
           {loading ? <Spinner /> : ""}
           <span> Start Interview</span>
         </button>
@@ -75,7 +75,7 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
 function MockInterviewCard({ interviewData, setInterviewData }) {
   return (
     <Card className='border-0 shadow-none bg-transparent'>
-      <CardContent className='space-y-2 p-0 flex flex-wrap justify-center gap-1'>
+      <CardContent className='space-y-2 p-0 flex flex-wrap justify-center gap-1 mb-0 pb-2 pt-1'>
         <div className='relative w-[97%] mb-0'>
           <div className='absolute left-3 top-1/2 -translate-y-1/2 text-primary-500 dark:text-primary-400'>
             <Briefcase size={18} />
