@@ -1,5 +1,4 @@
 import "regenerator-runtime/runtime";
-import Webcam from "react-webcam";
 import { useRef, useState, useEffect, useContext } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
@@ -13,7 +12,6 @@ import { Spinner } from "../lib/Spinner";
 import { useSearchParams } from "react-router-dom";
 import FancyButton from "../components/Button";
 const url = import.meta.env.VITE_API_URL;
-console.log("API URL:", url);
 
 export function Interview() {
   useEffect(() => {
@@ -28,18 +26,16 @@ export function Interview() {
     setJobId(searchParams.get("jobId") || "");
   }, [searchParams]);
   useEffect(() => {
-    console.log("all jobs" + jobs);
     if (jobId) {
-      console.log("job id from url: " + jobId);
       const matchingJob = jobs.find((item) => item["id"] === jobId);
-      console.log("matching jobs: " + matchingJob);
       if (matchingJob) {
         setJobOrMock("job");
         setJob(matchingJob);
-        console.log("job set");
       } else {
         setJob(null);
       }
+    } else {
+      setJob(null);
     }
   }, [jobId, jobs]);
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();

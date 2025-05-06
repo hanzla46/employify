@@ -12,10 +12,6 @@ const options = {
 };
 
 export default function DialogForm({ start, setInterviewData, interviewData, job, jobOrMock, setJobOrMock, loading, setLoading }) {
-  useEffect(() => {
-    console.log("job" + job);
-    console.log("mock or job" + jobOrMock);
-  }, [job, jobOrMock]);
   const startIt = () => {
     if (jobOrMock === "mock") {
       if (
@@ -61,12 +57,13 @@ export default function DialogForm({ start, setInterviewData, interviewData, job
         </button>
       </div>
       {jobOrMock === "mock" ? <MockInterviewCard interviewData={interviewData} setInterviewData={setInterviewData} /> : ""}
-      {jobOrMock === "job" && job ? <JobDataCard job={job} /> : ""}
+      {jobOrMock === "job" ? <JobDataCard job={job} /> : ""}
 
       <div className='flex justify-around mt-0'>
         <button
           onClick={startIt}
-          className='w-36 py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center'>
+          disabled={loading}
+          className='w-36 py-3 px-4 bg-gradient-to-r from-primary-600 to-purple-600 hover:from-primary-700 hover:to-purple-700 text-white font-medium rounded-lg transition-all duration-200 transform hover:-translate-y-1 hover:shadow-lg flex items-center justify-center disabled:opacity-40'>
           {loading ? <Spinner /> : ""}
           <span> Start Interview</span>
         </button>
@@ -191,8 +188,7 @@ function MockInterviewCard({ interviewData, setInterviewData }) {
 }
 function JobDataCard({ job }) {
   useEffect(() => {
-    console.log("in job card");
-    console.log(job);
+    console.log("jobb: " + job);
   }, []);
   const timeAgo = (postedAt) => {
     const diffMs = Date.now() - new Date(postedAt).getTime();
@@ -205,7 +201,7 @@ function JobDataCard({ job }) {
   };
   return (
     <div className='text-black dark:text-white'>
-      {job ? (
+      {job?.title ? (
         <>
           <div className='flex flex-row p-2 items-center flex-wrap'>
             <h3 className='mr-2 whitespace-nowrap'>Job Title:</h3>
@@ -232,7 +228,7 @@ function JobDataCard({ job }) {
           )}
         </>
       ) : (
-        <div className='p-4 text-center'>
+        <div className='p-4 text-center text-green-500 z-10'>
           <Link to={"/jobs"}>
             <h2 className='text-black dark:text-white font-semibold'>🚫 No job loaded. Find jobs to practice interviews!</h2>
           </Link>
