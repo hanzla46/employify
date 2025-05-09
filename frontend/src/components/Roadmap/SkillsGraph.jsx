@@ -64,9 +64,11 @@ const TaskNode = ({ data }) => {
 
   return (
     <div
-      className={`p-4 rounded-lg border-2 border-gray-300 bg-white shadow-xl max-w-[450px] m-8 ${
-        data.priority == "low" ? "bg-zinc-300" : ""
-      } ${data.priority == "medium" ? "bg-sky-300" : ""} ${data.priority == "high" ? "bg-red-200" : ""}`}
+      className={`p-4 rounded-lg border-4 border-gray-300 bg-white shadow-xl max-w-[450px] m-8 ${
+        data.priority === "low" ? "bg-zinc-300" : ""
+      } ${data.priority === "medium" ? "bg-sky-300" : ""} ${data.priority === "high" ? "bg-red-200" : ""} ${
+        data.tag === "new" ? "border-green-600" : ""
+      } ${data.tag === "updated" ? "border-blue-600" : ""}`}
       style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
       <div
@@ -181,7 +183,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         label: task.name || "Unnamed Task",
         tag: task.tag || "existing",
         description: task.description || "",
-        priority: task.priority || "",
+        priority: task.priority || "medium",
         subtasks: (task.subtasks || []).map((st, index) => ({
           // Ensure subtasks have unique IDs if possible, otherwise use index as fallback key
           id: st.id != null ? st.id : `${task.id}-sub-${index}`,
@@ -421,13 +423,17 @@ const SkillsGraph = () => {
         setModificationText("");
         setGraphData(result.data.data);
         setRoadmap(result.data.data.tasks);
+        setModifyLoading(false);
       } else {
         handleError("server error");
+        setModifyLoading(false);
       }
     } catch (error) {
-      handleError("server error");
+      handleError("error");
+      setModifyLoading(false);
+    } finally {
+      setModifyLoading(false);
     }
-    setModifyLoading(true);
   };
   return (
     <>

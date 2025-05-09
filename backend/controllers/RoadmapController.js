@@ -97,12 +97,12 @@ const modify = async (req, res) => {
     console.log("roadmap" + roadmap);
     const prompt = `Improve this career roadmap. user want modifications: ${query} \n and roadmap task array is ${roadmap.tasks} \n\n\n
 ---
-Strictly Keep the schema same. you can add/remove/change the tasks or subtasks depending on the modifications requirements. if you changeany task/subtask change their other data accordingly. Update tag of each task (new, updated etc).
+Strictly Keep the schema same. you can add/remove/change the tasks or subtasks depending on the modifications requirements. if you change any task/subtask change their other data accordingly. Update tag of each task (new, updated etc).
 ---
 Strictly give json response like:
 \`\`\`json
 {
-tasks: [all updated tasks array with schema of existing tasks],
+tasks: [all tasks array with schema of existing tasks],
 }
 \`\`\`
 `;
@@ -111,10 +111,7 @@ tasks: [all updated tasks array with schema of existing tasks],
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash-preview-04-17",
       generation_config: {
-        temperature: 2,
-        thinkingConfig: {
-          thinkingBudget: 0,
-        },
+        temperature: 1,
         response_mime_type: "application/json",
       },
     });
@@ -123,7 +120,8 @@ tasks: [all updated tasks array with schema of existing tasks],
     console.log("Generated content:", content);
     const match = content.match(/```json\n([\s\S]*?)\n```/);
     if (!match) {
-      throw new Error("💥 No valid JSON block found.");
+      console.log("💥 No valid JSON block found.");
+      return res.status(500).json({ success: false, message: "AI Engine Error!" });
     }
     const extractedJson = match[1];
     const roadmapData = await safeJsonParse(extractedJson);
@@ -140,6 +138,7 @@ tasks: [all updated tasks array with schema of existing tasks],
     });
   } catch (err) {
     console.log("failed modifying roadmap " + err);
+    return res.status(500).json({ success: false, message: "Server Error!" });
   }
 };
 
