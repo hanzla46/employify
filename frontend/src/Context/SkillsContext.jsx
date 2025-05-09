@@ -9,6 +9,7 @@ export const SkillsContext = createContext();
 export const SkillsProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [roadmap, setRoadmap] = useState([]);
+  const [suggestedChanges, setSuggestedChanges] = useState(["change1", "change2", "change3"]);
   const [hasProfile, setHasProfile] = useState(false);
   const [evaluated, setEvaluated] = useState(false);
   const [isPathSelected, setIsPathSelected] = useState(false);
@@ -35,6 +36,7 @@ export const SkillsProvider = ({ children }) => {
             console.log("Roadmap found:", getRoadmap.data.data);
             setEvaluated(true);
             setRoadmap(getRoadmap.data.data.tasks);
+            setSuggestedChanges(getRoadmap.data.data.changes);
             setIsPathSelected(true);
             console.log("Roadmap:", roadmap);
           } else {
@@ -69,6 +71,8 @@ export const SkillsProvider = ({ children }) => {
         isPathSelected,
         careerPath,
         setCareerPath,
+        suggestedChanges,
+        setSuggestedChanges,
       }}>
       {children}
     </SkillsContext.Provider>

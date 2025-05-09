@@ -18,24 +18,28 @@ const PositionSchema = new mongoose.Schema(
   { _id: false }
 );
 
-const TaskSchema = new mongoose.Schema({
-  id: { type: Number, required: true },
-  name: String,
-  description: String,
-  position: PositionSchema,
-  subtasks: [SubtaskSchema],
-  dependencies: [Number],
-  category: String,
-  difficulty: String,
-  estimated_time: String,
-  ai_impact: String,
-  priority: String,
-  tag: { type: String, default: "existing" },
-});
+const TaskSchema = new mongoose.Schema(
+  {
+    id: { type: Number, required: true },
+    name: String,
+    description: String,
+    position: PositionSchema,
+    subtasks: [SubtaskSchema],
+    dependencies: [Number],
+    category: String,
+    difficulty: String,
+    estimated_time: String,
+    ai_impact: String,
+    priority: String,
+    tag: { type: String, default: "existing" },
+  },
+  { _id: false }
+);
 
 const RoadmapSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   tasks: [TaskSchema],
+  changes: [String],
 });
 
 const Roadmap = mongoose.model("Roadmap", RoadmapSchema);

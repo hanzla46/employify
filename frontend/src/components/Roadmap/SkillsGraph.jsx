@@ -69,7 +69,10 @@ const TaskNode = ({ data }) => {
       } ${data.priority == "medium" ? "bg-sky-300" : ""} ${data.priority == "high" ? "bg-red-200" : ""}`}
       style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
-      <div className={`${data.tag === "new" ? "text-green-500" : "text-blue-500"} ${data.tag === "existing" ? "hidden" : ""}`}>
+      <div
+        className={`p-1 rounded-lg float-right font-bold text-xl bg-gray-300 ${
+          data.tag === "new" ? "text-green-700 inline" : "text-blue-700 inline"
+        } ${data.tag === "existing" ? "hidden" : ""}`}>
         {data.tag}
       </div>
       <div className='font-bold text-lg mb-2'>{data.label}</div>
@@ -176,6 +179,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       position: { x: 0, y: 0 }, // Placeholder
       data: {
         label: task.name || "Unnamed Task",
+        tag: task.tag || "existing",
         description: task.description || "",
         priority: task.priority || "",
         subtasks: (task.subtasks || []).map((st, index) => ({
@@ -297,7 +301,8 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-  const { setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath } = useContext(SkillsContext);
+  const { setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
+    useContext(SkillsContext);
   const [careerData, setCareerData] = useState({});
   const url = import.meta.env.VITE_API_URL;
   useEffect(() => {
@@ -392,7 +397,6 @@ const SkillsGraph = () => {
   }, [isPathSelected, roadmap]);
 
   const [modificationText, setModificationText] = useState("");
-  const [suggestedChanges, setSuggestedChanges] = useState(["change1", "change2", "change3"]);
   const [showSuggestions, setShowSuggestions] = useState(false);
   const handleSuggestionClick = (suggestion) => {
     setModificationText(suggestion);

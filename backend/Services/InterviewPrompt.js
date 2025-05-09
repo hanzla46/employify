@@ -174,7 +174,7 @@ DO NOT generate any summaries, even partial ones. If the data is recognizable, g
 Format your output as a clear, concise, professional summary in **one paragraph**. Make sure all the data provided in the summary fits logically and contextually into an interview preparation scenario.
   `;
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   const result = await model.generateContent(prompt);
   const content = result.response.candidates[0].content.parts[0].text;
   console.log("Generated info summary:", content);

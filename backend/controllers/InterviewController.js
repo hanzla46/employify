@@ -77,9 +77,10 @@ const continueInterview = async (req, res) => {
     const QId = interview.questions.length;
     if (req.file) {
       const videoFileBuffer = req.file.buffer;
-      ProcessVideo(videoFileBuffer, QId, userId);
+      ProcessVideo(req.file, QId, userId);
     }
-    const prompt = GeneratePrompt(interview.infoSummary);
+    const prompt = GeneratePrompt(interview);
+    console.log("interview prompt: " + prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
     const result = await model.generateContent(prompt);

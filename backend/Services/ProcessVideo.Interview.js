@@ -1,34 +1,69 @@
-const { GoogleGenerativeAI } = require("@google/generative-ai");
 const Interview = require("../models/InterviewModel");
+const { GoogleGenAI } = require("@google/genai");
 
 const ProcessVideo = async (videoFile, QId, userId) => {
   try {
     console.log("Processing the video...");
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
-
-    function fileToGenerativePart(videoFile) {
-      const base64EncodedData = videoFile.toString("base64");
-      return {
-        inlineData: {
-          data: base64EncodedData,
-          mimeType: "video/mp4", // Or the correct MIME type
-        },
+    console.log(videoFile.buffer.slice(0, 10).toString("hex"));
+    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API });
+    const modelName = "gemini-2.0-flash";
+    let files;
+    let config;
+    try {
+      console.log("Starting video file upload...");
+      files = [
+        await ai.files.upload({
+          file: videoFile.buffer,
+          mimeType: videoFile.mimetype || "video/mp4",
+          name: videoFile.originalname,
+        }),
+      ];
+      config = {
+        responseMimeType: "text/plain",
       };
+      console.log(`Video uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`);
+    } catch (error) {
+      console.error("Error uploading video file:", error);
+      throw new Error("Failed to upload video for processing.");
     }
-    if (!videoFile) {
-      console.error("No video file provided for processing.");
-      return;
-    }
-    const videoPart = fileToGenerativePart(videoFile);
     const prompt = `Analyze this video and provide insights on the person's facial expressions and emotions. Remember that the person is giving an interview. Your output should be: top 3 emotions with intensity from 0 to 1 and a one-sentence summary of the person's movement. Response should be in JSON and like this: array of objects of emotion and intensity and then a string of summary and then length of video in seconds. If you find no person, you can give random output of emotions and summary.`;
-
-    const result = await model.generateContent([prompt, videoPart]);
-    const response = await result.response;
-    const text = response.text();
-    const jsonString = text.match(/```json\n([\s\S]*?)\n```/)[1];
-    const parsedResult = JSON.parse(jsonString);
-
+    const contents = [
+      {
+        role: "user",
+        parts: [
+          {
+            fileData: {
+              fileUri: files[0].uri,
+              mimeType: files[0].mimeType,
+            },
+          },
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ];
+    let parsedResult = null;
+    try {
+      console.log("Generating content from video...");
+      const result = await ai.models.generateContent({
+        model: modelName,
+        contents: contents,
+      });
+      const response = result.response;
+      const text = response.text();
+      console.log("Raw response text:", text);
+      const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+      if (!jsonMatch || jsonMatch[1] === undefined) {
+        console.error("Could not find JSON block in response:", text);
+        throw new Error("Model response did not contain expected JSON block.");
+      }
+      const jsonString = jsonMatch[1];
+      parsedResult = JSON.parse(jsonString);
+    } catch (error) {
+      console.error("Error generating content from video:", error);
+      throw error;
+    }
     console.log("Gemini Response:", text);
     console.log("Parsed Result:", parsedResult);
 
