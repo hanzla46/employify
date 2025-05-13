@@ -142,7 +142,7 @@ function MockInterviewCard({ interviewData, setInterviewData }) {
               <SelectValue placeholder='Focus Area' />
             </SelectTrigger>
             <SelectContent className='bg-white dark:bg-gray-800 border-primary-200 dark:border-primary-800'>
-              {["Behavioral", "Soft Skills", "Problem Solving", "Communication", "AI Collaboration", "System Design"].map((item) => (
+              {["Behavioral", "Soft Skills", "Problem Solving", "Communication", "AI Collaboration", "Technical"].map((item) => (
                 <SelectItem key={item} value={item} className='text-gray-700 dark:text-gray-300 hover:bg-slate-300 dark:hover:bg-slate-600'>
                   {item}
                 </SelectItem>
@@ -211,7 +211,7 @@ function JobDataCard({ job }) {
           <div className='flex flex-row p-2 items-center flex-wrap'>
             <h3 className='mr-2 whitespace-nowrap'>Company:</h3>
             <a href={job.company?.website} target='_blank' className='truncate max-w-full'>
-              <h2 className='truncate'>{job.company?.name || "company"}</h2>
+              <h2 className='truncate underline'>{job.company?.name || "company"}</h2>
             </a>
           </div>
 
