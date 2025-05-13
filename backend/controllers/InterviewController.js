@@ -33,15 +33,7 @@ const startInterview = async (req, res) => {
     const introInterviewQuestions = [
       "Can you briefly introduce yourself?",
       "Walk me through your background. ",
-      "How did you get into this field? ",
-      "What got you interested in this role? ",
-      "What are you currently working on or learning? ",
-      "Tell me something that's not on your resume. ",
-      "What made you apply to our company? ",
       "How do you describe yourself in one sentence? ",
-      "What's one thing you're passionate about? ",
-      "What does your typical day look like?",
-      "What are you looking for in your next role? ",
       "What’s your story?",
       "What excites you the most about this opportunity? ",
     ];
