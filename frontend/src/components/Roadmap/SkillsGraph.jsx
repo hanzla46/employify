@@ -68,7 +68,7 @@ const TaskNode = ({ data }) => {
         data.priority === "low" ? "bg-zinc-300" : ""
       } ${data.priority === "medium" ? "bg-sky-300" : ""} ${data.priority === "high" ? "bg-red-200" : ""} ${
         data.tag === "new" ? "border-green-600" : ""
-      } ${data.tag === "updated" ? "border-blue-600" : ""}`}
+      } ${data.tag === "updated" ? "border-blue-700" : ""}`}
       style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
       <div
@@ -490,6 +490,7 @@ const SkillsGraph = () => {
 
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
+              <span className="absolute top-3 left-3">Sources</span>
               <button className='absolute top-2 right-2 text-gray-500 hover:text-gray-700' onClick={() => setShowSourcesModal(false)}>
                 ❌
               </button>
