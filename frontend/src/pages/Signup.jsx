@@ -16,12 +16,12 @@ export function Signup() {
   const navigate = useNavigate();
   useEffect(() => {
     if (user) {
-      handleSuccess("Already loggedin \n Redirecting to account page...");
+      handleSuccess(`Already loggedin \n Redirecting to ${redirectPath}...`);
       setTimeout(() => {
-        navigate("/account");
+        navigate(redirectPath);
       }, 3500);
     }
-  }, []);
+  }, [user]);
   const [signupInfo, setSignupInfo] = useState({
     name: "",
     email: "",

@@ -15,12 +15,12 @@ export function Login() {
   const redirectPath = new URLSearchParams(location.search).get("redirect") || "/";
   useEffect(() => {
     if (user) {
-      handleSuccess("Already loggedin \n Redirecting to account page...");
+      handleSuccess(`Already loggedin \n Redirecting to ${redirectPath}...`);
       setTimeout(() => {
-        navigate("/account");
+        navigate(redirectPath);
       }, 3500);
     }
-  }, []);
+  }, [user]);
   const [loginInfo, setLoginInfo] = useState({
     email: "",
     password: "",

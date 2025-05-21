@@ -160,7 +160,7 @@ Keep it direct, structured, and factual. Maximum ~150 words.
 
 ---
 ⚠️ IMPORTANT RULE:
-If **any** of the inputs contain:
+If Job Title or Interview Position of the inputs contain:
 - Random letters (e.g., "asdf", "qwerty", "xxxx"),
 - Incomplete or nonsense data (e.g., “1234”, “!@#”, “random nonsense”),
 - Invalid roles (e.g., "mango hunter", "banana king"), 
