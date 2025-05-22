@@ -8,7 +8,7 @@ const fetchJobsJSearch = async (req, res) => {
     method: "GET",
     url: "https://jsearch.p.rapidapi.com/search",
     params: {
-      query: query + " jobs",
+      query: query+" jobs",
       page: page,
       num_pages: "10",
       country: country,
@@ -16,7 +16,7 @@ const fetchJobsJSearch = async (req, res) => {
       work_from_home: work_from_home,
     },
     headers: {
-      "x-rapidapi-key": "ff82a3cb34msh70d1e319df0556bp1011c1jsnf3a797ae2c39",
+      "x-rapidapi-key": "e7ff5ba837mshd385fbd3d86d521p1897fajsn6965aaf24cd6",
       "x-rapidapi-host": "jsearch.p.rapidapi.com",
     },
   };
@@ -40,7 +40,7 @@ const fetchJobsJSearch = async (req, res) => {
       source: "jsearch",
       externalLink: job.job_apply_link,
       applyOptions: job.apply_options,
-      isRemote: job.job_is_remote,
+      isRemote: work_from_home =='true' ? true : false,
       qualifications: job.job_highlights?.Qualifications || [],
       responsibilities: job.job_highlights?.Responsibilities || [],
     }));

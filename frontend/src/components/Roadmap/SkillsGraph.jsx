@@ -14,7 +14,10 @@ import dagre from "dagre"; // Import dagre
 import { SkillsContext } from "../../Context/SkillsContext";
 import { Atom } from "react-loading-indicators";
 import { handleError, handleSuccess } from "../../utils";
-import { Send, Mic, Smile } from "lucide-react";
+import { Send, Mic, Smile, Check, FolderCheck } from "lucide-react";
+const checkCompleted = (stId) => {
+
+}
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -59,22 +62,19 @@ const getLayoutedElements = (nodes, edges, direction = "LR") => {
 };
 
 // --- Custom Node Component ---
-const TaskNode = ({ data }) => {
+const TaskNode = ({ data, setGraph }) => {
   const [expanded, setExpanded] = useState(false);
 
   return (
     <div
-      className={`p-4 rounded-lg border-4 border-gray-300 bg-white shadow-xl max-w-[450px] m-8 ${
-        data.priority === "low" ? "bg-zinc-300" : ""
-      } ${data.priority === "medium" ? "bg-sky-300" : ""} ${data.priority === "high" ? "bg-red-200" : ""} ${
-        data.tag === "new" ? "border-green-600" : ""
-      } ${data.tag === "updated" ? "border-blue-700" : ""}`}
+      className={`p-4 rounded-lg border-4 border-gray-300 bg-white shadow-xl max-w-[450px] m-8 ${data.priority === "low" ? "bg-zinc-300" : ""
+        } ${data.priority === "medium" ? "bg-sky-300" : ""} ${data.priority === "high" ? "bg-red-200" : ""} ${data.tag === "new" ? "border-green-600" : ""
+        } ${data.tag === "updated" ? "border-blue-700" : ""}`}
       style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
       {" "}
       <div
-        className={`p-1 rounded-lg float-right font-bold text-xl bg-gray-300 ${
-          data.tag === "new" ? "text-green-700 inline" : "text-blue-700 inline"
-        } ${data.tag === "existing" ? "hidden" : ""}`}>
+        className={`p-1 rounded-lg float-right font-bold text-xl bg-gray-300 ${data.tag === "new" ? "text-green-700 inline" : "text-blue-700 inline"
+          } ${data.tag === "existing" ? "hidden" : ""}`}>
         {data.tag}
       </div>
       <div className='font-bold text-lg mb-2'>{data.label}</div>
@@ -96,13 +96,16 @@ const TaskNode = ({ data }) => {
             <div
               key={subtask.id || index} // Use subtask.id if available and unique
               className='flex items-center justify-between flex-col mb-2 p-2 rounded border border-blue-300'>
-              <div className='text-sm mr-2'>{subtask.label}</div>
+              <div className="flex flex-row">
+                <div className="inline mr-1"> {subtask.completed ? <Check /> : <FolderCheck />} </div>
+                <div className='text-sm mr-2 inline'>{subtask.label}</div>
+              </div>
               <div className='flex flex-row justify-between mt-2'>
                 {" "}
                 <button
-                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150'
-                  onClick={() => data.onSubtaskAction(subtask.id)}>
-                  {subtask.buttonText || "Action"}
+                  className={`${!subtask.completed ? "bg-green-500 hover:bg-green-600" :"bg-red-400 hover:bg-red-500"} text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150`}
+                  onClick={() => data.onSubtaskComplete(subtask.id, subtask.label, data.label)}>
+                  {!subtask.completed ? subtask.buttonText : "Reset"}
                 </button>
                 <button
                   className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150 w-16'
@@ -132,9 +135,41 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
-  // const { roadmap, setRoadmap } = useContext(SkillsContext);
-  // const url = import.meta.env.VITE_API_URL;
+ const [evaluationModal, setEvaluationModal] = useState({
+    open: false,
+    stId: null,
+    subTaskName: '',
+    taskName: '',
+    messages: [],
+    file: null,
+    inputMessage: ''
+  });
+  const checkCompleted = useCallback((stId,subTaskName,taskName) => {
+    setNodes((prevNodes) => {
+      return prevNodes.map((node) => {
+        const updatedSubtasks = node.data.subtasks?.map((subtask) => {
+          if (subtask.id === stId) {
+            return {
+              ...subtask,
+              completed: !subtask.completed,
+            };
+          }
+          return subtask;
+        });
+        if (updatedSubtasks) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              subtasks: updatedSubtasks,
+            },
+          };
+        }
 
+        return node;
+      });
+    });
+  }, [setNodes]);
   // Handle subtask button clicks
   const handleSubtaskAction = useCallback((taskId, subtaskId) => {
     console.log(`Action triggered on subtask ${subtaskId} of task ${taskId}`);
@@ -184,12 +219,14 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         tag: task.tag || "existing",
         description: task.description || "",
         priority: task.priority || "medium",
+        onSubtaskComplete: checkCompleted,
         subtasks: (task.subtasks || []).map((st, index) => ({
           // Ensure subtasks have unique IDs if possible, otherwise use index as fallback key
           id: st.id != null ? st.id : `${task.id}-sub-${index}`,
           label: st.name || "Unnamed Subtask",
           buttonText: st.buttonText || "Complete",
           sources: st.sources || "",
+          completed: st.completed || false,
         })),
         onSubtaskAction: (subtaskId) => handleSubtaskAction(task.id, subtaskId),
         // Pass other data for display in the node

@@ -54,7 +54,7 @@ export function Jobs() {
   };
   useEffect(() => {
     if (!Array.isArray(jobs)) return;
-    setUniqueLocations(["All", "Remote", ...new Set(jobs.map((item) => item.location))]);
+    setUniqueLocations(["All", "Remote", ...new Set(jobs.map((item) => item.location).filter(Boolean))]);
     setUniqueJobTypes(["All", ...new Set(jobs.map((item) => item.type))]);
   }, [jobs]);
 

@@ -6,6 +6,7 @@ const SubtaskSchema = new mongoose.Schema(
     name: String,
     buttonText: String,
     sources: String,
+    completed:{type:Boolean, default:false},
   },
   { _id: false }
 );
