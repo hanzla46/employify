@@ -12,12 +12,11 @@ import "reactflow/dist/style.css";
 import axios from "axios";
 import dagre from "dagre"; // Import dagre
 import { SkillsContext } from "../../Context/SkillsContext";
+import { EvaluationModalUI } from "./EvaluationModalUI";
 import { Atom } from "react-loading-indicators";
 import { handleError, handleSuccess } from "../../utils";
 import { Send, Mic, Smile, Check, FolderCheck } from "lucide-react";
-const checkCompleted = (stId) => {
-
-}
+const url = import.meta.env.VITE_API_URL;
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
@@ -103,7 +102,7 @@ const TaskNode = ({ data, setGraph }) => {
               <div className='flex flex-row justify-between mt-2'>
                 {" "}
                 <button
-                  className={`${!subtask.completed ? "bg-green-500 hover:bg-green-600" :"bg-red-400 hover:bg-red-500"} text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150`}
+                  className={`${!subtask.completed ? "bg-green-500 hover:bg-green-600" : "bg-red-400 hover:bg-red-500"} text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150`}
                   onClick={() => data.onSubtaskComplete(subtask.id, subtask.label, data.label)}>
                   {!subtask.completed ? subtask.buttonText : "Reset"}
                 </button>
@@ -135,7 +134,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
- const [evaluationModal, setEvaluationModal] = useState({
+  const [evaluationModal, setEvaluationModal] = useState({
     open: false,
     stId: null,
     subTaskName: '',
@@ -144,36 +143,17 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
     file: null,
     inputMessage: ''
   });
-  const checkCompleted = useCallback((stId,subTaskName,taskName) => {
-    setNodes((prevNodes) => {
-      return prevNodes.map((node) => {
-        const updatedSubtasks = node.data.subtasks?.map((subtask) => {
-          if (subtask.id === stId) {
-            return {
-              ...subtask,
-              completed: !subtask.completed,
-            };
-          }
-          return subtask;
-        });
-        if (updatedSubtasks) {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              subtasks: updatedSubtasks,
-            },
-          };
-        }
 
-        return node;
-      });
+  const checkCompleted = useCallback((stId, subTaskName, taskName) => {
+    setEvaluationModal({
+      open: true,
+      stId,
+      subTaskName,
+      taskName,
+      messages: [],
+      file: null,
+      inputMessage: ''
     });
-  }, [setNodes]);
-  // Handle subtask button clicks
-  const handleSubtaskAction = useCallback((taskId, subtaskId) => {
-    console.log(`Action triggered on subtask ${subtaskId} of task ${taskId}`);
-    // Implement your action logic here (e.g., mark as complete, open modal)
   }, []);
   const handleShowSourcesModal = useCallback(
     (sources) => {
@@ -324,6 +304,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         <MiniMap nodeStrokeColor='#ccc' nodeColor='#fff' nodeBorderRadius={2} pannable zoomable />
         <Background variant='dots' gap={15} size={1} />
       </ReactFlow>
+      {evaluationModal.open && <EvaluationModalUI evaluationModal={evaluationModal} setEvaluationModal={setEvaluationModal} />}
     </div>
   );
 };
@@ -343,7 +324,7 @@ const SkillsGraph = () => {
   const { setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
     useContext(SkillsContext);
   const [careerData, setCareerData] = useState({});
-  const url = import.meta.env.VITE_API_URL;
+
   useEffect(() => {
     if (isPathSelected) return;
     if (roadmap && roadmap.length > 0) {
@@ -493,38 +474,8 @@ const SkillsGraph = () => {
             />
           </ReactFlowProvider>
 
-          <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto px-4'>
-            <div className='relative'>
-              {showSuggestions && suggestedChanges.length > 0 && (
-                <ul className='absolute bottom-full mb-2 w-full bg-gray-300 dark:bg-slate-300 text-black rounded-md shadow-lg z-50'>
-                  {suggestedChanges.map((item, i) => (
-                    <li key={i} onClick={() => handleSuggestionClick(item)} className='cursor-pointer px-4 py-2 hover:bg-gray-200 text-sm'>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              )}
-              <div className='flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 shadow-lg'>
-                <input
-                  value={modificationText}
-                  onChange={(e) => setModificationText(e.target.value)}
-                  onFocus={() => setShowSuggestions(true)}
-                  onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
-                  disabled={modifyLoading}
-                  type='text'
-                  placeholder='Need Modifications?'
-                  className='flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none px-2 text-sm'
-                />
-                <button
-                  onClick={modify}
-                  disabled={modifyLoading}
-                  className={`bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full transition shadow-md disabled:opacity-50`}>
-                  <Send size={16} />
-                </button>
-              </div>
-            </div>
-          </div>
-
+          <InputArea setModificationText={setModificationText} showSuggestions={showSuggestions} setShowSuggestions={setShowSuggestions} suggestedChanges={suggestedChanges} handleSuggestionClick={handleSuggestionClick} modificationText={setModificationText}/>
+          
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
               <span className="absolute top-3 left-3">Sources</span>
@@ -541,5 +492,41 @@ const SkillsGraph = () => {
     </>
   );
 };
+
+function InputArea({ handleSuggestionClick, showSuggestions, suggestedChanges, modificationText, setModificationText, setShowSuggestions }) {
+  return (
+    <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto px-4'>
+      <div className='relative'>
+        {showSuggestions && suggestedChanges.length > 0 && (
+          <ul className='absolute bottom-full mb-2 w-full bg-gray-300 dark:bg-slate-300 text-black rounded-md shadow-lg z-50'>
+            {suggestedChanges.map((item, i) => (
+              <li key={i} onClick={() => handleSuggestionClick(item)} className='cursor-pointer px-4 py-2 hover:bg-gray-200 text-sm'>
+                {item}
+              </li>
+            ))}
+          </ul>
+        )}
+        <div className='flex items-center gap-2 bg-gray-800 rounded-full px-4 py-2 shadow-lg'>
+          <input
+            value={modificationText}
+            onChange={(e) => setModificationText(e.target.value)}
+            onFocus={() => setShowSuggestions(true)}
+            onBlur={() => setTimeout(() => setShowSuggestions(false), 150)}
+            disabled={modifyLoading}
+            type='text'
+            placeholder='Need Modifications?'
+            className='flex-1 bg-transparent text-white placeholder-gray-500 focus:outline-none px-2 text-sm'
+          />
+          <button
+            onClick={modify}
+            disabled={modifyLoading}
+            className={`bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full transition shadow-md disabled:opacity-50`}>
+            <Send size={16} />
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export default SkillsGraph;
