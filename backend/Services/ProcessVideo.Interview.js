@@ -4,20 +4,28 @@ const { GoogleGenAI } = require("@google/genai");
 const ProcessVideo = async (videoFile, QId, userId) => {
   try {
     console.log("Processing the video...");
-    console.log(videoFile.buffer.slice(0, 10).toString("hex"));
+    const filePath = path.join(__dirname, "uploads", videoFile.originalname);
+    fs.writeFile(filePath, req.file.buffer, (err) => {
+      if (err) return res.status(500).send("Failed to save file 😵");
+
+      res.send("File uploaded and saved 😎");
+
+      // ❌ Optional: Delete file later (example: after 10 seconds)
+      setTimeout(() => {
+        fs.unlink(filePath, (err) => {
+          if (err) console.error("Failed to delete file:", err);
+          else console.log("File deleted successfully 🧹");
+        });
+      }, 10000); // 10 seconds
+    });
+
     const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API });
     const modelName = "gemini-2.0-flash";
     let files;
     let config;
     try {
       console.log("Starting video file upload...");
-      files = [
-        await ai.files.upload({
-          file: videoFile.buffer,
-          mimeType: videoFile.mimetype || "video/mp4",
-          name: videoFile.originalname,
-        }),
-      ];
+      files = [await ai.files.upload({ file: filePath })];
       config = {
         responseMimeType: "text/plain",
       };

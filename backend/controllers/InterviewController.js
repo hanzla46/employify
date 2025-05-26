@@ -83,7 +83,6 @@ const continueInterview = async (req, res) => {
 
     const QId = interview.questions.length;
     if (req.file) {
-      const videoFileBuffer = req.file.buffer;
       ProcessVideo(req.file, QId, userId);
     }
     const prompt = GeneratePrompt(interview);
