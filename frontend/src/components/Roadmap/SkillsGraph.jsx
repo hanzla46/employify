@@ -12,7 +12,7 @@ import "reactflow/dist/style.css";
 import axios from "axios";
 import dagre from "dagre"; // Import dagre
 import { SkillsContext } from "../../Context/SkillsContext";
-import { EvaluationModalUI } from "./EvaluationModalUI";
+import EvaluationModalUI from "./EvaluationModalUI.jsx";
 import { Atom } from "react-loading-indicators";
 import { handleError, handleSuccess } from "../../utils";
 import { Send, Mic, Smile, Check, FolderCheck } from "lucide-react";
@@ -208,7 +208,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
           sources: st.sources || "",
           completed: st.completed || false,
         })),
-        onSubtaskAction: (subtaskId) => handleSubtaskAction(task.id, subtaskId),
+        
         // Pass other data for display in the node
         category: task.category,
         difficulty: task.difficulty,
@@ -266,7 +266,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       setNodes([]);
       setEdges([]);
     }
-  }, [graphData, handleSubtaskAction]); // Rerun layout when graphData changes
+  }, [graphData]); // Rerun layout when graphData changes
 
   if (loading) {
     return (
@@ -304,7 +304,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         <MiniMap nodeStrokeColor='#ccc' nodeColor='#fff' nodeBorderRadius={2} pannable zoomable />
         <Background variant='dots' gap={15} size={1} />
       </ReactFlow>
-      {evaluationModal.open && <EvaluationModalUI evaluationModal={evaluationModal} setEvaluationModal={setEvaluationModal} />}
+      {evaluationModal.open && <EvaluationModalUI setNodes={setNodes} evaluationModal={evaluationModal} setEvaluationModal={setEvaluationModal} />}
     </div>
   );
 };
@@ -474,8 +474,8 @@ const SkillsGraph = () => {
             />
           </ReactFlowProvider>
 
-          <InputArea setModificationText={setModificationText} showSuggestions={showSuggestions} setShowSuggestions={setShowSuggestions} suggestedChanges={suggestedChanges} handleSuggestionClick={handleSuggestionClick} modificationText={setModificationText}/>
-          
+          <InputArea modifyLoading={modifyLoading} modify={modify} setModificationText={setModificationText} showSuggestions={showSuggestions} setShowSuggestions={setShowSuggestions} suggestedChanges={suggestedChanges} handleSuggestionClick={handleSuggestionClick} modificationText={modificationText} />
+
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
               <span className="absolute top-3 left-3">Sources</span>
@@ -493,7 +493,7 @@ const SkillsGraph = () => {
   );
 };
 
-function InputArea({ handleSuggestionClick, showSuggestions, suggestedChanges, modificationText, setModificationText, setShowSuggestions }) {
+function InputArea({ modifyLoading, modify, handleSuggestionClick, showSuggestions, suggestedChanges, modificationText, setModificationText, setShowSuggestions }) {
   return (
     <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto px-4'>
       <div className='relative'>

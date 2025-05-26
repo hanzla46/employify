@@ -1,4 +1,8 @@
-export default EvaluationModalUI = ({evaluationModal,setEvaluationModal})=>{
+import { useCallback, useEffect } from "react";
+import axios from "axios";
+const url = import.meta.env.VITE_API_URL;
+export default function EvaluationModalUI({ evaluationModal, setEvaluationModal, setNodes }) {
+  useEffect(() => { console.log(url) }, [])
   const handleSendMessage = useCallback(async () => {
     if (!evaluationModal.inputMessage.trim() && !evaluationModal.file) return;
 
@@ -26,7 +30,8 @@ export default EvaluationModalUI = ({evaluationModal,setEvaluationModal})=>{
       }
 
       // Call your API endpoint here
-      const response = await axios.post(url+ '/roadmap/evaluate-subtask', formData, {
+      const response = await axios.post(url + '/roadmap/evaluate-subtask', formData, {
+        withCredentials: true,
         headers: {
           'Content-Type': 'multipart/form-data'
         }
@@ -46,6 +51,10 @@ export default EvaluationModalUI = ({evaluationModal,setEvaluationModal})=>{
 
       // If task is marked completed by AI, update the nodes
       if (response.data.completed) {
+        setEvaluationModal(prev => ({
+          ...prev,
+          open: false
+        }))
         setNodes(prevNodes =>
           prevNodes.map(node => ({
             ...node,
@@ -163,6 +172,4 @@ export default EvaluationModalUI = ({evaluationModal,setEvaluationModal})=>{
     </div>
 
   );
-
-
 }
