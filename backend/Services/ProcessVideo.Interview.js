@@ -1,35 +1,29 @@
 const Interview = require("../models/InterviewModel");
 const { GoogleGenAI } = require("@google/genai");
+const path = require("path");
+const fs = require("fs").promises;
 
 const ProcessVideo = async (videoFile, QId, userId) => {
   try {
     console.log("Processing the video...");
-    const filePath = path.join(__dirname, "uploads", videoFile.originalname);
-    fs.writeFile(filePath, req.file.buffer, (err) => {
-      if (err) return res.status(500).send("Failed to save file 😵");
+    const safeFileName = `${userId}_${QId}_${videoFile.originalname}`;
+    const filePath = path.join(__dirname, "uploads", safeFileName);
+    await fs.writeFile(filePath, videoFile.buffer);
 
-      res.send("File uploaded and saved 😎");
-
-      // ❌ Optional: Delete file later (example: after 10 seconds)
-      setTimeout(() => {
-        fs.unlink(filePath, (err) => {
-          if (err) console.error("Failed to delete file:", err);
-          else console.log("File deleted successfully 🧹");
-        });
-      }, 10000); // 10 seconds
-    });
-
-    const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API });
+    const ai = new GoogleGenAI(process.env.GEMINI_API);
     const modelName = "gemini-2.0-flash";
     let files;
     let config;
     try {
       console.log("Starting video file upload...");
       files = [await ai.files.upload({ file: filePath })];
+      await fs.unlink(filePath);
       config = {
         responseMimeType: "text/plain",
       };
-      console.log(`Video uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`);
+      console.log(
+        `Video uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`
+      );
     } catch (error) {
       console.error("Error uploading video file:", error);
       throw new Error("Failed to upload video for processing.");
@@ -58,6 +52,7 @@ const ProcessVideo = async (videoFile, QId, userId) => {
         model: modelName,
         contents: contents,
       });
+      console.log("video result: " + result);
       const response = result.response;
       const text = response.text();
       console.log("Raw response text:", text);
@@ -72,7 +67,7 @@ const ProcessVideo = async (videoFile, QId, userId) => {
       console.error("Error generating content from video:", error);
       throw error;
     }
-    console.log("Gemini Response:", text);
+    // console.log("Gemini Response:", text);
     console.log("Parsed Result:", parsedResult);
 
     const interview = await Interview.findOne({
