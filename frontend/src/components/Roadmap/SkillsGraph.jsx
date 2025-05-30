@@ -6,7 +6,9 @@ import ReactFlow, {
   useNodesState,
   useEdgesState,
   MarkerType,
-  ReactFlowProvider, // Import ReactFlowProvider
+  ReactFlowProvider,
+  Handle,
+  Position,
 } from "reactflow";
 import "reactflow/dist/style.css";
 import axios from "axios";
@@ -20,8 +22,8 @@ const url = import.meta.env.VITE_API_URL;
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-const NODE_WIDTH = 390; // Estimate width of your TaskNode + padding
-const NODE_HEIGHT = 280; // Estimate height (can vary with expansion, use an average)
+const NODE_WIDTH = 500; // Estimate width of your TaskNode + padding
+const NODE_HEIGHT = 380; // Estimate height (can vary with expansion, use an average)
 
 const getLayoutedElements = (nodes, edges, direction = "LR") => {
   dagreGraph.setGraph({ rankdir: direction, nodesep: 50, ranksep: 100 }); // Adjust spacing
@@ -66,14 +68,31 @@ const TaskNode = ({ data, setGraph }) => {
 
   return (
     <div
-      className={`p-4 rounded-lg border-4 border-gray-300 bg-white shadow-xl max-w-[450px] m-8 ${data.priority === "low" ? "bg-zinc-300" : ""
-        } ${data.priority === "medium" ? "bg-sky-300" : ""} ${data.priority === "high" ? "bg-red-200" : ""} ${data.tag === "new" ? "border-green-600" : ""
-        } ${data.tag === "updated" ? "border-blue-700" : ""}`}
-      style={{ minWidth: `${NODE_WIDTH - 16}px` }}>
-      {" "}
+      className={`p-4 rounded-lg border-4 shadow-xl m-8 ${data.priority === "low" ? "bg-green-200" : ""} ${
+        data.priority === "medium" ? "bg-sky-200" : ""
+      } ${data.priority === "high" ? "bg-red-100" : ""} ${data.tag === "new" ? "border-green-600" : ""} ${
+        data.tag === "updated" ? "border-blue-600" : ""
+      } ${data.tage !== "new" && data.tag !== "updated" ? "border-gray-400" : ""}`}
+      style={{ maxWidth: `${NODE_WIDTH - 10}px` }}>
+      <Handle
+        type='target'
+        position={Position.Left}
+        // Optional: Add a unique id if you had multiple handles on the same side/position
+        // id="a"
+        style={{ background: "#3B82F6", left: 24 }} // Example styling
+      />
+      <Handle
+        type='source'
+        position={Position.Right}
+        // Optional: Add a unique id
+        // id="b"
+        style={{ background: "#3B82F6", right: 24 }} // Example styling
+      />
+
       <div
-        className={`p-1 rounded-lg float-right font-bold text-xl bg-gray-300 ${data.tag === "new" ? "text-green-700 inline" : "text-blue-700 inline"
-          } ${data.tag === "existing" ? "hidden" : ""}`}>
+        className={`p-1 rounded-lg float-right font-bold text-xl bg-gray-300 ${
+          data.tag === "new" ? "text-green-700 inline" : "text-blue-700 inline"
+        } ${data.tag === "existing" ? "hidden" : ""}`}>
         {data.tag}
       </div>
       <div className='font-bold text-lg mb-2'>{data.label}</div>
@@ -95,14 +114,16 @@ const TaskNode = ({ data, setGraph }) => {
             <div
               key={subtask.id || index} // Use subtask.id if available and unique
               className='flex items-center justify-between flex-col mb-2 p-2 rounded border border-blue-300'>
-              <div className="flex flex-row">
-                <div className="inline mr-1"> {subtask.completed ? <Check /> : <FolderCheck />} </div>
+              <div className='flex flex-row'>
+                <div className='inline mr-1'> {subtask.completed ? <Check /> : <FolderCheck />} </div>
                 <div className='text-sm mr-2 inline'>{subtask.label}</div>
               </div>
               <div className='flex flex-row justify-between mt-2'>
                 {" "}
                 <button
-                  className={`${!subtask.completed ? "bg-green-500 hover:bg-green-600" : "bg-red-400 hover:bg-red-500"} text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150`}
+                  className={`${
+                    !subtask.completed ? "bg-green-500 hover:bg-green-600" : "bg-red-400 hover:bg-red-500"
+                  } text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150`}
                   onClick={() => data.onSubtaskComplete(subtask.id, subtask.label, data.label)}>
                   {!subtask.completed ? subtask.buttonText : "Reset"}
                 </button>
@@ -137,11 +158,11 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   const [evaluationModal, setEvaluationModal] = useState({
     open: false,
     stId: null,
-    subTaskName: '',
-    taskName: '',
+    subTaskName: "",
+    taskName: "",
     messages: [],
     file: null,
-    inputMessage: ''
+    inputMessage: "",
   });
 
   const checkCompleted = useCallback((stId, subTaskName, taskName) => {
@@ -152,7 +173,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       taskName,
       messages: [],
       file: null,
-      inputMessage: ''
+      inputMessage: "",
     });
   }, []);
   const handleShowSourcesModal = useCallback(
@@ -208,7 +229,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
           sources: st.sources || "",
           completed: st.completed || false,
         })),
-        
+
         // Pass other data for display in the node
         category: task.category,
         difficulty: task.difficulty,
@@ -232,14 +253,14 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
               id: `e-${sourceId}-${targetId}`, // Ensure unique edge ID
               source: sourceId,
               target: targetId,
-              type: "smoothstep", // Or 'default', 'straight', 'step'
+              type: "default", // Or 'default', 'straight', 'step'
               animated: true,
               markerEnd: {
                 type: MarkerType.ArrowClosed,
                 width: 15, // Smaller arrow
                 height: 15,
               },
-              style: { stroke: "#60a5fa", strokeWidth: 2 }, // Example style
+              style: { stroke: "#3B82F6", strokeWidth: 4 }, // Example style
             });
           } else {
             console.warn(`Skipping edge from ${sourceId} to ${targetId}: Node not found in task list.`);
@@ -288,7 +309,52 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   return (
     // Height needs to be explicitly set on the container for ReactFlow
     <div style={{ width: "100%", height: "700px" }}>
-      {" "}
+      <div className='fixed right-4 top-9 z-10 bg-white dark:bg-gray-800 rounded-md shadow-md p-3 text-sm text-gray-800 dark:text-gray-200 flex flex-col space-y-3'>
+        {" "}
+        {/* Increased space-y */}
+        {/* Priority Indicators (Affects Background) */}
+        <div>
+          <span className='font-semibold mr-2'>Priority (BG):</span> {/* Indicate it affects background */}
+          <span className='inline-flex items-center space-x-1 mr-3'>
+            {/* Using background color */}
+            <span className='block w-3 h-3 rounded-full bg-zinc-300'></span>
+            <span>Low</span>
+          </span>
+          <span className='inline-flex items-center space-x-1 mr-3'>
+            {/* Using background color */}
+            <span className='block w-3 h-3 rounded-full bg-sky-300'></span>
+            <span>Medium</span>
+          </span>
+          <span className='inline-flex items-center space-x-1'>
+            {/* Using background color */}
+            <span className='block w-3 h-3 rounded-full bg-red-200'></span>
+            <span>High</span>
+          </span>
+        </div>
+        {/* Tag Indicators (Affects Border) */}
+        <div>
+          <span className='font-semibold mr-2'>Tag (Border):</span> {/* Indicate it affects border */}
+          <span className='inline-flex items-center space-x-1 mr-3'>
+            {/* Using border color and a transparent background */}
+            <span className='block w-3 h-3 rounded-full border-2 border-gray-400 bg-transparent'></span>{" "}
+            {/* Border for existing, transparent bg */}
+            <span>Existing</span>
+          </span>
+          <span className='inline-flex items-center space-x-1 mr-3'>
+            {/* Using border color and a transparent background */}
+            <span className='block w-3 h-3 rounded-full border-2 border-blue-600 bg-transparent'></span>{" "}
+            {/* Border for updated, transparent bg */}
+            <span>Updated</span>
+          </span>
+          <span className='inline-flex items-center space-x-1'>
+            {/* Using border color and a transparent background */}
+            <span className='block w-3 h-3 rounded-full border-2 border-green-600 bg-transparent'></span>{" "}
+            {/* Border for new, transparent bg */}
+            <span>New</span>
+          </span>
+        </div>
+      </div>
+
       {/* Increased height */}
       <ReactFlow
         nodes={nodes}
@@ -300,11 +366,16 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         fitViewOptions={{ padding: 0.1, maxZoom: 1.2 }} // Add padding around fitView
         minZoom={0.2} // Allow zooming out further
       >
-        <Controls />
-        <MiniMap nodeStrokeColor='#ccc' nodeColor='#fff' nodeBorderRadius={2} pannable zoomable />
-        <Background variant='dots' gap={15} size={1} />
+        <div className='fixed left-3 bottom-6 z-10'>
+          {" "}
+          <Controls />
+        </div>
+        {/* <MiniMap nodeStrokeColor='#ccc' nodeColor='#fff' nodeBorderRadius={2} pannable zoomable /> */}
+        <Background variant='cross' gap={15} size={1} />
       </ReactFlow>
-      {evaluationModal.open && <EvaluationModalUI setNodes={setNodes} evaluationModal={evaluationModal} setEvaluationModal={setEvaluationModal} />}
+      {evaluationModal.open && (
+        <EvaluationModalUI setNodes={setNodes} evaluationModal={evaluationModal} setEvaluationModal={setEvaluationModal} />
+      )}
     </div>
   );
 };
@@ -474,11 +545,20 @@ const SkillsGraph = () => {
             />
           </ReactFlowProvider>
 
-          <InputArea modifyLoading={modifyLoading} modify={modify} setModificationText={setModificationText} showSuggestions={showSuggestions} setShowSuggestions={setShowSuggestions} suggestedChanges={suggestedChanges} handleSuggestionClick={handleSuggestionClick} modificationText={modificationText} />
+          <InputArea
+            modifyLoading={modifyLoading}
+            modify={modify}
+            setModificationText={setModificationText}
+            showSuggestions={showSuggestions}
+            setShowSuggestions={setShowSuggestions}
+            suggestedChanges={suggestedChanges}
+            handleSuggestionClick={handleSuggestionClick}
+            modificationText={modificationText}
+          />
 
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
-              <span className="absolute top-3 left-3">Sources</span>
+              <span className='absolute top-3 left-3'>Sources</span>
               <button className='absolute top-2 right-2 text-gray-500 hover:text-gray-700' onClick={() => setShowSourcesModal(false)}>
                 ❌
               </button>
@@ -493,7 +573,16 @@ const SkillsGraph = () => {
   );
 };
 
-function InputArea({ modifyLoading, modify, handleSuggestionClick, showSuggestions, suggestedChanges, modificationText, setModificationText, setShowSuggestions }) {
+function InputArea({
+  modifyLoading,
+  modify,
+  handleSuggestionClick,
+  showSuggestions,
+  suggestedChanges,
+  modificationText,
+  setModificationText,
+  setShowSuggestions,
+}) {
   return (
     <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto px-4'>
       <div className='relative'>

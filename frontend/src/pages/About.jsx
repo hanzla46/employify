@@ -15,6 +15,7 @@ import {
   CircleUserRound,
 } from "lucide-react";
 import { motion } from "framer-motion";
+import SpeechToText from "../components/delete/SpeechToText";
 
 export function About() {
   const [activeTab, setActiveTab] = useState("story");
@@ -556,6 +557,7 @@ export function About() {
           </div>
         </div>
       </div>
+      <SpeechToText />
     </div>
   );
 }

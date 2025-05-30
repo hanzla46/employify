@@ -203,9 +203,9 @@ function JobDataCard({ job }) {
     <div className='text-black dark:text-white'>
       {job?.title ? (
         <>
-          <div className='flex flex-row p-2 items-center flex-wrap'>
-            <h3 className='mr-2 whitespace-nowrap'>Job Title:</h3>
-            <h2 className='truncate max-w-full'>{job.title || "title"}</h2>
+          <div className='flex flex-row p-2 items-center'>
+            <h3 className='mr-2'>Job Title:</h3>
+            <h2 className='wrap'>{job.title || "title"}</h2>
           </div>
 
           <div className='flex flex-row p-2 items-center flex-wrap'>
