@@ -309,53 +309,8 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   return (
     // Height needs to be explicitly set on the container for ReactFlow
     <div style={{ width: "100%", height: "700px" }}>
-      <div className='fixed right-4 top-9 z-10 bg-white dark:bg-gray-800 rounded-md shadow-md p-3 text-sm text-gray-800 dark:text-gray-200 flex flex-col space-y-3'>
-        {" "}
-        {/* Increased space-y */}
-        {/* Priority Indicators (Affects Background) */}
-        <div>
-          <span className='font-semibold mr-2'>Priority (BG):</span> {/* Indicate it affects background */}
-          <span className='inline-flex items-center space-x-1 mr-3'>
-            {/* Using background color */}
-            <span className='block w-3 h-3 rounded-full bg-zinc-300'></span>
-            <span>Low</span>
-          </span>
-          <span className='inline-flex items-center space-x-1 mr-3'>
-            {/* Using background color */}
-            <span className='block w-3 h-3 rounded-full bg-sky-300'></span>
-            <span>Medium</span>
-          </span>
-          <span className='inline-flex items-center space-x-1'>
-            {/* Using background color */}
-            <span className='block w-3 h-3 rounded-full bg-red-200'></span>
-            <span>High</span>
-          </span>
-        </div>
-        {/* Tag Indicators (Affects Border) */}
-        <div>
-          <span className='font-semibold mr-2'>Tag (Border):</span> {/* Indicate it affects border */}
-          <span className='inline-flex items-center space-x-1 mr-3'>
-            {/* Using border color and a transparent background */}
-            <span className='block w-3 h-3 rounded-full border-2 border-gray-400 bg-transparent'></span>{" "}
-            {/* Border for existing, transparent bg */}
-            <span>Existing</span>
-          </span>
-          <span className='inline-flex items-center space-x-1 mr-3'>
-            {/* Using border color and a transparent background */}
-            <span className='block w-3 h-3 rounded-full border-2 border-blue-600 bg-transparent'></span>{" "}
-            {/* Border for updated, transparent bg */}
-            <span>Updated</span>
-          </span>
-          <span className='inline-flex items-center space-x-1'>
-            {/* Using border color and a transparent background */}
-            <span className='block w-3 h-3 rounded-full border-2 border-green-600 bg-transparent'></span>{" "}
-            {/* Border for new, transparent bg */}
-            <span>New</span>
-          </span>
-        </div>
-      </div>
+      <Indicators />
 
-      {/* Increased height */}
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -366,7 +321,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         fitViewOptions={{ padding: 0.1, maxZoom: 1.2 }} // Add padding around fitView
         minZoom={0.2} // Allow zooming out further
       >
-        <div className='fixed left-3 bottom-6 z-10'>
+        <div className='fixed left-3 bottom-6 z-20'>
           {" "}
           <Controls />
         </div>
@@ -613,6 +568,56 @@ function InputArea({
             <Send size={16} />
           </button>
         </div>
+      </div>
+    </div>
+  );
+}
+
+function Indicators() {
+  return (
+    <div className='fixed right-4 top-9 z-10 bg-white dark:bg-gray-800 rounded-md shadow-md p-3 pt-5 text-sm text-gray-800 dark:text-gray-200 flex flex-col space-y-3'>
+      {" "}
+      {/* Increased space-y */}
+      {/* Priority Indicators (Affects Background) */}
+      <div>
+        <span className='font-semibold mr-2'>Priority (BG):</span> {/* Indicate it affects background */}
+        <span className='inline-flex items-center space-x-1 mr-3'>
+          {/* Using background color */}
+          <span className='block w-3 h-3 rounded-full bg-zinc-300'></span>
+          <span>Low</span>
+        </span>
+        <span className='inline-flex items-center space-x-1 mr-3'>
+          {/* Using background color */}
+          <span className='block w-3 h-3 rounded-full bg-sky-300'></span>
+          <span>Medium</span>
+        </span>
+        <span className='inline-flex items-center space-x-1'>
+          {/* Using background color */}
+          <span className='block w-3 h-3 rounded-full bg-red-200'></span>
+          <span>High</span>
+        </span>
+      </div>
+      {/* Tag Indicators (Affects Border) */}
+      <div>
+        <span className='font-semibold mr-2'>Tag (Border):</span> {/* Indicate it affects border */}
+        <span className='inline-flex items-center space-x-1 mr-3'>
+          {/* Using border color and a transparent background */}
+          <span className='block w-3 h-3 rounded-full border-2 border-gray-400 bg-transparent'></span>{" "}
+          {/* Border for existing, transparent bg */}
+          <span>Existing</span>
+        </span>
+        <span className='inline-flex items-center space-x-1 mr-3'>
+          {/* Using border color and a transparent background */}
+          <span className='block w-3 h-3 rounded-full border-2 border-blue-600 bg-transparent'></span>{" "}
+          {/* Border for updated, transparent bg */}
+          <span>Updated</span>
+        </span>
+        <span className='inline-flex items-center space-x-1'>
+          {/* Using border color and a transparent background */}
+          <span className='block w-3 h-3 rounded-full border-2 border-green-600 bg-transparent'></span>{" "}
+          {/* Border for new, transparent bg */}
+          <span>New</span>
+        </span>
       </div>
     </div>
   );
