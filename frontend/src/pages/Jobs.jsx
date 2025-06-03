@@ -3,7 +3,7 @@ import { Briefcase, MapPin, DollarSign, Clock, Search, BookmarkPlus, Share2, Mic
 import ProtectedRoute from "../Context/ProtectedRoute";
 import { JobsContext } from "../Context/JobsContext";
 import { useSearchParams, useLocation, Navigate, useNavigate, Link } from "react-router-dom";
-import { handleSuccess } from "../utils";
+import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
 import { SkillsContext } from "../Context/SkillsContext";
 const url = import.meta.env.VITE_API_URL;
@@ -124,6 +124,7 @@ export function Jobs() {
 
   const handleGetCoverLetter = async (job) => {
     const { id, title, company } = job;
+    const jobId = id;
     updateJobActionState(id, "coverLetter", { status: "loading" });
     try {
       const res = await axios.get(url + `/jobs/generateCoverLetter?jobId=${id}`, { responseType: "blob", withCredentials: true });
@@ -131,7 +132,8 @@ export function Jobs() {
       if (contentType && contentType.includes("application/json")) {
         const text = await res.data.text();
         const errorData = JSON.parse(text);
-        throw new Error(errorData.message || "Server said nope 🙅‍♂️");
+        handleError(errorData.message || "Server said nope 🙅‍♂️");
+        throw new Error(errorData.message);
       }
       const fileBlob = res.data;
       updateJobActionState(id, "coverLetter", {
@@ -147,19 +149,29 @@ export function Jobs() {
   };
 
   const handleGetResume = async (job, quality) => {
-    const { id: jobId, title, company } = job;
+    const { id, title, company } = job;
+    const jobId = id;
     const actionKey = quality === "Normal" ? "resumeNormal" : "resumeBest";
     updateJobActionState(jobId, actionKey, { status: "loading" });
     setActiveResumeDropdown(null); // Close dropdown after selection
 
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2500));
-      const dummyBlob = new Blob([`Dummy ${quality} Resume for ${title} at ${company.name}`], { type: "text/plain" });
+      const res = await axios.get(url + `/jobs/generateResume?quality=${quality}&jobId=${id}`, {
+        responseType: "blob",
+        withCredentials: true,
+      });
+      const contentType = res.headers["content-type"];
+      if (contentType && contentType.includes("application/json")) {
+        const text = await res.data.text();
+        const errorData = JSON.parse(text);
+        handleError(errorData.message || "Server said nope 🙅‍♂️");
+        throw new Error(errorData.message);
+      }
+      const fileBlob = res.data;
       updateJobActionState(jobId, actionKey, {
         status: "loaded",
-        file: dummyBlob,
-        fileName: `${title.replace(/\W+/g, "_")}_${company.name.replace(/\W+/g, "_")}_Resume_${quality}.txt`,
+        file: fileBlob,
+        fileName: `${title.replace(/\W+/g, "_")}_${company.name.replace(/\W+/g, "_")}_Resume_${quality}.pdf`,
       });
       handleSuccess(`${quality} resume generated!`);
     } catch (error) {

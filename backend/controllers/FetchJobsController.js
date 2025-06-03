@@ -153,13 +153,18 @@ const generateResume = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await Profile.findOne({ userId });
-    const summary = profile.profileSummary;
-    const { jobId, quality } = req.params;
-    const job = Job.find({ id: jobId });
-    if (quality === "normal") {
-      const resume = await getNormalResumeData(summary, job);
-    } else if (quality === "best") {
-      const resume = await getBestResumeData(summary, job);
+    const { jobId, quality } = req.query;
+    console.log("params: " + jobId + "  " + quality);
+    const job = await Job.findOne({ id: jobId });
+    if (quality.toLowerCase() === "normal") {
+      const resumeBuffer = await getNormalResumeData(profile, job);
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="NormalResume_${job.id}_123.pdf"`,
+      });
+      res.end(resumeBuffer);
+    } else if (quality.toLowerCase() === "best") {
+      const resume = await getBestResumeData(profile, job);
     }
   } catch (error) {
     console.log("error while generating resume: " + error);

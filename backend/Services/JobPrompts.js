@@ -1,4 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const puppeteer = require("puppeteer");
+const path = require("path");
+const fs = require("fs");
 const CalculateRelevancyScores = async (jobs, profileSummary) => {
   const prompt = `
      You are a career coach AI. Based on the candidate's profile summary and the job description, rate how relevant each job is from 0 to 100.
@@ -113,7 +116,95 @@ const getCoverLetterData = async (summary, job) => {
   console.log("cover letter data: " + content);
   return content;
 };
-const getNormalResumeData = async (summary, job) => {};
+const getNormalResumeData = async (profile, job) => {
+  const prompt = `Generate a professional and well-structured resume in HTML format, using the provided user profile data. The resume should be designed for a job application, emphasizing clarity, readability, and impact. The output should be a complete, self-contained HTML document.
+  ---
+User Profile Data:
+Hard Skills: ${profile.hardSkills} \n
+Soft Skills: ${profile.softSkills} \n
+Work Experience: ${profile.jobs} \n
+Projects: ${profile.projects} \n
+Career Goal: ${profile.careerGoal} \n
+Location: ${profile.location} \n
+
+\n
+Job Details:
+Title: ${job.title} \n
+Description: ${job.description}\n\n
+---
+Output Requirements:
+HTML Structure: A complete HTML5 document with <!DOCTYPE html>, <html>, <head>, and <body> tags. Dont include unnecessary backticks at start or end.
+Styling: Minimal inline CSS or a <style> block within the <head> for basic professional formatting (e.g., font family, sizes, margins, bullet point styles). No external stylesheets.
+Sections: Organize the resume clearly into the following standard sections:
+Contact Information: Name (prominently displayed), Email, Phone, LinkedIn Profile, Portfolio Link.
+Summary/Objective (Optional but Recommended): A brief (2-3 sentences) professional summary highlighting years of experience, key expertise, and career goals relevant to tech roles. This should be concise and impactful.
+Skills: A list of key technical and soft skills, potentially categorized (e.g., Programming Languages, Cloud Platforms, Databases, Methodologies).
+Work Experience: For each role, include:
+Job Title
+Company Name
+Location (if available, or implied by remote/candidate location)
+Start Date – End Date (use "Present" for current role)
+A bulleted list of 3-5 concise, action-oriented responsibilities and achievements, quantifying impact where possible.
+Projects (Optional but Recommended): For each project, include:
+Project Name
+Brief Description (1-2 sentences)
+Link (e.g., GitHub)
+Education: For each degree, include:
+Degree Name
+University Name
+Graduation Year
+Certifications (Optional): List any relevant professional certifications.
+Content Emphasis:
+Prioritize recent and relevant work experience.
+Use strong action verbs in bullet points (e.g., "Led," "Developed," "Implemented," "Optimized").
+Quantify achievements whenever possible (e.g., "improved performance by 30%," "reduced deployment time by 50%").
+Ensure all relevant skills from keySkills are prominently displayed.
+Formatting: Use headings (<h2>, <h3>), lists (<ul>, <li>), and bold text (<strong>) to enhance readability.
+Length: Aim for a concise, professional resume (typically 1-2 pages for this level of experience). The HTML can naturally expand, but the content should be focused.
+Tone: Professional, clear, concise, and results-oriented.`;
+  console.log("prompt: " + prompt);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+  const result = await model.generateContent(prompt);
+  console.log("Generated Content Response:", result);
+  const content = result.response.candidates[0].content.parts[0].text;
+  console.log("resume data: " + content);
+  const { buffer, filePath } = await generatePDF(content, `NormalResume${job.id}_123.pdf`);
+  fs.unlinkSync(filePath);
+  return buffer;
+};
+
+const generatePDF = async (htmlString, fileName = "output.pdf") => {
+  const browser = await puppeteer.launch({ headless: "new" });
+  const page = await browser.newPage();
+
+  await page.setContent(htmlString, { waitUntil: "networkidle0" });
+
+  const outputPath = path.join(__dirname, "..", "pdfs");
+  if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(outputPath);
+  }
+
+  const fullPath = path.join(outputPath, fileName);
+
+  // 🧠 BUFFER MODE
+  const buffer = await page.pdf({
+    format: "A4",
+    printBackground: true,
+  });
+
+  // 💾 SAVE TO DISK
+  fs.writeFileSync(fullPath, buffer); // write buffer directly
+
+  await browser.close();
+
+  // 📦 Return both like a boss
+  return {
+    buffer,
+    filePath: fullPath,
+  };
+};
+
 const getBestResumeData = async (summary, job) => {};
 module.exports = {
   CalculateRelevancyScores,
