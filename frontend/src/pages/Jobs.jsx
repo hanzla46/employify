@@ -1,11 +1,13 @@
 import React, { useState, useEffect, useContext } from "react";
-import { Briefcase, MapPin, DollarSign, Clock, Search, BookmarkPlus, Share2, ChevronRight, Star, ChevronDown } from "lucide-react";
+import { Briefcase, MapPin, DollarSign, Clock, Search, BookmarkPlus, Share2, Mic, Sparkles, ChevronDown } from "lucide-react";
 import ProtectedRoute from "../Context/ProtectedRoute";
 import { JobsContext } from "../Context/JobsContext";
 import { useSearchParams, useLocation, Navigate, useNavigate, Link } from "react-router-dom";
 import { handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
+import { SkillsContext } from "../Context/SkillsContext";
 export function Jobs() {
+  const { hasProfile } = useContext(SkillsContext);
   const { jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
@@ -90,10 +92,19 @@ export function Jobs() {
   return (
     <div className='min-h-screen bg-gradient-to-b pt-16 from-gray-50 to-white dark:from-gray-800 dark:to-gray-700'>
       {/* Header */}
-      <header className='sticky top-12 z-10 bg-white dark:bg-gray-800 shadow-md'>
-        <div className='container mx-auto px-4 py-4'>
+      <header className='sticky top-11 z-10 bg-white dark:bg-gray-800 shadow-md'>
+        <div className='container mx-auto px-2 py-2'>
           <div className='flex justify-between items-center'>
-            <h1 className='text-2xl font-bold text-primary-600 dark:text-primary-400'>Personalized Job Matching</h1>
+            <h1 className='text-xl font-bold text-primary-600 dark:text-primary-400'>Personalized Job Matching</h1>
+            {!hasProfile && (
+              <div>
+                {" "}
+                <Link to={"/roadmap"}>
+                  {" "}
+                  <h2 className='text-red-600 dark:text-red-400'>❗ Add Profile for Personalized Jobs</h2>
+                </Link>
+              </div>
+            )}
             <div className='hidden md:flex space-x-4'>
               <button className='text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'>
                 Saved ({savedJobs.length})
@@ -155,156 +166,162 @@ export function Jobs() {
               {filteredJobs.map((job) => (
                 <div
                   key={job.id}
-                  className={`bg-white dark:bg-gray-800 rounded-lg shadow-lg transition-all duration-200 ${
+                  className={`relative bg-gray-200 dark:bg-gray-900 rounded-xl shadow-lg shadow-gray-500 transition-all duration-300 ${
                     job.featured ? "border-l-4 border-primary-500" : ""
                   } ${expandedJob === job.id ? "ring-2 ring-primary-500" : ""}`}>
-                  <div className='p-6'>
-                    <div className='flex items-start justify-between mb-4'>
-                      <div className='flex'>
-                        <div className='mr-4 flex-shrink-0'>
+                  {/* Featured Ribbon */}
+                  {job.featured && (
+                    <div className='absolute top-3 right-3 bg-gradient-to-r from-primary-500 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md z-10'>
+                      FEATURED
+                    </div>
+                  )}
+
+                  <div className='p-3'>
+                    <div className='flex flex-col md:flex-row md:items-start gap-5'>
+                      {/* Company Logo */}
+                      <div className='flex-shrink-0'>
+                        <div className='bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl w-16 h-16 flex items-center justify-center overflow-hidden'>
                           <img
                             src={
                               job.company.logo ||
                               "https://img.freepik.com/premium-vector/building-logo-icon-design-template-vector_67715-555.jpg?w=360"
                             }
                             alt={`${job.company.name} logo`}
-                            className='w-12 h-12 rounded-md bg-gray-200 object-cover'
+                            className='w-12 h-12 object-contain'
                           />
                         </div>
-                        <div>
-                          <div className='flex items-center mb-1'>
-                            <h2 className='text-xl font-semibold dark:text-white mr-2'>{job.title}</h2>
-                            {job.featured && (
-                              <span className='bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400 text-xs font-medium px-2 py-0.5 rounded-full'>
-                                Featured
-                              </span>
-                            )}
-                          </div>
-                          <p className='text-gray-600 dark:text-gray-300 mb-1'>{job.company.name}</p>
-                          <div className='flex items-center text-sm text-gray-500 dark:text-gray-400'>
-                            <div className='flex items-center mr-2'>
-                              <Star className='h-4 w-4 text-yellow-400 mr-1' />
-                              <span>{job.score || 46}</span>
+                      </div>
+
+                      {/* Job Info */}
+                      <div className='flex-grow'>
+                        <div className='flex flex-wrap items-start justify-between gap-3 mb-2'>
+                          <div>
+                            <h2 className='text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 transition-colors'>
+                              {job.title}
+                            </h2>
+                            <a href={job.company.website} className='block underline text-gray-600 dark:text-gray-300 mb-2'>
+                              {job.company.name}
+                            </a>
+
+                            {/* AI Score Badge */}
+                            <div className='inline-flex items-center bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/10 dark:to-amber-600/10 border border-amber-400/30 rounded-full px-3 py-1 mb-3'>
+                              <Sparkles className='h-4 w-4 text-amber-400 mr-1' />
+                              <span className='text-sm font-medium text-amber-700 dark:text-amber-300'>AI Match: {job.score || 50}%</span>
                             </div>
-                            <span className='text-gray-300 dark:text-gray-600 mx-1'>•</span>
+                          </div>
+
+                          {/* Action Buttons */}
+                          <div className='flex gap-2'>
+                            <button
+                              onClick={() => toggleSaveJob(job.id)}
+                              className={`p-2 rounded-full transition-all ${
+                                savedJobs.includes(job.id)
+                                  ? "text-primary-500 bg-primary-100/80 dark:bg-primary-900/50"
+                                  : "text-gray-500 hover:text-primary-500 bg-gray-100 dark:bg-gray-700 hover:bg-primary-100/50"
+                              }`}>
+                              <BookmarkPlus className='h-5 w-5' />
+                            </button>
+                            <button
+                              onClick={() => shareJob(job.id)}
+                              className='p-2 rounded-full text-gray-500 hover:text-blue-500 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100/50 transition-all'>
+                              <Share2 className='h-5 w-5' />
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* Job Metadata */}
+                        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-2'>
+                          <div className='max-w-52 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                            <MapPin className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
+                            <span className='truncate'>
+                              {job.location} {job.isRemote && "(Remote)"}
+                            </span>
+                          </div>
+
+                          <div className='max-w-60 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                            <Briefcase className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
+                            <span>{job.type}</span>
+                          </div>
+
+                          <div className='max-w-36 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                            <Clock className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
                             <span>{timeAgo(job.postedAt)}</span>
                           </div>
                         </div>
-                      </div>
-                      <div className='flex space-x-2'>
+
+                        {/* Expandable Section */}
+                        {expandedJob === job.id && (
+                          <div className='mt-3 pt-4 border-t border-gray-200 dark:border-gray-700'>
+                            <h3 className='font-bold text-gray-900 dark:text-white mb-3'>Job Description</h3>
+                            <p className='text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line'>{job.description}</p>
+
+                            <div className='flex flex-col sm:flex-row gap-3'>
+                              <a
+                                href={job.company.website || `https://www.google.com/search?q=${job.company.name}`}
+                                target='_blank'
+                                className='flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
+                                View Company
+                              </a>
+                              <button className='flex-1 bg-gradient-to-r from-blue-600 to-indigo-700 text-white px-4 py-3 rounded-xl font-medium hover:from-blue-700 hover:to-indigo-800 transition-all duration-200 shadow-lg hover:shadow-xl'>
+                                Get Cover Letter
+                              </button>
+                              <button className='flex-1 bg-gradient-to-r from-indigo-700 to-purple-700 text-white px-4 py-3 rounded-xl font-medium hover:from-indigo-800 hover:to-purple-800 transition-all duration-200 shadow-lg hover:shadow-xl'>
+                                Get Resume
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Expand/Collapse Button */}
                         <button
-                          onClick={() => toggleSaveJob(job.id)}
-                          className={`p-2 rounded-full ${
-                            savedJobs.includes(job.id)
-                              ? "bg-primary-100 dark:bg-primary-900 text-primary-600 dark:text-primary-400"
-                              : "bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300"
-                          }`}>
-                          <BookmarkPlus className='h-5 w-5' />
-                        </button>
-                        <button
-                          onClick={() => shareJob(job.id)}
-                          className='p-2 rounded-full bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-300'>
-                          <Share2 className='h-5 w-5' />
+                          className='mt-4 w-full py-2 text-center bg-gray-100 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors'
+                          onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}>
+                          <div className='flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-medium'>
+                            {expandedJob === job.id ? "Show less" : "Show full details"}
+                            <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${expandedJob === job.id ? "rotate-180" : ""}`} />
+                          </div>
                         </button>
                       </div>
                     </div>
-
-                    <div className='grid grid-cols-2 md:grid-cols-4 gap-4 mb-4'>
-                      <div className='flex items-center text-gray-600 dark:text-gray-300'>
-                        <MapPin className='h-5 w-5 mr-2 text-gray-500 dark:text-gray-400' />
-                        {job.location} {job.isRemote && "(Remote)"}
-                      </div>
-                      <div className='flex items-center text-gray-600 dark:text-gray-300'>
-                        <DollarSign className='h-5 w-5 mr-2 text-gray-500 dark:text-gray-400' />
-                        {job.salary == 0 || job.salary == "Not specified" ? "Not Specified" : <span>{job.salary}</span>}
-                      </div>
-                      <div className='flex items-center text-gray-600 dark:text-gray-300'>
-                        <Briefcase className='h-5 w-5 mr-2 text-gray-500 dark:text-gray-400' />
-                        {job.type}
-                      </div>
-                      <div className='flex items-center text-gray-600 dark:text-gray-300'>
-                        <Clock className='h-5 w-5 mr-2 text-gray-500 dark:text-gray-400' />
-                        {timeAgo(job.postedAt)}
-                      </div>
-                    </div>
-
-                    {expandedJob === job.id && (
-                      <div className='mt-4 pb-4 border-t border-gray-200 dark:border-gray-700 pt-4'>
-                        <h3 className='font-medium text-gray-900 dark:text-white mb-2'>Job Description</h3>
-                        <p className='text-gray-600 dark:text-gray-300 mb-6'>{job.description}</p>
-                        <div className='flex flex-col sm:flex-row sm:justify-between space-y-3 sm:space-y-0'>
-                          <a
-                            href={job.company.website || `https://www.google.com/search?q=${job.company.name}`}
-                            target='_blank'
-                            className='inline-flex items-center justify-center px-4 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-primary-600 dark:text-primary-400 bg-primary-50 dark:bg-primary-900/20 hover:bg-primary-100 dark:hover:bg-primary-900/40'>
-                            View Company
-                          </a>
-                          <a
-                            href={job.externalLink}
-                            target='_blank'
-                            className='inline-flex items-center justify-center px-6 py-2 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-primary-600 dark:bg-primary-500 hover:bg-primary-700 dark:hover:bg-primary-600'>
-                            Easy Apply
-                          </a>
-                        </div>
-                      </div>
-                    )}
-
-                    <button
-                      className='mt-2 flex items-center text-primary-600 dark:text-primary-400 text-sm font-medium'
-                      onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}>
-                      {expandedJob === job.id ? "Show less" : "Show more"}
-                      <ChevronRight className={`h-4 w-4 ml-1 transition-transform ${expandedJob === job.id ? "rotate-90" : ""}`} />
-                    </button>
                   </div>
 
-                  <div className='bg-gray-50 dark:bg-gray-800 px-6 py-2 flex justify-between items-center relative mt-0'>
-                    <div className='text-sm text-gray-500 dark:text-gray-400'>
-                      <Link to={"/interview?jobId=" + job.id}>
-                        <FancyButton text={"Practice Interview"} />
-                      </Link>
-                    </div>
-                    <div className='flex flex-row'>
-                      {" "}
-                      <div className='bg-primary-600 dark:bg-primary-500 text-white px-4 py-2 rounded-lg font-medium hover:bg-primary-700 dark:hover:bg-primary-600 transition-colors'>
-                        {" "}
-                        <a href={job.externalLink} target='_blank'>
-                          Apply Now
-                        </a>{" "}
-                      </div>
+                  {/* Footer Actions */}
+                  <div className='bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 px-5 py-4 flex flex-col sm:flex-row justify-between items-center gap-3 border-t border-gray-200 dark:border-gray-700'>
+                    <Link to={"/interview?jobId=" + job.id} className='w-full sm:w-auto'>
+                      <FancyButton text={"Practice Interview"} />
+                    </Link>
+
+                    <div className='flex items-center w-full sm:w-auto'>
+                      <a
+                        href={job.externalLink}
+                        target='_blank'
+                        className='flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-5 py-2.5 rounded-l-xl font-medium text-center transition-all duration-200 shadow-lg hover:shadow-xl'>
+                        Apply Now
+                      </a>
+
                       {job.applyOptions && job.applyOptions.length > 0 && (
-                        <div className='ml-2 relative'>
-                          {/* Dropdown Trigger Button */}
+                        <div className='relative'>
                           <button
                             onClick={() => toggleApplyDropdown(job.id)}
-                            className='p-1 rounded hover:bg-gray-200 dark:hover:bg-gray-600 text-black dark:text-white'>
-                            <ChevronDown />
+                            className='h-full px-3 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-r-xl transition-colors'>
+                            <ChevronDown className='h-4 w-4' />
                           </button>
+
                           {openApplyDropdownJobId === job.id && (
-                            <ul className='min-w-[150px] px-4 py-2 text-sm text-gray-600 dark:text-gray-100 space-y-1 absolute bg-white dark:bg-gray-800 shadow-lg rounded-lg z-10 right-0 top-full mt-2 border border-gray-200 dark:border-gray-700'>
-                              {" "}
-                              {/* Added min-width, border, text color */}
-                              {job.applyOptions.map((option, index) => (
-                                <li
-                                  key={index}
-                                  className='flex items-center justify-between space-x-4 py-1' // Adjusted spacing/padding
-                                >
-                                  <span className='text-gray-500 dark:text-gray-400 whitespace-nowrap'>
-                                    {" "}
-                                    {/* Prevent wrap */}
-                                    {option.publisher}
-                                  </span>
+                            <div className='absolute right-0 top-full mt-2 w-56 bg-white dark:bg-gray-800 rounded-xl shadow-2xl z-30 overflow-hidden border border-gray-200 dark:border-gray-700'>
+                              <div className='py-1'>
+                                {job.applyOptions.map((option, index) => (
                                   <a
+                                    key={index}
                                     href={option.apply_link}
                                     target='_blank'
-                                    rel='noopener noreferrer'
-                                    className='text-primary-600 dark:text-primary-400 hover:underline font-medium whitespace-nowrap' // Added font-medium, prevent wrap
-                                    onClick={() => setOpenApplyDropdownJobId(null)} // Optional: Close dropdown on click
-                                  >
-                                    Apply
+                                    className='block px-3 py-2 text-sm text-gray-500 hover:bg-gray-50 transition-colors border-b border-gray-100 dark:border-gray-700 last:border-0'
+                                    onClick={() => setOpenApplyDropdownJobId(null)}>
+                                    <div className='font-medium'>{option.publisher}</div>
                                   </a>
-                                </li>
-                              ))}
-                            </ul>
+                                ))}
+                              </div>
+                            </div>
                           )}
                         </div>
                       )}
