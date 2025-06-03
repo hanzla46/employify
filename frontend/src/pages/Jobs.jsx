@@ -6,6 +6,8 @@ import { useSearchParams, useLocation, Navigate, useNavigate, Link } from "react
 import { handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
 import { SkillsContext } from "../Context/SkillsContext";
+const url = import.meta.env.VITE_API_URL;
+import axios from "axios";
 
 export function Jobs() {
   const { hasProfile } = useContext(SkillsContext);
@@ -121,15 +123,20 @@ export function Jobs() {
   };
 
   const handleGetCoverLetter = async (job) => {
-    const { id: jobId, title, company } = job;
-    updateJobActionState(jobId, "coverLetter", { status: "loading" });
+    const { id, title, company } = job;
+    updateJobActionState(id, "coverLetter", { status: "loading" });
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 2000));
-      const dummyBlob = new Blob([`Dummy Cover Letter for ${title} at ${company.name}`], { type: "text/plain" });
-      updateJobActionState(jobId, "coverLetter", {
+      const res = await axios.get(url + `/jobs/generateCoverLetter?jobId=${id}`, { responseType: "blob", withCredentials: true });
+      const contentType = res.headers["content-type"];
+      if (contentType && contentType.includes("application/json")) {
+        const text = await res.data.text();
+        const errorData = JSON.parse(text);
+        throw new Error(errorData.message || "Server said nope 🙅‍♂️");
+      }
+      const fileBlob = res.data;
+      updateJobActionState(id, "coverLetter", {
         status: "loaded",
-        file: dummyBlob,
+        file: fileBlob,
         fileName: `${title.replace(/\W+/g, "_")}_${company.name.replace(/\W+/g, "_")}_CoverLetter.txt`,
       });
       handleSuccess("Cover letter generated!");

@@ -75,4 +75,50 @@ ${profile}
     return "LLM_ERROR";
   }
 };
-module.exports = { CalculateRelevancyScores, getKeywordsAndSummary };
+const getCoverLetterData = async (summary, job) => {
+  const prompt = `
+      You are an expert career advisor and professional writer.
+      Generate a compelling, professional, and tailored cover letter for the following individual applying for the specified job.
+
+      **Applicant's Profile Summary:**
+      ${summary}
+
+      **Job Details:**
+      Job Title: ${job.title}
+      Company: ${job.company.name || "devsinc"}
+      Job Description:
+      ---
+      ${job.description}
+      ---
+
+      **Instructions:**
+      - The cover letter should be addressed to the hiring manager of ${
+        job.company.name
+      } (if the name is not known, use a generic salutation like "Dear Hiring Team at ${job.company.name}").
+      - Highlight how the applicant's skills and experiences from their profile summary align with the key requirements and responsibilities mentioned in the job description.
+      - Maintain a professional and enthusiastic tone.
+      - Ensure the letter expresses strong interest in the role and the company.
+      - Conclude with a call to action, such as requesting an interview.
+      - The letter should be well-structured with an introduction, body paragraphs (2-3), and a conclusion.
+      - Do not include placeholders like "[Applicant's Name]" or "[Company Name]" unless it's for the salutation/closing where specific names are unknown. The content should be ready to use.
+      - Focus on quality and relevance. Avoid generic statements.
+      - Output only the cover letter text, without any introductory or concluding remarks from you (the AI). Start directly with the salutation (e.g., "Dear Hiring Team...").
+    `;
+  console.log("prompt: " + prompt);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
+  const result = await model.generateContent(prompt);
+  console.log("Generated Content Response:", result);
+  const content = result.response.candidates[0].content.parts[0].text;
+  console.log("cover letter data: " + content);
+  return content;
+};
+const getNormalResumeData = async (summary, job) => {};
+const getBestResumeData = async (summary, job) => {};
+module.exports = {
+  CalculateRelevancyScores,
+  getKeywordsAndSummary,
+  getCoverLetterData,
+  getNormalResumeData,
+  getBestResumeData,
+};
