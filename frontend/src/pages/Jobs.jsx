@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import { Briefcase, MapPin, DollarSign, Clock, Search, BookmarkPlus, Share2, Mic, Sparkles, ChevronDown, Loader2 } from "lucide-react"; // Added Loader2
 import ProtectedRoute from "../Context/ProtectedRoute";
 import { JobsContext } from "../Context/JobsContext";
+import { AuthContext } from "../Context/AuthContext";
 import { useSearchParams, useLocation, Navigate, useNavigate, Link } from "react-router-dom";
 import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
@@ -11,6 +12,7 @@ import axios from "axios";
 
 export function Jobs() {
   const { hasProfile } = useContext(SkillsContext);
+  const { user } = useContext(AuthContext);
   const { jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
@@ -26,15 +28,18 @@ export function Jobs() {
   // State for Cover Letter and Resume generation
   const [jobActionStates, setJobActionStates] = useState({});
   const [activeResumeDropdown, setActiveResumeDropdown] = useState(null); // Stores jobId or null
-
+  const [isOpenedsavedJobs, setIsOpenedSavedJobs] = useState(false);
   useEffect(() => {
+    if (isOpenedsavedJobs) {
+      return;
+    }
     const urlFilters = {
       search: searchParams.get("search") || "",
       location: searchParams.get("location") || "All",
       jobType: searchParams.get("jobType") || "All",
     };
     setFilters(urlFilters);
-  }, []);
+  }, [isOpenedsavedJobs]);
 
   const shareJob = async (jobId) => {
     await navigator.clipboard.writeText(window.location.origin + "/job" + "?jobId=" + jobId);
@@ -67,7 +72,7 @@ export function Jobs() {
   useEffect(() => {
     if (!Array.isArray(jobs)) return;
     setUniqueLocations(["All", "Remote", ...new Set(jobs.map((item) => item.location).filter(Boolean))]);
-    setUniqueJobTypes(["All", ...new Set(jobs.map((item) => item.type))]);
+    setUniqueJobTypes(["All", ...new Set(jobs.map((item) => item.type).filter(Boolean))]);
   }, [jobs]);
 
   useEffect(() => {
@@ -92,6 +97,20 @@ export function Jobs() {
     } else {
       setSavedJobs([...savedJobs, jobId]);
     }
+  };
+  const openCloseSavedJobs = () => {
+    if (isOpenedsavedJobs) {
+      setFilters({
+        search: "",
+        location: "",
+        jobType: "",
+      });
+      setIsOpenedSavedJobs(false);
+      return;
+    }
+    let filteredJobs = jobs.filter((job) => savedJobs.includes(job.id));
+    setFilteredJobs(filteredJobs);
+    setIsOpenedSavedJobs(true);
   };
 
   const navigate = useNavigate();
@@ -211,17 +230,27 @@ export function Jobs() {
         <div className='container mx-auto px-2 py-2'>
           <div className='flex justify-between items-center'>
             <h1 className='text-xl font-bold text-primary-600 dark:text-primary-400'>Personalized Job Matching</h1>
-            {!hasProfile && (
+            {!hasProfile && user ? (
               <div>
                 {" "}
                 <Link to={"/roadmap"}>
                   {" "}
-                  <h2 className='text-red-600 dark:text-red-400'>❗ Add Profile for Personalized Jobs</h2>
+                  <h2 className='text-red-600 dark:text-red-400'>
+                    ❗ <span className='underline'>Add Profile </span>to unlock features
+                  </h2>
                 </Link>
               </div>
+            ) : (
+              ""
             )}
             <div className='hidden md:flex space-x-4'>
-              <button className='text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400'>
+              <button
+                onClick={() => {
+                  openCloseSavedJobs();
+                }}
+                className={`p-1 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 ${
+                  isOpenedsavedJobs ? "bg-green-500 dark:bg-green-300 border rounded-lg text-primary-600 dark:text-primary-400" : "bg-none"
+                }`}>
                 Saved ({savedJobs.length})
               </button>
             </div>
@@ -231,51 +260,52 @@ export function Jobs() {
       <ProtectedRoute>
         <div className='container mx-auto px-4 py-8'>
           <div className='max-w-6xl mx-auto'>
-            {/* Search and filters section */}
-            <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8'>
-              <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
-                <div className='md:col-span-2'>
-                  <div className='relative'>
-                    <input
-                      type='text'
-                      placeholder='Search job title, company, skill...'
+            {!isOpenedsavedJobs && (
+              <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8'>
+                <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+                  <div className='md:col-span-2'>
+                    <div className='relative'>
+                      <input
+                        type='text'
+                        placeholder='Search job title, company, skill...'
+                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                        value={filters.search}
+                        onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                      />
+                      <Search className='absolute right-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400' />
+                    </div>
+                  </div>
+                  <div>
+                    <select
                       className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
-                      value={filters.search}
-                      onChange={(e) => setFilters({ ...filters, search: e.target.value })}
-                    />
-                    <Search className='absolute right-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400' />
+                      value={filters.location}
+                      onChange={(e) => setFilters({ ...filters, location: e.target.value })}>
+                      {uniqueLocations.map((location) => (
+                        <option key={location} value={location}>
+                          {location}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <select
+                      className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                      value={filters.jobType}
+                      onChange={(e) => setFilters({ ...filters, jobType: e.target.value })}>
+                      {uniqueJobTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 </div>
-                <div>
-                  <select
-                    className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
-                    value={filters.location}
-                    onChange={(e) => setFilters({ ...filters, location: e.target.value })}>
-                    {uniqueLocations.map((location) => (
-                      <option key={location} value={location}>
-                        {location}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-                <div>
-                  <select
-                    className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
-                    value={filters.jobType}
-                    onChange={(e) => setFilters({ ...filters, jobType: e.target.value })}>
-                    {uniqueJobTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-              <div className='mt-4 flex justify-end items-center'>
-                <div className='text-sm text-gray-600 dark:text-gray-300'>Found {filteredJobs.length} jobs</div>
-              </div>
-            </div>
 
+                <div className='mt-4 flex justify-end items-center'>
+                  <div className='text-sm text-gray-600 dark:text-gray-300'>Found {filteredJobs.length} jobs</div>
+                </div>
+              </div>
+            )}
             {/* Job listings */}
             <div className='space-y-6'>
               {filteredJobs.map((job) => {
@@ -326,7 +356,9 @@ export function Jobs() {
                               {/* AI Score Badge */}
                               <div className='inline-flex items-center bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/10 dark:to-amber-600/10 border border-amber-400/30 rounded-full px-3 py-1 mb-3'>
                                 <Sparkles className='h-4 w-4 text-amber-400 mr-1' />
-                                <span className='text-sm font-medium text-amber-700 dark:text-amber-300'>AI Match: {job.score || 50}%</span>
+                                <span className='text-sm font-medium text-amber-700 dark:text-amber-300'>
+                                  AI Match: {job.score ? job.score + "%" : "N/A"}
+                                </span>
                               </div>
                             </div>
 
@@ -405,13 +437,14 @@ export function Jobs() {
                         <FancyButton text={"Practice Interview"} />
                       </Link>
                       {/* resume and CL */}
+
                       <div className='flex flex-row gap-2'>
                         {" "}
                         <button
                           onClick={() =>
                             clState.status === "loaded" ? handleDownloadFile(job.id, "coverLetter") : handleGetCoverLetter(job)
                           }
-                          disabled={clState.status === "loading"}
+                          disabled={clState.status === "loading" || !hasProfile}
                           className={`${baseActionBtnClass} ${clBtnColors} ${clState.status === "loading" ? disabledBtnClass : ""}`}>
                           {clState.status === "loading" ? (
                             <>
@@ -428,7 +461,7 @@ export function Jobs() {
                         <div className='flex-1 relative'>
                           <button
                             onClick={() => setActiveResumeDropdown(activeResumeDropdown === job.id ? null : job.id)}
-                            disabled={resumeNormalState.status === "loading" || resumeBestState.status === "loading"}
+                            disabled={resumeNormalState.status === "loading" || resumeBestState.status === "loading" || !hasProfile}
                             className={`w-full ${baseActionBtnClass} ${resumeBtnColors} ${
                               resumeNormalState.status === "loading" || resumeBestState.status === "loading" ? disabledBtnClass : ""
                             }`}>
@@ -544,7 +577,7 @@ export function Jobs() {
             </div>
 
             {/* No results state */}
-            {jobs.length === 0 && (
+            {jobs.length !== 0 && filteredJobs.length === 0 && (
               <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-10 text-center'>
                 <div className='text-gray-500 dark:text-gray-400 mb-4'>
                   <Search className='h-10 w-10 mx-auto mb-2' />
@@ -566,26 +599,10 @@ export function Jobs() {
               </div>
             )}
 
-            {/* Pagination */}
-            {jobs.length > 0 && (
-              <div className='mt-8 flex justify-center'>
-                <nav className='inline-flex rounded-md shadow'>
-                  <button className='px-3 py-2 rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300'>
-                    Previous
-                  </button>
-                  <button className='px-3 py-2 border-t border-b border-gray-300 dark:border-gray-600 bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400 font-medium'>
-                    1
-                  </button>
-                  <button className='px-3 py-2 border-t border-b border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300'>
-                    2
-                  </button>
-                  <button className='px-3 py-2 border-t border-b border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300'>
-                    3
-                  </button>
-                  <button className='px-3 py-2 rounded-r-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-500 dark:text-gray-300'>
-                    Next
-                  </button>
-                </nav>
+            {/* Loading state */}
+            {jobs.length === 0 && (
+              <div className='flex items-center justify-center h-64'>
+                <Loader2 className='animate-spin h-10 w-10 text-primary-600 dark:text-primary-400' />
               </div>
             )}
           </div>

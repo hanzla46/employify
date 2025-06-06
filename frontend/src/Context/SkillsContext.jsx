@@ -23,6 +23,8 @@ export const SkillsProvider = ({ children }) => {
           setHasProfile(false);
           setRoadmap([]);
           setEvaluated(false);
+          setCareerPath("");
+          setIsPathSelected(false);
           return;
         }
         const profileResponse = await axios.get(url + "/profile/check");
