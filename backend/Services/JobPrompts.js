@@ -1,4 +1,5 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
 const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
@@ -117,57 +118,112 @@ const getCoverLetterData = async (summary, job) => {
   return content;
 };
 const getNormalResumeData = async (profile, job) => {
-  const prompt = `Generate a professional and well-structured resume in HTML format, using the provided user profile data. The resume should be designed for a job application, emphasizing clarity, readability, and impact. The output should be a complete, self-contained HTML document.
-  ---
-User Profile Data:
-Hard Skills: ${profile.hardSkills} \n
-Soft Skills: ${profile.softSkills} \n
-Work Experience: ${profile.jobs} \n
-Projects: ${profile.projects} \n
-Career Goal: ${profile.careerGoal} \n
-Location: ${profile.location} \n
+  const prompt = `You are a senior frontend engineer and elite resume designer specializing in professional, print-ready resumes for modern job applications. Your task is to generate a **complete and visually polished resume** in **HTML and embedded CSS**, based on the following user profile and job description.
 
-\n
-Job Details:
-Title: ${job.title} \n
-Description: ${job.description}\n\n
----
-Output Requirements:
-HTML Structure: A complete HTML5 document with <!DOCTYPE html>, <html>, <head>, and <body> tags. Dont include unnecessary backticks at start or end.
-Styling: Minimal inline CSS or a <style> block within the <head> for basic professional formatting (e.g., font family, sizes, margins, bullet point styles). No external stylesheets.
-Sections: Organize the resume clearly into the following standard sections:
-Contact Information: Name (prominently displayed), Email, Phone, LinkedIn Profile, Portfolio Link.
-Summary/Objective (Optional but Recommended): A brief (2-3 sentences) professional summary highlighting years of experience, key expertise, and career goals relevant to tech roles. This should be concise and impactful.
-Skills: A list of key technical and soft skills, potentially categorized (e.g., Programming Languages, Cloud Platforms, Databases, Methodologies).
-Work Experience: For each role, include:
-Job Title
-Company Name
-Location (if available, or implied by remote/candidate location)
-Start Date – End Date (use "Present" for current role)
-A bulleted list of 3-5 concise, action-oriented responsibilities and achievements, quantifying impact where possible.
-Projects (Optional but Recommended): For each project, include:
-Project Name
-Brief Description (1-2 sentences)
-Link (e.g., GitHub)
-Education: For each degree, include:
-Degree Name
-University Name
-Graduation Year
-Certifications (Optional): List any relevant professional certifications.
-Content Emphasis:
-Prioritize recent and relevant work experience.
-Use strong action verbs in bullet points (e.g., "Led," "Developed," "Implemented," "Optimized").
-Quantify achievements whenever possible (e.g., "improved performance by 30%," "reduced deployment time by 50%").
-Ensure all relevant skills from keySkills are prominently displayed.
-Formatting: Use headings (<h2>, <h3>), lists (<ul>, <li>), and bold text (<strong>) to enhance readability.
-Length: Aim for a concise, professional resume (typically 1-2 pages for this level of experience). The HTML can naturally expand, but the content should be focused.
-Tone: Professional, clear, concise, and results-oriented.`;
+⚠️ Follow all formatting, styling, and structure rules strictly. This is intended to be used in a professional hiring context and must be visually perfect, aligned, and print-ready.
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+🎨 DESIGN RULES:
+
+- Overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).
+- Keep max resume width to **800px**, centered on page.
+- Use **neutral fonts** (e.g., Arial, Helvetica, or 'Segoe UI') with consistent typography hierarchy.
+- Apply **professional color scheme**: dark text (#1A1A1A), subtle highlights (#007ACC or equivalent).
+- Ensure spacing and alignment is pixel-perfect. No overflow, no broken sections.
+- Use consistent padding/margin, clear section dividers, and readable line spacing.
+- Design must look clean on both desktop and print.
+
+🧱 STRUCTURE & CONTENT RULES:
+
+- Use semantic, accessible HTML (<section>, <article>, <header>, <ul>, etc.).
+- Include Sections according to the reference resume including details in each section.
+- **Use actual data provided**. NEVER insert placeholders or lorem ipsum.
+- Match keywords from the job description naturally throughout the resume content.
+
+🎯 CSS RULES:
+
+- Include a full <style> block inside <head> (no external stylesheets or libraries).
+- Use **Flexbox or CSS Grid** for layout (no tables).
+- Use BEM-style or clean class names.
+- Ensure the design is **responsive**, readable, and **print-friendly**.
+- Use consistent font sizes.
+- No animations or transitions.
+
+📄 FINAL OUTPUT:
+
+- Return a **full standalone HTML document**, starting from <!DOCTYPE html> with proper <html>, <head>, and <body>.
+- **DO NOT** include any markdown, code fences, or commentary.
+- **ONLY** return valid HTML+CSS code (no explanations or wrapping characters).
+- Treat this as production code — it must be clean, semantic, and well-structured.
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+👤 USER PROFILE DATA:
+
+Name: John Doe  
+Hard Skills: ${profile.hardSkills}  
+Soft Skills: ${profile.softSkills}  
+Work Experience: ${profile.jobs}  
+Projects: ${profile.projects}  
+Career Goal: ${profile.careerGoal}  
+Location: ${profile.location}  \n
+
+📌 JOB DESCRIPTION:
+
+Title: ${job.title}  
+Description: ${job.description}  
+
+
+`;
   console.log("prompt: " + prompt);
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
-  const result = await model.generateContent(prompt);
-  console.log("Generated Content Response:", result);
-  const content = result.response.candidates[0].content.parts[0].text;
+  const ai = new GoogleGenAI({
+    apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
+  });
+  const modelName = "gemini-2.5-flash-preview-05-20";
+  let files;
+  let config;
+  try {
+    console.log("Starting generating resume...");
+    files = [await ai.files.upload({ file: path.join(__dirname, "example_resume.png") })];
+    config = {
+      responseMimeType: "text/plain",
+    };
+    console.log(`example resume uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`);
+  } catch (error) {
+    console.error("Error uploading example resume file:", error);
+    throw new Error("Failed to upload example resume for processing.");
+  }
+  const contents = [
+    {
+      role: "user",
+      parts: [
+        {
+          fileData: {
+            fileUri: files[0].uri,
+            mimeType: files[0].mimeType,
+          },
+        },
+        {
+          text: prompt,
+        },
+      ],
+    },
+  ];
+  let content = "";
+  try {
+    console.log("Generating content from example resume...");
+    const result = await ai.models.generateContent({
+      model: modelName,
+      contents: contents,
+      config,
+    });
+    content = result.candidates[0].content.parts[0].text;
+    console.log("Raw response text:", content);
+  } catch (error) {
+    console.error("Error generating resume content: ", error);
+    throw error;
+  }
   console.log("resume data: " + content);
   const { buffer, filePath } = await generatePDF(content, `NormalResume${job.id}_123.pdf`);
   fs.unlinkSync(filePath);
@@ -189,8 +245,9 @@ const generatePDF = async (htmlString, fileName = "output.pdf") => {
 
   // 🧠 BUFFER MODE
   const buffer = await page.pdf({
-    format: "A4",
+    width: "800px", // or any width you want
     printBackground: true,
+    preferCSSPageSize: true,
   });
 
   // 💾 SAVE TO DISK
