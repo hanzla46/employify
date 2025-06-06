@@ -235,8 +235,8 @@ export function Jobs() {
                 {" "}
                 <Link to={"/roadmap"}>
                   {" "}
-                  <h2 className='text-red-600 dark:text-red-400'>
-                    ❗ <span className='underline'>Add Profile </span>to unlock features
+                  <h2 className='text-red-600 dark:text-red-400 underline'>
+                    ❗ Add Profile to unlock more features <span className='text-xl'>↗</span>
                   </h2>
                 </Link>
               </div>
@@ -407,7 +407,7 @@ export function Jobs() {
                               <h3 className='font-bold text-gray-900 dark:text-white mb-3'>Job Description</h3>
                               <p className='text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line'>{job.description}</p>
 
-                              <div className='flex flex-col sm:flex-row gap-3'>
+                              <div className='w-1/3 flex flex-col sm:flex-row gap-3'>
                                 <a
                                   href={job.company.website || `https://www.google.com/search?q=${job.company.name}`}
                                   target='_blank'
@@ -419,14 +419,19 @@ export function Jobs() {
                           )}
 
                           {/* Expand/Collapse Button */}
-                          <button
-                            className='mt-4 w-full py-2 text-center bg-gray-100 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors'
-                            onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}>
-                            <div className='flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-medium'>
-                              {expandedJob === job.id ? "Show less" : "Show full details"}
-                              <ChevronDown className={`h-4 w-4 ml-2 transition-transform ${expandedJob === job.id ? "rotate-180" : ""}`} />
-                            </div>
-                          </button>
+                          <center>
+                            {" "}
+                            <button
+                              className='mt-4 w-[60%] md:w-[30%] py-2 text-center bg-gray-100 dark:bg-gray-700/50 hover:bg-gray-200 dark:hover:bg-gray-700 rounded-lg transition-colors'
+                              onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}>
+                              <div className='flex items-center justify-center text-primary-600 dark:text-primary-400 text-sm font-medium'>
+                                {expandedJob === job.id ? "Show less" : "Show full details"}
+                                <ChevronDown
+                                  className={`h-4 w-4 ml-2 transition-transform ${expandedJob === job.id ? "rotate-180" : ""}`}
+                                />
+                              </div>
+                            </button>
+                          </center>
                         </div>
                       </div>
                     </div>
@@ -445,7 +450,9 @@ export function Jobs() {
                             clState.status === "loaded" ? handleDownloadFile(job.id, "coverLetter") : handleGetCoverLetter(job)
                           }
                           disabled={clState.status === "loading" || !hasProfile}
-                          className={`${baseActionBtnClass} ${clBtnColors} ${clState.status === "loading" ? disabledBtnClass : ""}`}>
+                          className={`disabled:opacity-60 ${baseActionBtnClass} ${clBtnColors} ${
+                            clState.status === "loading" ? disabledBtnClass : ""
+                          }`}>
                           {clState.status === "loading" ? (
                             <>
                               <Loader2 className='animate-spin h-5 w-5 mr-2' /> Generating CL...
@@ -462,7 +469,7 @@ export function Jobs() {
                           <button
                             onClick={() => setActiveResumeDropdown(activeResumeDropdown === job.id ? null : job.id)}
                             disabled={resumeNormalState.status === "loading" || resumeBestState.status === "loading" || !hasProfile}
-                            className={`w-full ${baseActionBtnClass} ${resumeBtnColors} ${
+                            className={`w-full disabled:opacity-60 ${baseActionBtnClass} ${resumeBtnColors} ${
                               resumeNormalState.status === "loading" || resumeBestState.status === "loading" ? disabledBtnClass : ""
                             }`}>
                             {resumeNormalState.status === "loading" || resumeBestState.status === "loading" ? (
