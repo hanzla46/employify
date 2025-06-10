@@ -6,7 +6,7 @@ const SubtaskSchema = new mongoose.Schema(
     name: String,
     buttonText: String,
     sources: String,
-    completed:{type:Boolean, default:false},
+    completed: { type: Boolean, default: false },
   },
   { _id: false }
 );
@@ -30,7 +30,6 @@ const TaskSchema = new mongoose.Schema(
     category: String,
     difficulty: String,
     estimated_time: String,
-    ai_impact: String,
     priority: String,
     tag: { type: String, default: "existing" },
   },

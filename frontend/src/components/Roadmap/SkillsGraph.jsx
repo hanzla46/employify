@@ -22,8 +22,8 @@ const url = import.meta.env.VITE_API_URL;
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
 
-const NODE_WIDTH = 500; // Estimate width of your TaskNode + padding
-const NODE_HEIGHT = 380; // Estimate height (can vary with expansion, use an average)
+const NODE_WIDTH = 550; // Estimate width of your TaskNode + padding
+const NODE_HEIGHT = 250; // Estimate height (can vary with expansion, use an average)
 
 const getLayoutedElements = (nodes, edges, direction = "LR") => {
   dagreGraph.setGraph({ rankdir: direction, nodesep: 50, ranksep: 100 }); // Adjust spacing
@@ -234,7 +234,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         category: task.category,
         difficulty: task.difficulty,
         estimated_time: task.estimated_time,
-        ai_impact: task.ai_impact,
+        ai_impact: task.ai_impact || "",
         showSources: (sources) => handleShowSourcesModal(sources),
       },
     }));
