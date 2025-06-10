@@ -78,9 +78,6 @@ const getJobs = async (req, res) => {
       const skillWords = profile.jobKeywords.map((s) => s.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
       const pattern = skillWords.join("|");
       skillRegex = new RegExp(pattern, "i");
-      console.log("Generated Skill Regex:", skillRegex);
-    } else {
-      console.log(`User ${userId} has no hard skills listed. No jobs will match skill criteria.`);
     }
     const locationOrRemoteConditions = [{ isRemote: true }];
     if (profile.location) {
@@ -90,18 +87,10 @@ const getJobs = async (req, res) => {
       locationOrRemoteConditions.push({
         location: { $regex: userCountryRegex },
       });
-      console.log("Adding User City Location Condition:", {
-        location: locationOrRemoteConditions,
-      });
-    } else {
-      console.log(
-        `User ${userId} has no city specified in profile. Location matching will only consider 'isRemote: true'.`
-      );
     }
     const finalQuery = {
       $and: [skillRegex ? { description: { $regex: skillRegex } } : { _id: null }, { $or: locationOrRemoteConditions }],
     };
-    console.log("Final Mongoose Query:", JSON.stringify(finalQuery, null, 2));
     const matchingJobs = await Job.find(finalQuery).lean();
     console.log(`Found ${matchingJobs.length} matching jobs for user ${userId}.`);
     let profileSummary =

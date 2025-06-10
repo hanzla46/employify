@@ -8,6 +8,7 @@ const ProfileSchema = new mongoose.Schema({
       name: { type: String, required: true },
       experience: { type: String, required: true }, // e.g., "1.5 years"
     },
+    { _id: false },
   ],
   softSkills: [
     {
@@ -15,6 +16,7 @@ const ProfileSchema = new mongoose.Schema({
       name: { type: String, required: true },
       proficiency: { type: String, required: true }, // e.g., "Intermediate"
     },
+    { _id: false },
   ],
   jobs: [
     {
@@ -24,12 +26,24 @@ const ProfileSchema = new mongoose.Schema({
       startDate: { type: Date, required: true },
       endDate: { type: Date, required: true },
     },
+    { _id: false },
   ],
   projects: [
     {
       id: { type: Number, required: true },
       name: { type: String, required: true },
     },
+    { _id: false },
+  ],
+  education: [
+    {
+      id: { type: Number, required: true },
+      degree: { type: String, required: true },
+      field: { type: String, required: true },
+      startYear: { type: Date, required: true },
+      endYear: { type: Date, required: true },
+    },
+    { _id: false },
   ],
   careerGoal: { type: String, required: true },
   location: {
