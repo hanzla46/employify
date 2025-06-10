@@ -41,6 +41,7 @@ export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const [isAudioRecording, setIsAudioRecording] = useState(false);
   const [question, setQuestion] = useState("");
+  const [questionCount, setQuestionCount] = useState(0);
   const [category, setCategory] = useState("");
   const [written, setWritten] = useState("");
   const [score, setScore] = useState();
@@ -127,6 +128,7 @@ export function Interview() {
         }
       );
       if (response.data.success) {
+        setQuestionCount(1);
         setQuestion(response.data.question);
         setCategory(response.data.category);
         handleSuccess("Interview started successfully!");
@@ -185,6 +187,7 @@ export function Interview() {
         },
       });
       if (response.data.success) {
+        setQuestionCount(questionCount + 1);
         setQuestion(response.data.question);
         setCategory(response.data.category);
         setScore(response.data.score);
@@ -339,7 +342,7 @@ export function Interview() {
               {isStarted && (
                 <div className='grid grid-cols-1 md:grid-cols-12 gap-4 p-6'>
                   <div className='md:col-span-5'>
-                    <QuestionAndScore question={question} score={score} summary={summary} />
+                    <QuestionAndScore questionCount={questionCount} question={question} score={score} summary={summary} />
                   </div>
                   <div className='md:col-span-4'>
                     <ResponsesComponent
@@ -352,13 +355,13 @@ export function Interview() {
                   </div>
                   <div className='md:col-span-3 md:float-left flex flex-col justify-normal'>
                     <VideoComponent stream={previewStream} isVideoRecording={isVideoRecording} />
-                    <div
-                      className='mt-5'
-                      onClick={() => {
-                        setIsCompleted(true);
-                        setIsStarted(false);
-                      }}>
-                      <FancyButton text={"End Interview"} />{" "}
+                    <div className='mt-5 relative group'>
+                      <FancyButton disabled={questionCount < 4} text={"End Interview"} />{" "}
+                      {questionCount < 4 && (
+                        <span className='pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg z-10 whitespace-nowrap'>
+                          Answer at least 4 Questions
+                        </span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -479,7 +482,7 @@ function InstructionsCard({ title, items, icon }) {
   );
 }
 
-function QuestionAndScore({ question, score, summary }) {
+function QuestionAndScore({ question, score, summary, questionCount }) {
   const scoreValue = score ? parseInt(score) : 0;
 
   const getScoreColor = (score) => {
@@ -499,7 +502,7 @@ function QuestionAndScore({ question, score, summary }) {
       <div className='bg-gradient-to-r from-indigo-600 to-purple-600 p-4'>
         <h3 className='text-lg font-medium text-white flex items-center'>
           <Sparkles className='h-5 w-5 mr-2' />
-          Current Question
+          Current Question &nbsp; &nbsp; <b>{questionCount}</b>
         </h3>
       </div>
 

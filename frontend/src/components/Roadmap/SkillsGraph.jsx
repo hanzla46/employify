@@ -347,11 +347,12 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-  const { setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
+  const { contextLoading, setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
     useContext(SkillsContext);
   const [careerData, setCareerData] = useState({});
 
   useEffect(() => {
+    if (contextLoading) return; // Wait for context to load
     if (isPathSelected) return;
     if (roadmap && roadmap.length > 0) {
       return;
@@ -368,13 +369,14 @@ const SkillsGraph = () => {
       setCareerData(result.data.data);
     };
     fetchPaths();
-  }, [roadmap, isPathSelected]);
+  }, [roadmap, isPathSelected, contextLoading]);
 
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(() => {
     const fetchRoadmap = async () => {
+      if (contextLoading) return; // Wait for context to load
       if (!isPathSelected) return;
       setModifyLoading(true);
       try {
@@ -440,7 +442,7 @@ const SkillsGraph = () => {
       setGraphData({ tasks: roadmap });
       setLoading(false);
     }
-  }, [isPathSelected, roadmap]);
+  }, [isPathSelected, roadmap, contextLoading]);
 
   const [modificationText, setModificationText] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
@@ -539,12 +541,12 @@ function InputArea({
   setShowSuggestions,
 }) {
   return (
-    <div className='fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto px-4'>
+    <div className='z-50 fixed bottom-1 left-[40%] w-full max-w-2xl mx-auto px-4'>
       <div className='relative'>
         {showSuggestions && suggestedChanges.length > 0 && (
-          <ul className='absolute bottom-full mb-2 w-full bg-gray-300 dark:bg-slate-300 text-black rounded-md shadow-lg z-50'>
+          <ul className='absolute bottom-full mb-2 w-full bg-gray-300 dark:bg-slate-300 text-black rounded-md shadow-lg z-20'>
             {suggestedChanges.map((item, i) => (
-              <li key={i} onClick={() => handleSuggestionClick(item)} className='cursor-pointer px-4 py-2 hover:bg-gray-200 text-sm'>
+              <li key={i} onClick={() => handleSuggestionClick(item)} className='z-50 cursor-pointer px-4 py-2 hover:bg-gray-200 text-sm'>
                 {item}
               </li>
             ))}

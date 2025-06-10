@@ -8,6 +8,7 @@ axios.defaults.headers.common["Accept"] = "application/json";
 export const SkillsContext = createContext();
 export const SkillsProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
+  const [contextLoading, setContextLoading] = useState(true);
   const [roadmap, setRoadmap] = useState([]);
   const [suggestedChanges, setSuggestedChanges] = useState(["change1", "change2", "change3"]);
   const [hasProfile, setHasProfile] = useState(false);
@@ -37,7 +38,7 @@ export const SkillsProvider = ({ children }) => {
           if (getRoadmap.data.success) {
             console.log("Roadmap found:", getRoadmap.data.data);
             setEvaluated(true);
-            setRoadmap(getRoadmap.data.data.tasks);
+            await setRoadmap(getRoadmap.data.data.tasks);
             setSuggestedChanges(getRoadmap.data.data.changes);
             setIsPathSelected(true);
             console.log("Roadmap:", roadmap);
@@ -51,6 +52,8 @@ export const SkillsProvider = ({ children }) => {
         }
       } catch (error) {
         console.error("Failed to check Profile:", error.message);
+      } finally {
+        setContextLoading(false);
       }
     };
     checkProfile();
@@ -63,6 +66,7 @@ export const SkillsProvider = ({ children }) => {
   return (
     <SkillsContext.Provider
       value={{
+        contextLoading,
         roadmap,
         setRoadmap,
         evaluated,
