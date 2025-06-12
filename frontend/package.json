@@ -18,6 +18,7 @@
     "@tailwindcss/vite": "^4.0.13",
     "@vercel/speed-insights": "^1.2.0",
     "aos": "^2.3.4",
+    "audiobuffer-to-wav": "^1.0.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "dagre": "^0.8.5",

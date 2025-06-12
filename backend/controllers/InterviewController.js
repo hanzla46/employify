@@ -1,7 +1,7 @@
 const Interview = require("../models/InterviewModel");
 const { GeneratePrompt, GetInterviewInfo } = require("../Services/InterviewPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { ProcessVideo } = require("../Services/ProcessVideo.Interview");
+const { ProcessVideo, ProcessAudio } = require("../Services/ProcessMedia.Interview");
 const Profile = require("../models/ProfileModel");
 
 const startInterview = async (req, res) => {
@@ -54,16 +54,13 @@ const startInterview = async (req, res) => {
     });
   }
 };
-
 const continueInterview = async (req, res) => {
   try {
     console.log("Continue Interview Request:", req.body);
-    console.log("Request Files:", req.file);
+    const video = req.files?.video?.[0];
+    const audio = req.files?.audio?.[0];
     const userId = req.user._id;
     const { question, written, answer, category } = req.body;
-    if (!req.file) {
-      console.log("No video file uploaded.");
-    }
 
     const interview = await Interview.findOne({
       userId,
@@ -82,8 +79,15 @@ const continueInterview = async (req, res) => {
     await interview.save();
 
     const QId = interview.questions.length;
-    if (req.file) {
-      ProcessVideo(req.file, QId, userId);
+    if (video) {
+      ProcessVideo(video, QId, userId);
+    } else {
+      console.log("No video file uploaded.");
+    }
+    if (audio) {
+      ProcessAudio(audio, QId, userId);
+    } else {
+      console.log("No audio file uploaded.");
     }
     const prompt = GeneratePrompt(interview);
     console.log("interview prompt: " + prompt);

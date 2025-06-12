@@ -21,9 +21,7 @@ const ProcessVideo = async (videoFile, QId, userId) => {
       config = {
         responseMimeType: "text/plain",
       };
-      console.log(
-        `Video uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`
-      );
+      console.log(`Video uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`);
     } catch (error) {
       console.error("Error uploading video file:", error);
       throw new Error("Failed to upload video for processing.");
@@ -99,5 +97,51 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     // DO NOT re-throw here. We want the main interview flow to continue.
   }
 };
+async function ProcessAudio(audio, QId, userId) {
+  const filePath = path.join(__dirname, `../audioUploads/${QId}_${userId}.wav`);
+  fs.writeFileSync(filePath, audio.buffer);
+  const API_KEY = process.env.ASSEMBLY_AI_KEY;
 
-module.exports = { ProcessVideo };
+  try {
+    const uploadRes = await axios({
+      method: "post",
+      url: "https://api.assemblyai.com/v2/upload",
+      headers: {
+        authorization: API_KEY,
+        "transfer-encoding": "chunked",
+      },
+      data: fs.createReadStream(filePath),
+    });
+    const audioUrl = uploadRes.data.upload_url;
+    const transcriptRes = await axios.post(
+      "https://api.assemblyai.com/v2/transcript",
+      { audio_url: audioUrl },
+      { headers: { authorization: API_KEY } }
+    );
+    const transcriptId = transcriptRes.data.id;
+    let result;
+    while (true) {
+      const poll = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
+        headers: { authorization: API_KEY },
+      });
+      if (poll.data.status === "completed") {
+        result = poll.data;
+        console.log(" TRANSCRIPT:", result.text);
+        break;
+      } else if (poll.data.status === "error") {
+        throw new Error(`AssemblyAI Error: ${poll.data.error}`);
+      }
+
+      await new Promise((r) => setTimeout(r, 3000));
+    }
+
+    // 🔄 Save result to DB / notify frontend / etc.
+    console.log("🎯 Final audio transcript:", result.text);
+  } catch (err) {
+    console.error("🔥 AssemblyAI error:", err.message);
+  } finally {
+    fs.existsSync(filePath) && fs.unlinkSync(filePath);
+  }
+}
+
+module.exports = { ProcessVideo, ProcessAudio };
