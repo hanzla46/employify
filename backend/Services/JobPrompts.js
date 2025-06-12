@@ -185,7 +185,7 @@ Description: ${job.description}
   let config;
   try {
     console.log("Starting generating resume...");
-    files = [await ai.files.upload({ file: path.join(__dirname, "example_resume.png") })];
+    files = [await ai.files.upload({ file: path.join(__dirname, "example_resume_classic.png") })];
     config = {
       responseMimeType: "text/plain",
     };
@@ -262,7 +262,230 @@ const generatePDF = async (htmlString, fileName = "output.pdf") => {
   };
 };
 
-const getBestResumeData = async (summary, job) => {};
+const getBestResumeData = async (profile, job) => {
+  const generatePrompt = (profile, job, style) => {
+    const promptBase = `You are a senior frontend engineer and elite resume designer specializing in professional, print-ready resumes for modern job applications. Your task is to generate a **complete and visually polished resume** in **HTML and embedded CSS**, based on the following user profile and job description.
+
+⚠️ Follow all formatting, styling, and structure rules strictly. This is intended to be used in a professional hiring context and must be visually perfect, aligned, and print-ready.
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+🎨 DESIGN RULES:
+
+- Overall aesthetic should match the visual style described below.
+- Keep max resume width to **800px**, centered on page.
+- Use **neutral fonts** (e.g., Arial, Helvetica, or 'Segoe UI') with consistent typography hierarchy.
+- Apply **professional color scheme**: dark text (#1A1A1A), subtle highlights (#007ACC or equivalent).
+- Ensure spacing and alignment is pixel-perfect. No overflow, no broken sections.
+- Use consistent padding/margin, clear section dividers, and readable line spacing.
+- Design must look clean on both desktop and print.
+
+🧱 STRUCTURE & CONTENT RULES:
+
+- Use semantic, accessible HTML (<section>, <article>, <header>, <ul>, etc.).
+- Include Sections according to the reference resume including details in each section.
+- **Use actual data provided**. NEVER insert placeholders or lorem ipsum.
+- Match keywords from the job description naturally throughout the resume content.
+
+🎯 CSS RULES:
+
+- Include a full <style> block inside <head> (no external stylesheets or libraries).
+- Use **Flexbox or CSS Grid** for layout (no tables).
+- Use BEM-style or clean class names.
+- Ensure the design is **responsive**, readable, and **print-friendly**.
+- Use consistent font sizes.
+- No animations or transitions.
+
+📄 FINAL OUTPUT:
+
+- Return a **full standalone HTML document**, starting from <!DOCTYPE html> with proper <html>, <head>, and <body>.
+- **DO NOT** include any markdown, code fences, or commentary.
+- **ONLY** return valid HTML+CSS code (no explanations or wrapping characters).
+- Treat this as production code — it must be clean, semantic, and well-structured.
+
+––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
+
+👤 USER PROFILE DATA:
+
+Name: John Doe  
+Hard Skills: ${profile.hardSkills}  
+Soft Skills: ${profile.softSkills}  
+Work Experience: ${profile.jobs}  
+Projects: ${profile.projects}  
+Education: ${profile.education}
+Career Goal: ${profile.careerGoal}  
+Location: ${profile.location}  \n
+
+📌 JOB DESCRIPTION:
+
+Title: ${job.title}  
+Description: ${job.description}  
+
+`;
+
+    let styleInstructions = "";
+    if (style === "modern") {
+      styleInstructions =
+        "- The design should be modern and clean, with a focus on readability. Use a simple layout with clear sections. Make sure that the overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).";
+    } else if (style === "classic") {
+      styleInstructions =
+        "- The design should be classic and professional, with a traditional layout. Use a balanced and structured design. Make sure that the overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).";
+    } else if (style === "creative") {
+      styleInstructions =
+        "- The design should be creative, using unique design elements to stand out. Use a visually appealing design that will grab the attention of the recruiter. Make sure that the overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).";
+    } else {
+      styleInstructions = "- The design should be clean, minimalist and professional";
+    }
+
+    return promptBase + styleInstructions;
+  };
+  const ai = new GoogleGenAI({
+    apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
+  });
+  const modelName = "gemini-2.5-flash-preview-05-20"; // Using the latest model
+  let exampleFile = "";
+
+  // Function to process a single style
+  const generateResumeForStyle = async (style) => {
+    const prompt = generatePrompt(profile, job, style);
+    if (style === "modern") {
+      exampleFile = "example_resume_modern.png";
+    } else if (style === "classic") {
+      exampleFile = "example_resume_classic.png";
+    } else if (style === "creative") {
+      exampleFile = "example_resume_creative.png";
+    } else {
+      exampleFile = "example_resume.png"; // Default case
+    }
+    // Upload the example resume image file
+    let files;
+    try {
+      files = [await ai.files.upload({ file: path.join(__dirname, exampleFile) })];
+      console.log(
+        `Example resume uploaded successfully for ${style}. File URI: ${files[0].uri}, File Name: ${files[0].name}`
+      );
+    } catch (error) {
+      console.error(`Error uploading example resume for ${style}:`, error);
+      throw new Error(`Failed to upload example resume for ${style}.`);
+    }
+
+    const contents = [
+      {
+        role: "user",
+        parts: [
+          {
+            fileData: {
+              fileUri: files[0].uri,
+              mimeType: files[0].mimeType,
+            },
+          },
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ];
+
+    let content = "";
+    try {
+      console.log(`Generating content for ${style}...`);
+      const result = await ai.models.generateContent({
+        model: modelName,
+        contents: contents,
+        responseMimeType: "text/plain",
+      });
+      content = result.candidates[0].content.parts[0].text;
+      console.log(`Raw response text for ${style}: (First 100 chars) ${content.substring(0, 100)}...`);
+    } catch (error) {
+      console.error(`Error generating resume content for ${style}: `, error);
+      throw error;
+    }
+
+    const { buffer, filePath } = await generatePDF(content, `resume_${style}_${job.id}.pdf`);
+    // No need to unlink here, it's done in the main function
+
+    return { buffer, filePath, style };
+  };
+
+  // Parallel API calls for different styles
+  const resumePromises = [
+    generateResumeForStyle("modern"),
+    generateResumeForStyle("classic"),
+    generateResumeForStyle("creative"),
+  ];
+
+  let resumes;
+  try {
+    resumes = await Promise.all(resumePromises);
+  } catch (error) {
+    console.error("Error generating resumes in parallel:", error);
+    throw error;
+  }
+
+  //   Combine resume data for the selection prompt
+  const resumeData = resumes.map((resume) => {
+    return {
+      style: resume.style,
+      htmlContent: resume.buffer.toString(),
+      filePath: resume.filePath, // Store file path for cleanup
+    };
+  });
+
+  // Prompt for choosing the best resume
+  const selectionPrompt = `
+    You have generated three resumes with different styles based on a user profile and job description.  You will be provided the raw HTML for each.  Please analyze each resume based on the following criteria:
+
+    - **Visual Appeal:** How aesthetically pleasing and professional is the design? Is it clean, well-organized, and easy on the eyes?
+    - **Readability:** How easy is the content to read and understand? Is the typography clear, and is the information logically structured?
+    - **Suitability:** Does the design and content best reflect the user profile and job description? Does it highlight the most relevant skills and experiences?
+
+    Considering these factors, select the resume that you consider the visually best option for a modern job application, and provide its 'style' name.
+
+    Resume Options:
+
+    ${resumeData
+      .map(
+        (resume, index) => `
+        Resume ${index + 1} (${resume.style}):
+        ${resume.htmlContent}
+        `
+      )
+      .join("\n\n")}
+    
+    Based on the evaluation, which of the above resumes is the best choice? Provide only the style name of the best resume (e.g., "modern", "classic", or "creative").
+    `;
+  let bestResumeStyle;
+
+  try {
+    console.log("Starting resume selection...");
+    const aiSelection = await ai.models.generateContent({
+      model: modelName,
+      contents: [{ role: "user", parts: [{ text: selectionPrompt }] }],
+      responseMimeType: "text/plain",
+    });
+
+    bestResumeStyle = aiSelection.candidates[0].content.parts[0].text.trim();
+    console.log("Best resume style:", bestResumeStyle);
+  } catch (error) {
+    console.error("Error selecting the best resume:", error);
+    throw error;
+  }
+
+  // Find and return the selected resume buffer
+  const selectedResume = resumes.find((resume) => resume.style === bestResumeStyle);
+
+  if (!selectedResume) {
+    throw new Error("No resume found for the selected style.");
+  }
+
+  // Clean up all generated PDF files
+  resumes.forEach((resume) => {
+    fs.unlinkSync(resume.filePath);
+    console.log(`Deleted temporary file: ${resume.filePath}`);
+  });
+
+  return selectedResume.buffer;
+};
 module.exports = {
   CalculateRelevancyScores,
   getKeywordsAndSummary,

@@ -153,7 +153,12 @@ const generateResume = async (req, res) => {
       });
       res.end(resumeBuffer);
     } else if (quality.toLowerCase() === "best") {
-      const resume = await getBestResumeData(profile, job);
+      const resumeBuffer = await getBestResumeData(profile, job);
+      res.set({
+        "Content-Type": "application/pdf",
+        "Content-Disposition": `attachment; filename="BestResume_${job.id}_123.pdf"`,
+      });
+      res.end(resumeBuffer);
     }
   } catch (error) {
     console.log("error while generating resume: " + error);
