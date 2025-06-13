@@ -10,14 +10,15 @@ import { Spinner } from "../lib/Spinner";
 import { useSearchParams } from "react-router-dom";
 import FancyButton from "../components/Button";
 import toWav from "audiobuffer-to-wav";
-
+// regenrator runtime
+import "regenerator-runtime/runtime";
 const url = import.meta.env.VITE_API_URL;
 
 export function Interview() {
   useEffect(() => {
     document.title = "Interview | Employify AI";
     return () => {
-      // Cleanup speech recognition
+      // Cleanup
       SpeechRecognition.stopListening();
     };
   }, []);

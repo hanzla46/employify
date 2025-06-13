@@ -230,119 +230,17 @@ Description: ${job.description}
   return buffer;
 };
 
-const generatePDF = async (htmlString, fileName = "output.pdf") => {
-  const browser = await puppeteer.launch({ headless: "new" });
-  const page = await browser.newPage();
-
-  await page.setContent(htmlString, { waitUntil: "networkidle0" });
-
-  const outputPath = path.join(__dirname, "..", "pdfs");
-  if (!fs.existsSync(outputPath)) {
-    fs.mkdirSync(outputPath);
-  }
-
-  const fullPath = path.join(outputPath, fileName);
-
-  // 🧠 BUFFER MODE
-  const buffer = await page.pdf({
-    width: "800px", // or any width you want
-    printBackground: true,
-    preferCSSPageSize: true,
-  });
-
-  // 💾 SAVE TO DISK
-  fs.writeFileSync(fullPath, buffer); // write buffer directly
-
-  await browser.close();
-
-  // 📦 Return both like a boss
-  return {
-    buffer,
-    filePath: fullPath,
-  };
-};
-
 const getBestResumeData = async (profile, job) => {
-  const generatePrompt = (profile, job, style) => {
-    const promptBase = `You are a senior frontend engineer and elite resume designer specializing in professional, print-ready resumes for modern job applications. Your task is to generate a **complete and visually polished resume** in **HTML and embedded CSS**, based on the following user profile and job description.
-
-⚠️ Follow all formatting, styling, and structure rules strictly. This is intended to be used in a professional hiring context and must be visually perfect, aligned, and print-ready.
-
-––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-
-🎨 DESIGN RULES:
-
-- Overall aesthetic should match the visual style described below.
-- Keep max resume width to **800px**, centered on page.
-- Use **neutral fonts** (e.g., Arial, Helvetica, or 'Segoe UI') with consistent typography hierarchy.
-- Apply **professional color scheme**: dark text (#1A1A1A), subtle highlights (#007ACC or equivalent).
-- Ensure spacing and alignment is pixel-perfect. No overflow, no broken sections.
-- Use consistent padding/margin, clear section dividers, and readable line spacing.
-- Design must look clean on both desktop and print.
-
-🧱 STRUCTURE & CONTENT RULES:
-
-- Use semantic, accessible HTML (<section>, <article>, <header>, <ul>, etc.).
-- Include Sections according to the reference resume including details in each section.
-- **Use actual data provided**. NEVER insert placeholders or lorem ipsum.
-- Match keywords from the job description naturally throughout the resume content.
-
-🎯 CSS RULES:
-
-- Include a full <style> block inside <head> (no external stylesheets or libraries).
-- Use **Flexbox or CSS Grid** for layout (no tables).
-- Use BEM-style or clean class names.
-- Ensure the design is **responsive**, readable, and **print-friendly**.
-- Use consistent font sizes.
-- No animations or transitions.
-
-📄 FINAL OUTPUT:
-
-- Return a **full standalone HTML document**, starting from <!DOCTYPE html> with proper <html>, <head>, and <body>.
-- **DO NOT** include any markdown, code fences, or commentary.
-- **ONLY** return valid HTML+CSS code (no explanations or wrapping characters).
-- Treat this as production code — it must be clean, semantic, and well-structured.
-
-––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-
-👤 USER PROFILE DATA:
-
-Name: John Doe  
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
-Work Experience: ${profile.jobs}  
-Projects: ${profile.projects}  
-Education: ${profile.education}
-Career Goal: ${profile.careerGoal}  
-Location: ${profile.location}  \n
-
-📌 JOB DESCRIPTION:
-
-Title: ${job.title}  
-Description: ${job.description}  
-
-`;
-
-    let styleInstructions = "";
-    if (style === "modern") {
-      styleInstructions =
-        "- The design should be modern and clean, with a focus on readability. Use a simple layout with clear sections. Make sure that the overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).";
-    } else if (style === "classic") {
-      styleInstructions =
-        "- The design should be classic and professional, with a traditional layout. Use a balanced and structured design. Make sure that the overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).";
-    } else if (style === "creative") {
-      styleInstructions =
-        "- The design should be creative, using unique design elements to stand out. Use a visually appealing design that will grab the attention of the recruiter. Make sure that the overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).";
-    } else {
-      styleInstructions = "- The design should be clean, minimalist and professional";
-    }
-
-    return promptBase + styleInstructions;
-  };
   const ai = new GoogleGenAI({
     apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
   });
-  const modelName = "gemini-2.5-flash-preview-05-20"; // Using the latest model
+  const modelName = "gemini-2.5-flash-preview-05-20";
+  const config = {
+    thinkingConfig: {
+      thinkingBudget: 0,
+    },
+    responseMimeType: "text/plain",
+  };
   let exampleFile = "";
 
   // Function to process a single style
@@ -392,7 +290,7 @@ Description: ${job.description}
       const result = await ai.models.generateContent({
         model: modelName,
         contents: contents,
-        responseMimeType: "text/plain",
+        config: config,
       });
       content = result.candidates[0].content.parts[0].text;
       console.log(`Raw response text for ${style}: (First 100 chars) ${content.substring(0, 100)}...`);
@@ -427,7 +325,7 @@ Description: ${job.description}
     return {
       style: resume.style,
       htmlContent: resume.buffer.toString(),
-      filePath: resume.filePath, // Store file path for cleanup
+      filePath: resume.filePath,
     };
   });
 
@@ -461,7 +359,10 @@ Description: ${job.description}
     const aiSelection = await ai.models.generateContent({
       model: modelName,
       contents: [{ role: "user", parts: [{ text: selectionPrompt }] }],
-      responseMimeType: "text/plain",
+      config: {
+        thinkingConfig: { thinkingBudget: 0 },
+        responseMimeType: "text/plain",
+      },
     });
 
     bestResumeStyle = aiSelection.candidates[0].content.parts[0].text.trim();
@@ -486,6 +387,192 @@ Description: ${job.description}
 
   return selectedResume.buffer;
 };
+
+//helper functions
+//func 1 - for pdf generation
+const generatePDF = async (htmlString, fileName = "output.pdf") => {
+  const browser = await puppeteer.launch({ headless: "new" });
+  const page = await browser.newPage();
+
+  await page.setContent(htmlString, { waitUntil: "networkidle0" });
+
+  const outputPath = path.join(__dirname, "pdfs");
+  if (!fs.existsSync(outputPath)) {
+    fs.mkdirSync(outputPath);
+  }
+
+  const fullPath = path.join(outputPath, fileName);
+
+  // 🧠 BUFFER MODE
+  const buffer = await page.pdf({
+    format: "A4",
+    printBackground: true,
+    preferCSSPageSize: false,
+    displayHeaderFooter: false,
+    headerTemplate: "<span></span>",
+    footerTemplate: "<span></span>",
+    margin: {
+      top: "1cm",
+      right: "1cm",
+      bottom: "1cm",
+      left: "1cm",
+    },
+  });
+
+  // 💾 SAVE TO DISK
+  fs.writeFileSync(fullPath, buffer); // write buffer directly
+
+  await browser.close();
+
+  // 📦 Return both like a boss
+  return {
+    buffer,
+    filePath: fullPath,
+  };
+};
+// func 2 - for best resume generation
+const generatePrompt = (profile, job, style) => {
+  let promptBase = "";
+
+  if (style === "modern") {
+    promptBase = `
+You are a **modern frontend engineer and UX-centric resume stylist**. Your task is to generate a clean, modern, and fully responsive **HTML + embedded CSS** resume inspired by the attached **MODERN reference resume** design.
+
+📌 YOU MUST:
+- Mirror the **layout, typography, and overall aesthetic** of the reference resume attached.
+- Keep max width at 800px, centered.
+- Use clean, neutral fonts like 'Segoe UI' or Helvetica.
+- Stick to dark text (#1A1A1A) and blue highlights (#007ACC).
+- Use CSS Grid or Flexbox for clear, modular layout.
+- Ensure it's 100% print-friendly and screen-readable.
+
+🧱 STRUCTURE:
+- Use semantic HTML (<section>, <article>, <header>, etc.).
+- Include: Contact, Summary, Hard Skills, Soft Skills, Work Experience, Projects, Education, Career Goal.
+- Integrate job description keywords naturally.
+
+📄 FINAL OUTPUT:
+- Return a **standalone HTML document** with embedded <style> in <head>.
+- **DO NOT** use markdown, placeholders, or explanations.
+
+💡 This resume must follow the **modern resume example** attached. Style, spacing, and layout should be visibly aligned.
+
+👤 USER PROFILE:
+Name: John Doe  
+Hard Skills: ${profile.hardSkills}  
+Soft Skills: ${profile.softSkills}  
+Work Experience: ${profile.jobs}  
+Projects: ${profile.projects}  
+Education: ${profile.education}  
+Career Goal: ${profile.careerGoal}  
+Location: ${profile.location}
+
+🎯 JOB DESCRIPTION:
+Title: ${job.title}  
+Description: ${job.description}
+    `;
+  } else if (style === "classic") {
+    promptBase = `
+You are a **traditional resume architect** crafting high-quality, timeless resumes for professional use. Your task is to create a **print-optimized HTML + CSS resume** that mirrors the attached **CLASSIC resume reference** design.
+
+📌 YOU MUST:
+- Replicate the layout, spacing, fonts, and structure of the reference resume.
+- Use a serif font stack (Georgia, Times New Roman).
+- Keep color palette monochrome: black, gray, soft lines.
+- Full-width sections, right-aligned dates, uppercase section headers.
+- Strictly print-ready: no animations, perfect alignment.
+
+🧱 STRUCTURE:
+- Semantic HTML with <header>, <section>, etc.
+- Include: Contact Info, Objective, Work Experience, Education, Skills, Projects.
+- Maintain formal, conservative tone.
+- Add keywords from job description subtly, without disrupting formality.
+
+📄 FINAL OUTPUT:
+- Return a **clean HTML document** with embedded CSS in the <head>.
+- Absolutely **no markdown**, placeholder text, or commentary.
+
+💡 Match layout and formatting exactly to the **classic resume example** provided.
+
+👤 USER PROFILE:
+Name: John Doe  
+Hard Skills: ${profile.hardSkills}  
+Soft Skills: ${profile.softSkills}  
+Work Experience: ${profile.jobs}  
+Projects: ${profile.projects}  
+Education: ${profile.education}  
+Career Goal: ${profile.careerGoal}  
+Location: ${profile.location}
+
+🎯 JOB DESCRIPTION:
+Title: ${job.title}  
+Description: ${job.description}
+    `;
+  } else if (style === "creative") {
+    promptBase = `
+You are a **creative resume designer** known for building stunning, unconventional resume layouts that still pass ATS and print tests. Your goal is to deliver a visually striking resume in **HTML + CSS**, inspired by the attached **CREATIVE resume example**.
+
+📌 YOU MUST:
+- Take design and layout inspiration directly from the reference creative resume.
+- Use bold color schemes (e.g., accent colors like #FF5C00 or #4A90E2).
+- Modern font: Poppins, Fira Sans, or equivalent.
+- Use sidebars, flex layouts, highlight blocks.
+- Print-optimized but creative — think startup, design agency, or tech-forward role.
+
+🧱 STRUCTURE:
+- Use semantic HTML tags.
+- Layout may be 2-column or asymmetric.
+- Include: Contact, Summary, Skills, Work Experience, Projects, Education, Career Goal.
+- Infuse keywords from job post *seamlessly* without compromising the artistic vibe.
+
+📄 FINAL OUTPUT:
+- Provide **only a complete HTML page** with CSS in the <head>.
+- **No markdown**, dummy text, or commentary allowed.
+
+💡 Mirror the aesthetic and structural DNA of the **creative resume sample** provided.
+
+👤 USER PROFILE:
+Name: John Doe  
+Hard Skills: ${profile.hardSkills}  
+Soft Skills: ${profile.softSkills}  
+Work Experience: ${profile.jobs}  
+Projects: ${profile.projects}  
+Education: ${profile.education}  
+Career Goal: ${profile.careerGoal}  
+Location: ${profile.location}
+
+🎯 JOB DESCRIPTION:
+Title: ${job.title}  
+Description: ${job.description}
+    `;
+  } else {
+    // fallback (modern default)
+    promptBase = `
+You are a senior frontend engineer and resume designer. Your task is to create a **professional HTML + CSS resume** based on the provided data.
+
+📌 Design should be clean, minimalist, and follow the **modern resume reference** provided.
+
+(See modern style rules...)
+
+👤 USER PROFILE:
+Name: John Doe  
+Hard Skills: ${profile.hardSkills}  
+Soft Skills: ${profile.softSkills}  
+Work Experience: ${profile.jobs}  
+Projects: ${profile.projects}  
+Education: ${profile.education}  
+Career Goal: ${profile.careerGoal}  
+Location: ${profile.location}
+
+🎯 JOB DESCRIPTION:
+Title: ${job.title}  
+Description: ${job.description}
+    `;
+  }
+
+  return promptBase.trim();
+};
+
 module.exports = {
   CalculateRelevancyScores,
   getKeywordsAndSummary,

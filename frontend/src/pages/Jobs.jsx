@@ -382,22 +382,22 @@ export function Jobs() {
                           </div>
 
                           {/* Job Metadata */}
-                          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-2'>
-                            <div className='max-w-52 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                          <div className='flex flex-wrap justify-around gap-3 mb-2'>
+                            <div className='w-auto flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
                               <MapPin className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
-                              <span className='truncate'>
+                              <span className='truncate inline-block w-auto'>
                                 {job.location} {job.isRemote && "(Remote)"}
                               </span>
                             </div>
 
-                            <div className='max-w-60 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                            <div className='w-auto flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
                               <Briefcase className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
-                              <span>{job.type}</span>
+                              <span className='inline-block w-auto'>{job.type}</span>
                             </div>
 
-                            <div className='max-w-36 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                            <div className='w-auto flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
                               <Clock className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
-                              <span>{timeAgo(job.postedAt)}</span>
+                              <span className='inline-block w-auto'>{timeAgo(job.postedAt)}</span>
                             </div>
                           </div>
 
