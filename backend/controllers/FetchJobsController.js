@@ -93,18 +93,20 @@ const getJobs = async (req, res) => {
     };
     const matchingJobs = await Job.find(finalQuery).lean();
     console.log(`Found ${matchingJobs.length} matching jobs for user ${userId}.`);
-    let profileSummary =
-      profile.profileSummary ||
-      "Full Stack Developer with 2 years of hands-on experience in building and deploying scalable web applications. Proficient in React, Next.js, Tailwind, Node.js, and MongoDB, with a strong foundation in REST APIs and authentication systems. Successfully completed multiple projects, including a career development platform with AI-driven resume analysis and interview simulations. Previously worked at a fast-paced startup, leading development of key features such as role-based access control and third-party integrations (Stripe, Google OAuth). Skilled in Git, Docker, and deploying apps via Vercel and DigitalOcean";
-    const relevancyScores = await CalculateRelevancyScores(matchingJobs, profileSummary);
-    const scoreMap = new Map(relevancyScores.map((item) => [item.id, item.score]));
-    console.log("Relevancy Scores:", scoreMap);
+    const jobAnalysis = await CalculateRelevancyScores(matchingJobs, profile);
+    const analysisMap = new Map(jobAnalysis.map((analysis) => [analysis.id, analysis]));
+    // console.log("Job Analysis:", analysisMap);
+
     const sortedJobs = matchingJobs
       .map((job) => ({
         ...job,
-        score: scoreMap.get(job._id.toString()) || 0,
+        matchAnalysis: analysisMap.get(job._id.toString()) || {
+          score: 0,
+          why: [],
+          missing: [],
+        },
       }))
-      .sort((a, b) => b.score - a.score);
+      .sort((a, b) => b.matchAnalysis.score - a.matchAnalysis.score);
     res.status(200).json({ message: "fetched matching jobs", jobs: sortedJobs });
   } catch (error) {
     console.error(error);

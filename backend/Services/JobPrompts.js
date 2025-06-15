@@ -3,32 +3,74 @@ const { GoogleGenAI } = require("@google/genai");
 const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
-const CalculateRelevancyScores = async (jobs, profileSummary) => {
+const CalculateRelevancyScores = async (jobs, profile) => {
   const prompt = `
-     You are a career coach AI. Based on the candidate's profile summary and the job description, rate how relevant each job is from 0 to 100.
-     
-     Profile Summary: ${profileSummary}
-     
+     You are a career coach AI. Based on the candidate's profile summary and each job description, provide a relevancy analysis.
+
+     Career Goal: ${profile.careerGoal} \n
+     Profile Summary: ${profile.profileSummary}
+
      All Jobs with their descriptions:
      ${jobs
        .map((job, idx) => `Job #${idx + 1}:\nID: ${job._id.toString()}\nDescription: ${job.description}`)
        .join("\n\n")}
      
-     Respond in JSON like this:
+     For each job, analyze and provide:
+     1. Match Score (0-100): How well the candidate's profile matches the job requirements
+     2. Why: List 3 key reasons why this job is a good match (matching skills, experience, etc.)
+     3. What's Missing: List up to 3 important requirements or skills that the candidate lacks
+
+Why and What's Missing should be concise and specific to each job. dont give explanations or additional text. prefer phrases over sentences.
+
+     Respond in JSON format:
      \`\`\`json
      [
-       { "id": "660fa7c1...d8ef", "score": 87 },
-       { "id": "661234abc...09e7", "score": 42 }
+       {
+         "id": "job_id",
+         "score": 85,
+         "why": ["reason1", "reason2", "reason3"],
+         "missing": ["missing1", "missing2", "missing3"]
+       },
+       // other jobs
      ]
      \`\`\`
      `;
+  // console.log("prompt: " + prompt);
 
-  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
-  const result = await model.generateContent(prompt);
-  const content = result.response.candidates[0].content.parts[0].text;
+  const ai = new GoogleGenAI({
+    apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
+  });
+  const contents = [
+    {
+      role: "user",
+      parts: [
+        {
+          text: prompt,
+        },
+      ],
+    },
+  ];
+  const modelName = "gemini-2.5-flash-preview-05-20";
+  const config = {
+    thinkingConfig: {
+      thinkingBudget: 0,
+    },
+    generationConfig: {
+      temperature: 0.0,
+      topP: 1.0,
+      topK: 1,
+    },
+  };
+  const result = await ai.models.generateContent({
+    model: modelName,
+    contents: contents,
+    config: config,
+  });
+  let content = result.candidates[0].content.parts[0].text;
+  // console.log("job ai content: " + content);
   const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
   const parsedResult = JSON.parse(jsonString);
+
   return parsedResult;
 };
 
@@ -360,7 +402,7 @@ const getBestResumeData = async (profile, job) => {
 
   // Clean up all generated PDF files
   resumes.forEach((resume) => {
-    //fs.unlinkSync(resume.filePath);
+    fs.unlinkSync(resume.filePath);
     console.log(`Deleted temporary file: ${resume.filePath}`);
   });
 
