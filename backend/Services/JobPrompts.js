@@ -118,64 +118,7 @@ const getCoverLetterData = async (summary, job) => {
   return content;
 };
 const getNormalResumeData = async (profile, job) => {
-  const prompt = `You are a senior frontend engineer and elite resume designer specializing in professional, print-ready resumes for modern job applications. Your task is to generate a **complete and visually polished resume** in **HTML and embedded CSS**, based on the following user profile and job description.
-
-⚠️ Follow all formatting, styling, and structure rules strictly. This is intended to be used in a professional hiring context and must be visually perfect, aligned, and print-ready.
-
-––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-
-🎨 DESIGN RULES:
-
-- Overall aesthetic should match the visual style of the reference resume provided (clean, minimalist, professional).
-- Keep max resume width to **800px**, centered on page.
-- Use **neutral fonts** (e.g., Arial, Helvetica, or 'Segoe UI') with consistent typography hierarchy.
-- Apply **professional color scheme**: dark text (#1A1A1A), subtle highlights (#007ACC or equivalent).
-- Ensure spacing and alignment is pixel-perfect. No overflow, no broken sections.
-- Use consistent padding/margin, clear section dividers, and readable line spacing.
-- Design must look clean on both desktop and print.
-
-🧱 STRUCTURE & CONTENT RULES:
-
-- Use semantic, accessible HTML (<section>, <article>, <header>, <ul>, etc.).
-- Include Sections according to the reference resume including details in each section.
-- **Use actual data provided**. NEVER insert placeholders or lorem ipsum.
-- Match keywords from the job description naturally throughout the resume content.
-
-🎯 CSS RULES:
-
-- Include a full <style> block inside <head> (no external stylesheets or libraries).
-- Use **Flexbox or CSS Grid** for layout (no tables).
-- Use BEM-style or clean class names.
-- Ensure the design is **responsive**, readable, and **print-friendly**.
-- Use consistent font sizes.
-- No animations or transitions.
-
-📄 FINAL OUTPUT:
-
-- Return a **full standalone HTML document**, starting from <!DOCTYPE html> with proper <html>, <head>, and <body>.
-- **DO NOT** include any markdown, code fences, or commentary.
-- **ONLY** return valid HTML+CSS code (no explanations or wrapping characters).
-- Treat this as production code — it must be clean, semantic, and well-structured.
-
-––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––––
-
-👤 USER PROFILE DATA:
-
-Name: John Doe  
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
-Work Experience: ${profile.jobs}  
-Projects: ${profile.projects}  
-Career Goal: ${profile.careerGoal}  
-Location: ${profile.location}  \n
-
-📌 JOB DESCRIPTION:
-
-Title: ${job.title}  
-Description: ${job.description}  
-
-
-`;
+  const prompt = generatePrompt(profile, job, "classic");
   console.log("prompt: " + prompt);
   const ai = new GoogleGenAI({
     apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
@@ -219,6 +162,10 @@ Description: ${job.description}
       config,
     });
     content = result.candidates[0].content.parts[0].text;
+    content = content
+      .replace(/^```html\s*/, "")
+      .replace(/^```\s*/, "")
+      .replace(/```$/, "");
     console.log("Raw response text:", content);
   } catch (error) {
     console.error("Error generating resume content: ", error);
@@ -237,9 +184,14 @@ const getBestResumeData = async (profile, job) => {
   const modelName = "gemini-2.5-flash-preview-05-20";
   const config = {
     thinkingConfig: {
-      thinkingBudget: 0,
+      thinkingBudget: 1024,
     },
     responseMimeType: "text/plain",
+    generationConfig: {
+      temperature: 0.0,
+      topP: 1.0,
+      topK: 1,
+    },
   };
   let exampleFile = "";
 
@@ -293,6 +245,10 @@ const getBestResumeData = async (profile, job) => {
         config: config,
       });
       content = result.candidates[0].content.parts[0].text;
+      content = content
+        .replace(/^```html\s*/, "")
+        .replace(/^```\s*/, "")
+        .replace(/```$/, "");
       console.log(`Raw response text for ${style}: (First 100 chars) ${content.substring(0, 100)}...`);
     } catch (error) {
       console.error(`Error generating resume content for ${style}: `, error);
@@ -321,17 +277,30 @@ const getBestResumeData = async (profile, job) => {
   }
 
   //   Combine resume data for the selection prompt
-  const resumeData = resumes.map((resume) => {
-    return {
-      style: resume.style,
-      htmlContent: resume.buffer.toString(),
-      filePath: resume.filePath,
-    };
-  });
+  const resumeData = resumes.map((resume) => ({
+    style: resume.style,
+    filePath: resume.filePath,
+  }));
+
+  // Upload all PDF files for visual comparison
+  const pdfFiles = [];
+  for (const resume of resumeData) {
+    try {
+      const file = await ai.files.upload({ file: resume.filePath });
+      pdfFiles.push({
+        style: resume.style,
+        uri: file.uri,
+        mimeType: file.mimeType,
+      });
+    } catch (error) {
+      console.error(`Error uploading PDF for ${resume.style}:`, error);
+      throw new Error(`Failed to upload PDF for ${resume.style}`);
+    }
+  }
 
   // Prompt for choosing the best resume
   const selectionPrompt = `
-    You have generated three resumes with different styles based on a user profile and job description.  You will be provided the raw HTML for each.  Please analyze each resume based on the following criteria:
+    You have generated three resumes with different styles based on a user profile and job description. I have attached the PDF versions of each resume for you to visually analyze. Please analyze each resume based on the following criteria:
 
     - **Visual Appeal:** How aesthetically pleasing and professional is the design? Is it clean, well-organized, and easy on the eyes?
     - **Readability:** How easy is the content to read and understand? Is the typography clear, and is the information logically structured?
@@ -339,33 +308,43 @@ const getBestResumeData = async (profile, job) => {
 
     Considering these factors, select the resume that you consider the visually best option for a modern job application, and provide its 'style' name.
 
-    Resume Options:
+      1. First PDF: Modern style resume
+    2. Second PDF: Classic style resume
+    3. Third PDF: Creative style resume
 
-    ${resumeData
-      .map(
-        (resume, index) => `
-        Resume ${index + 1} (${resume.style}):
-        ${resume.htmlContent}
-        `
-      )
-      .join("\n\n")}
-    
-    Based on the evaluation, which of the above resumes is the best choice? Provide only the style name of the best resume (e.g., "modern", "classic", or "creative").
+    Based on the evaluation of the PDF files attached, which of the resumes (modern, classic, or creative) is the best choice? Provide only the ONE WORD Style name of the best resume.
     `;
   let bestResumeStyle;
 
   try {
     console.log("Starting resume selection...");
+    const contents = [
+      {
+        role: "user",
+        parts: [
+          ...pdfFiles.map((file) => ({
+            fileData: {
+              fileUri: file.uri,
+              mimeType: file.mimeType,
+            },
+          })),
+          {
+            text: selectionPrompt,
+          },
+        ],
+      },
+    ];
+
     const aiSelection = await ai.models.generateContent({
       model: modelName,
-      contents: [{ role: "user", parts: [{ text: selectionPrompt }] }],
+      contents: contents,
       config: {
         thinkingConfig: { thinkingBudget: 0 },
         responseMimeType: "text/plain",
       },
     });
 
-    bestResumeStyle = aiSelection.candidates[0].content.parts[0].text.trim();
+    bestResumeStyle = aiSelection.candidates[0].content.parts[0].text.trim().toLowerCase();
     console.log("Best resume style:", bestResumeStyle);
   } catch (error) {
     console.error("Error selecting the best resume:", error);
@@ -381,14 +360,14 @@ const getBestResumeData = async (profile, job) => {
 
   // Clean up all generated PDF files
   resumes.forEach((resume) => {
-    fs.unlinkSync(resume.filePath);
+    //fs.unlinkSync(resume.filePath);
     console.log(`Deleted temporary file: ${resume.filePath}`);
   });
 
   return selectedResume.buffer;
 };
 
-//helper functions
+//HELPER FUNCTIONS
 //func 1 - for pdf generation
 const generatePDF = async (htmlString, fileName = "output.pdf") => {
   const browser = await puppeteer.launch({ headless: "new" });
@@ -430,7 +409,7 @@ const generatePDF = async (htmlString, fileName = "output.pdf") => {
     filePath: fullPath,
   };
 };
-// func 2 - for best resume generation
+// func 2
 const generatePrompt = (profile, job, style) => {
   let promptBase = "";
 
@@ -448,7 +427,9 @@ You are a **modern frontend engineer and UX-centric resume stylist**. Your task 
 
 🧱 STRUCTURE:
 - Use semantic HTML (<section>, <article>, <header>, etc.).
-- Include: Contact, Summary, Hard Skills, Soft Skills, Work Experience, Projects, Education, Career Goal.
+- Include sections according to the reference resume.
+- CSS should be perfectly aligned with the design.
+- Use clear section dividers, consistent padding/margin.
 - Integrate job description keywords naturally.
 
 📄 FINAL OUTPUT:
