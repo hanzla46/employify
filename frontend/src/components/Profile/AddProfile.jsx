@@ -7,12 +7,40 @@ import { countryCityMap } from "./CountryCityData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 const ProfileForm = ({ setHasProfile }) => {
   const url = import.meta.env.VITE_API_URL;
+
+  const fetchSubskills = async (skillName, skillId) => {
+    if (skillName === "") return;
+    try {
+      const response = await axios.get(`${url}/profile/subskills/${encodeURIComponent(skillName)}`);
+      if (response.data.success) {
+        setHardSkills(hardSkills.map((skill) => (skill.id === skillId ? { ...skill, subskills: response.data.subskills } : skill)));
+      }
+    } catch (error) {
+      handleError("Failed to fetch subskills");
+      console.error(error);
+    }
+  };
+
+  const handleSubskillToggle = (skillId, subskill) => {
+    setHardSkills(
+      hardSkills.map((skill) => {
+        if (skill.id === skillId) {
+          const selectedSubskills = skill.selectedSubskills.includes(subskill)
+            ? skill.selectedSubskills.filter((s) => s !== subskill)
+            : [...skill.selectedSubskills, subskill];
+          return { ...skill, selectedSubskills };
+        }
+        return skill;
+      })
+    );
+  };
+
   const [activeTab, setActiveTab] = useState("hard");
-  const [hardSkills, setHardSkills] = useState([{ id: 1, name: "", experience: "" }]);
-  const [softSkills, setSoftSkills] = useState([{ id: 1, name: "", proficiency: "" }]);
+  const [hardSkills, setHardSkills] = useState([{ id: Math.random(), name: "", experience: "", subskills: [], selectedSubskills: [] }]);
+  const [softSkills, setSoftSkills] = useState([{ id: Math.random(), name: "", proficiency: "" }]);
   const [jobs, setJobs] = useState([
     {
-      id: 1,
+      id: Math.random(),
       title: "",
       company: "",
       startDate: "",
@@ -21,15 +49,14 @@ const ProfileForm = ({ setHasProfile }) => {
   ]);
   const [projects, setProjects] = useState([
     {
-      id: 1,
+      id: Math.random(),
       name: "",
     },
   ]);
   const [education, setEducation] = useState([
     {
-      id: 1,
+      id: Math.random(),
       degree: "",
-      field: "",
       startYear: "",
       endYear: "",
     },
@@ -40,21 +67,23 @@ const ProfileForm = ({ setHasProfile }) => {
   const addSkill = (type) => {
     if (type === "hard") {
       const newSkill = {
-        id: hardSkills.length + 1,
+        id: Math.random(),
         name: "",
         experience: "",
+        subskills: [],
+        selectedSubskills: [],
       };
       setHardSkills([...hardSkills, newSkill]);
     } else if (type === "soft") {
       const newSkill = {
-        id: softSkills.length + 1,
+        id: Math.random(),
         name: "",
         proficiency: "",
       };
       setSoftSkills([...softSkills, newSkill]);
     } else if (type === "job") {
       const newJob = {
-        id: jobs.length + 1,
+        id: Math.random(),
         title: "",
         company: "",
         startDate: "",
@@ -63,15 +92,14 @@ const ProfileForm = ({ setHasProfile }) => {
       setJobs([...jobs, newJob]);
     } else if (type === "project") {
       const newProject = {
-        id: projects.length + 1,
+        id: Math.random(),
         name: "",
       };
       setProjects([...projects, newProject]);
     } else if (type === "education") {
       const newEducation = {
-        id: education.length,
+        id: Math.random(),
         degree: "",
-        field: "",
         startYear: "",
         endYear: "",
       };
@@ -106,52 +134,84 @@ const ProfileForm = ({ setHasProfile }) => {
       setEducation(education.filter((edu) => edu.id !== id));
     }
   };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Here you would typically send the data to an API
-    console.log("Hard skills:", hardSkills);
-    console.log("Soft skills:", softSkills);
-    console.log("Jobs:", jobs);
-    console.log("Projects:", projects);
-    console.log("Goal:", careerGoal);
-    console.log("Education:", education);
-    const result = await axios.post(
-      url + "/profile/add",
-      {
-        hardSkills,
-        softSkills,
-        jobs,
-        projects,
-        careerGoal,
-        education,
-        location: {
-          country: selectedCountry,
-          city: selectedCity,
+
+    // Process hard skills
+    const processedHardSkills = hardSkills.map((skill) => ({
+      name: skill.name,
+      experience: skill.experience.toString(),
+      subskills: skill.selectedSubskills || [],
+    }));
+
+    // Process soft skills
+    const processedSoftSkills = softSkills.map((skill) => ({
+      name: skill.name,
+      proficiency: skill.proficiency,
+    }));
+
+    // Process jobs
+    const processedJobs = jobs.map((job) => ({
+      title: job.title,
+      company: job.company,
+      startDate: job.startDate,
+      endDate: job.endDate,
+    }));
+
+    // Process projects
+    const processedProjects = projects.map((project) => ({
+      name: project.name,
+    }));
+
+    // Process education
+    const processedEducation = education.map((edu) => ({
+      degree: edu.degree,
+      field: edu.field,
+      startYear: edu.startYear.toString(),
+      endYear: edu.endYear.toString(),
+    }));
+
+    try {
+      const result = await axios.post(
+        url + "/profile/add",
+        {
+          hardSkills: processedHardSkills,
+          softSkills: processedSoftSkills,
+          jobs: processedJobs,
+          projects: processedProjects,
+          careerGoal,
+          education: processedEducation,
+          location: {
+            country: selectedCountry,
+            city: selectedCity,
+          },
         },
-      },
-      {
-        withCredentials: true,
-        headers: {
-          Accept: "application/json",
-          "Content-Type": "application/json",
-        },
+        {
+          withCredentials: true,
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      if (result.data.success) {
+        setHasProfile(true);
+        handleSuccess("Information submitted successfully!");
+      } else {
+        handleError(result.data.message);
       }
-    );
-    if (result.data.success) {
-      setHasProfile(true);
-      // setProfile([...hardSkills, ...softSkills, ...jobs, ...projects]);
-      handleSuccess("Information submitted successfully!");
-    } else if (result.data.success == false) {
-      handleError(result.data.message);
+    } catch (error) {
+      console.error("Submit error:", error);
+      handleError(error.response?.data?.message || "Failed to submit profile");
     }
   };
 
   const renderHardSkills = () => {
-    return hardSkills.map((skill) => (
+    return hardSkills.map((skill, id) => (
       <div key={`hard-${skill.id}`} className='mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800'>
         <div className='flex justify-between items-center mb-3'>
-          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Skill #{skill.id}</h3>
+          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Skill #{id + 1}</h3>
           {hardSkills.length > 1 && (
             <button
               type='button'
@@ -162,48 +222,72 @@ const ProfileForm = ({ setHasProfile }) => {
           )}
         </div>
 
-        <div className='grid grid-cols-1 md:grid-cols-3 gap-4'>
-          <div>
-            <label htmlFor={`hard-skill-name-${skill.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-              Skill Name
-            </label>
-            <input
-              type='text'
-              id={`hard-skill-name-${skill.id}`}
-              value={skill.name}
-              onChange={(e) => handleChange("hard", skill.id, "name", e.target.value)}
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-              placeholder='e.g. JavaScript, Python, Photoshop'
-              required
-            />
+        <div className='grid grid-cols-1 gap-4'>
+          <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            <div>
+              <label htmlFor={`hard-skill-name-${skill.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                Skill Name
+              </label>
+              <input
+                type='text'
+                id={`hard-skill-name-${skill.id}`}
+                value={skill.name}
+                onChange={(e) => handleChange("hard", skill.id, "name", e.target.value)}
+                onBlur={() => fetchSubskills(skill.name, skill.id)}
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                placeholder='e.g. JavaScript, Python, Photoshop'
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor={`hard-skill-exp-${skill.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                Experience (years)
+              </label>
+              <input
+                type='number'
+                id={`hard-skill-exp-${skill.id}`}
+                value={skill.experience}
+                onChange={(e) => handleChange("hard", skill.id, "experience", e.target.value)}
+                min='0'
+                step='0.5'
+                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+                placeholder='e.g. 2.5'
+                required
+              />
+            </div>
           </div>
 
-          <div>
-            <label htmlFor={`hard-skill-exp-${skill.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-              Experience (years)
-            </label>
-            <input
-              type='number'
-              id={`hard-skill-exp-${skill.id}`}
-              value={skill.experience}
-              onChange={(e) => handleChange("hard", skill.id, "experience", e.target.value)}
-              min='0'
-              step='0.5'
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-              placeholder='e.g. 2.5'
-              required
-            />
-          </div>
+          {skill.subskills.length > 0 && (
+            <div>
+              <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Select Related Skills</label>
+              <div className='flex flex-wrap gap-2'>
+                {skill.subskills.map((subskill, index) => (
+                  <button
+                    key={index}
+                    type='button'
+                    onClick={() => handleSubskillToggle(skill.id, subskill)}
+                    className={`px-3 py-1 rounded-full text-sm transition-colors ${
+                      skill.selectedSubskills.includes(subskill)
+                        ? "bg-primary-500 text-white hover:bg-primary-600"
+                        : "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    }`}>
+                    {subskill}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
     ));
   };
 
   const renderSoftSkills = () => {
-    return softSkills.map((skill) => (
+    return softSkills.map((skill, id) => (
       <div key={`soft-${skill.id}`} className='mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800'>
         <div className='flex justify-between items-center mb-3'>
-          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Skill #{skill.id}</h3>
+          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Skill #{id + 1}</h3>
           {softSkills.length > 1 && (
             <button
               type='button'
@@ -255,10 +339,10 @@ const ProfileForm = ({ setHasProfile }) => {
   };
 
   const renderJobs = () => {
-    return jobs.map((job) => (
+    return jobs.map((job, id) => (
       <div key={`job-${job.id}`} className='mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800'>
         <div className='flex justify-between items-center mb-3'>
-          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Job #{job.id}</h3>
+          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Job #{id + 1}</h3>
           {jobs.length > 1 && (
             <button
               type='button'
@@ -334,10 +418,10 @@ const ProfileForm = ({ setHasProfile }) => {
   };
 
   const renderEducation = () => {
-    return education.map((edu) => (
+    return education.map((edu, id) => (
       <div key={`edu-${edu.id}`} className='mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800'>
         <div className='flex justify-between items-center mb-3'>
-          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Education #{edu.id}</h3>
+          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Education #{id + 1}</h3>
           {education.length > 1 && (
             <button
               type='button'
@@ -358,20 +442,6 @@ const ProfileForm = ({ setHasProfile }) => {
               value={edu.degree}
               onChange={(e) => handleChange("education", edu.id, "degree", e.target.value)}
               placeholder='Bachelor of Science'
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-              required
-            />
-          </div>
-          <div>
-            <label htmlFor={`edu-field-${edu.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-              Field of Study
-            </label>
-            <input
-              type='text'
-              id={`edu-field-${edu.id}`}
-              value={edu.field}
-              onChange={(e) => handleChange("education", edu.id, "field", e.target.value)}
-              placeholder='Computer Science'
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
               required
             />
@@ -414,12 +484,12 @@ const ProfileForm = ({ setHasProfile }) => {
   };
 
   const renderProjects = () => {
-    return projects.map((project) => (
+    return projects.map((project, id) => (
       <div
         key={`project-${project.id}`}
         className='mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800'>
         <div className='flex justify-between items-center mb-3'>
-          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Project #{project.id}</h3>
+          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Project #{id + 1}</h3>
           {projects.length > 1 && (
             <button
               type='button'
@@ -670,7 +740,7 @@ const ProfileForm = ({ setHasProfile }) => {
                 clipRule='evenodd'
               />
             </svg>
-            Add Another Education 
+            Add Another Education
           </button>
         </div>
 
