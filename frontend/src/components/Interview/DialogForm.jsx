@@ -220,10 +220,10 @@ function JobDataCard({ job }) {
             <h2 className='truncate'>{timeAgo(job.postedAt)}</h2>
           </div>
 
-          {job.score && (
+          {job.matchAnalysis.score && (
             <div className='flex flex-row p-2 items-center flex-wrap'>
               <h3 className='mr-2 whitespace-nowrap'>Relevancy:</h3>
-              <h2 className='truncate'>{job.score}</h2>
+              <h2 className='truncate'>{job.matchAnalysis.score}</h2>
             </div>
           )}
         </>

@@ -108,6 +108,9 @@ tasks: [all tasks array with schema of existing tasks],
     const model = genAI.getGenerativeModel({
       model: "gemini-2.5-flash-preview-04-17",
       generation_config: {
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
         temperature: 1,
         response_mime_type: "application/json",
       },

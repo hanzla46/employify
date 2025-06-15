@@ -182,12 +182,15 @@ export function Interview() {
     setLoading(true);
     try {
       // Initialize all recording devices first
-      const audioRecorder = await setupAudioRecording();
-      const videoRecorder = await setupVideoRecording();
+      const [audioRecorder, videoRecorder] = await Promise.all([setupAudioRecording(), setupVideoRecording()]);
 
       if (!audioRecorder || !videoRecorder) {
-        console.log("Failed to initialize recording devices");
+        throw new Error("Failed to initialize recording devices");
       }
+
+      // Update state immediately with the new recorders
+      setMediaRecorder(audioRecorder);
+      setVideoRecorder(videoRecorder);
 
       // Start backend interview process
       const response = await axios.post(url + "/interview/start", { interviewData, jobOrMock, job }, { withCredentials: true });
@@ -212,12 +215,21 @@ export function Interview() {
       }
     } catch (error) {
       console.error("Failed to start interview:", error);
+
+      // Clean up any partial initialization
+      if (mediaRecorder) {
+        mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+      }
+      if (videoRecorder) {
+        videoRecorder.stream.getTracks().forEach((track) => track.stop());
+      }
+
       if (error.response) {
         handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
       } else if (error.request) {
         handleError("No response received from server.");
       } else {
-        handleError("Error setting up request: " + error.message);
+        handleError("Error setting up interview: " + error.message);
       }
     } finally {
       setLoading(false);
