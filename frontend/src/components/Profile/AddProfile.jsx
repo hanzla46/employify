@@ -143,30 +143,21 @@ const ProfileForm = ({ setHasProfile }) => {
       experience: skill.experience.toString(),
       subskills: skill.selectedSubskills || [],
     }));
-
-    // Process soft skills
     const processedSoftSkills = softSkills.map((skill) => ({
       name: skill.name,
       proficiency: skill.proficiency,
     }));
-
-    // Process jobs
     const processedJobs = jobs.map((job) => ({
       title: job.title,
       company: job.company,
       startDate: job.startDate,
       endDate: job.endDate,
     }));
-
-    // Process projects
     const processedProjects = projects.map((project) => ({
       name: project.name,
     }));
-
-    // Process education
     const processedEducation = education.map((edu) => ({
       degree: edu.degree,
-      field: edu.field,
       startYear: edu.startYear.toString(),
       endYear: edu.endYear.toString(),
     }));
