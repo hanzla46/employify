@@ -1,4 +1,5 @@
-const joi = require("joi");
+const joi = require("joi"); //javascript object validation library
+// This middleware validates the signup and login requests using Joi schema validation.
 const signupValidation = (req, res, next) => {
   const schema = joi.object({
     name: joi.string().min(3).max(20).required(),

@@ -70,16 +70,6 @@ Accelerators: ${selectedPath.Accelerators} \n
     *   **Realism & Iteration:** Include tasks related to seeking feedback (e.g., from mentors, peers, potential clients/employers), iterating on work (projects, resume, strategy), and explicitly stating the need to potentially adjust the plan based on outcomes and market shifts.
     *   **Soft Skill Development:** Integrate soft skill practice *within* relevant tasks (e.g., a "Present Project Findings" subtask under a Portfolio project) OR create dedicated 'Soft Skill Enhancement' tasks with specific practice methods (e.g., "Practice STAR method for interviews," "Run mock client negotiation," "Join Toastmasters/public speaking group").
     
-4. **Possible Changes:**
-   * Generate an array called 'changes' with 5-10 highly relevant, *predictive* user-requested edits they might make after seeing the roadmap. DO NOT be generic. Think like a skeptical user reviewing the output. Each change MUST be clearly tied to a specific task, subtask, or roadmap pattern, and reflect a real need for customization.
-   * Each change should be a string with no quotes/brakets.
-   * Examples of high-quality predictive changes:
-     * - Replace a subtask that says [Use ChatGPT for code review] with [Use CodeWhisperer for backend-specific suggestions]
-     * - Add a new task focused on [Job Search Strategy for Remote Roles in Europe] because the roadmap only covers local
-     * - Change estimated time from [2 weeks] to [5 days] for task user already has 90% experience in
-     * - Resequence a [Portfolio Building] task to come AFTER [AI-Enhanced Learning] so projects reflect updated skills
-   * Only suggest changes that would make the roadmap **more accurate, strategic, or user-relevant.** Do not include wishy-washy or vague changes. This section is to anticipate user intent and make roadmap *editable* smartly. 
-    
 3.  **Output Format (Strict JSON):** Adhere strictly to the following JSON structure. Ensure the entire output is a single valid JSON object.
 
     \`\`\`json
@@ -104,9 +94,6 @@ Accelerators: ${selectedPath.Accelerators} \n
           "priority": "medium"
         }
         // ... more task objects ...
-      ],
-      "changes": [
-         "change1","change2","change3",
       ],
     }
     \`\`\`

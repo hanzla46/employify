@@ -347,13 +347,13 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-  const { contextLoading, setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
+  const {  setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
     useContext(SkillsContext);
   const [careerData, setCareerData] = useState({});
 
   useEffect(() => {
-    if (contextLoading) return; // Wait for context to load
-    if (isPathSelected) return;
+    // if (contextLoading) return; // Wait for context to load
+    if (!isPathSelected) return;
     if (roadmap && roadmap.length > 0) {
       return;
     }
@@ -369,14 +369,14 @@ const SkillsGraph = () => {
       setCareerData(result.data.data);
     };
     fetchPaths();
-  }, [roadmap, isPathSelected, contextLoading]);
+  }, [roadmap, isPathSelected]);
 
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(() => {
     const fetchRoadmap = async () => {
-      if (contextLoading) return; // Wait for context to load
+      // if (contextLoading) return; // Wait for context to load
       if (!isPathSelected) return;
       setModifyLoading(true);
       try {
@@ -442,7 +442,7 @@ const SkillsGraph = () => {
       setGraphData({ tasks: roadmap });
       setLoading(false);
     }
-  }, [isPathSelected, roadmap, contextLoading]);
+  }, [isPathSelected, roadmap]);
 
   const [modificationText, setModificationText] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);
