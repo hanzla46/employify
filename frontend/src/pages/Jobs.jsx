@@ -13,7 +13,7 @@ import axios from "axios";
 export function Jobs() {
   const { hasProfile } = useContext(SkillsContext);
   const { user } = useContext(AuthContext);
-  const { jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
+  const { contextLoading, jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: "",
@@ -352,7 +352,10 @@ export function Jobs() {
                               <h2 className='text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 transition-colors'>
                                 {job.title}
                               </h2>
-                              <a href={job.company.website} className='block underline text-gray-600 dark:text-gray-300 mb-2'>
+                              <a
+                                href={job.company.website}
+                                target='_blank'
+                                className='block underline text-gray-600 dark:text-gray-300 mb-2'>
                                 {job.company.name}
                               </a>
 
@@ -385,7 +388,7 @@ export function Jobs() {
                           </div>
 
                           {/* Job Metadata */}
-                          <div className='flex flex-wrap justify-around gap-3 mb-2'>
+                          <div className='flex flex-wrap justify-around mb-2'>
                             <div className='w-auto flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
                               <MapPin className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
                               <span className='truncate inline-block w-auto'>
@@ -656,9 +659,18 @@ export function Jobs() {
             )}
 
             {/* Loading state */}
-            {jobs.length === 0 && (
+            {contextLoading && (
               <div className='flex items-center justify-center h-64'>
-                <Loader2 className='animate-spin h-10 w-10 text-primary-600 dark:text-primary-400' />
+                <Loader2 className='animate-spin h-16 w-16 text-primary-600 dark:text-primary-400' />
+              </div>
+            )}
+            {!contextLoading && jobs.length === 0 && (
+              <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-10 text-center'>
+                <div className='text-gray-500 dark:text-gray-400 mb-4'>
+                  <Search className='h-10 w-10 mx-auto mb-2' />
+                  <p className='text-lg font-medium'>Something went wrong</p>
+                </div>
+                <p className='text-gray-600 dark:text-gray-300 mb-6'>Please refresh the page</p>
               </div>
             )}
           </div>

@@ -5,6 +5,7 @@ const Job = require("../models/JobModel"); // 🧠 your Mongoose model
 const autoFetchJobs = async () => {
   const countries = ["PK", "US", "IN", "GB", "CA", "DE", "SG", "AU", "NL", "KE"];
   const queries = [
+    "Mobile App Developer",
     "Software Engineer",
     "Frontend Developer",
     "Backend Developer",
@@ -15,7 +16,6 @@ const autoFetchJobs = async () => {
     "Data Scientist",
     "Data Engineer",
     "Cloud Engineer",
-    "Mobile App Developer",
     "Computer Vision Engineer",
     "NLP Engineer",
     "Cybersecurity Analyst",
@@ -99,7 +99,8 @@ const autoFetchJobs = async () => {
               type: job.job_employment_type,
               salary: job.salary_min ? `${job.job_min_salary} - ${job.job_max_salary}` : 0,
               description: job.job_description,
-              location: job.job_city,
+              city: job.job_city,
+              location: job.job_location,
               postedAt: new Date(job.job_posted_at_datetime_utc),
               source: "jsearch",
               externalLink: job.job_apply_link,

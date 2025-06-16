@@ -16,9 +16,9 @@ const CalculateRelevancyScores = async (jobs, profile) => {
        .join("\n\n")}
      
      For each job, analyze and provide:
-     1. Match Score (0-100): How well the candidate's profile matches the job requirements
+     1. Match Score (0-100): How well the candidate's profile matches the job requirements (skills, experience, qualifications etc.).
      2. Why: List 3 key reasons why this job is a good match (matching skills, experience, etc.)
-     3. What's Missing: List up to 3 important requirements or skills that the candidate lacks
+     3. What's Missing: List up to 3 important requirements or skills that the candidate lacks. (not experience, but skills or qualifications).
 
 Why and What's Missing should be concise and specific to each job. dont give explanations or additional text. prefer phrases over sentences.
 
@@ -69,7 +69,7 @@ Why and What's Missing should be concise and specific to each job. dont give exp
   let content = result.candidates[0].content.parts[0].text;
   // console.log("job ai content: " + content);
   const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
-  const parsedResult = JSON.parse(jsonString);
+  const parsedResult = await safeJsonParse(jsonString);
 
   return parsedResult;
 };
@@ -595,6 +595,24 @@ Description: ${job.description}
 
   return promptBase.trim();
 };
+// json parse
+async function safeJsonParse(rawContent) {
+  try {
+    // Attempt normal parse first
+    return JSON.parse(rawContent);
+  } catch (err) {
+    console.warn("⚠️ Normal JSON parse failed. Trying to REPAIR broken JSON...");
+    try {
+      // Try to repair broken JSON
+      const repaired = repair(rawContent);
+      console.log("🛠️ Successfully repaired JSON.");
+      return JSON.parse(repaired);
+    } catch (repairErr) {
+      console.error("💀 JSON Repair also failed.");
+      throw new Error("Completely invalid JSON, bro. LLM needs chittar therapy.");
+    }
+  }
+}
 
 module.exports = {
   CalculateRelevancyScores,

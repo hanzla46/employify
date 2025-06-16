@@ -9,6 +9,7 @@ const JobSchema = new mongoose.Schema({
     website: String,
   },
   location: String,
+  city: String,
   type: { type: String, default: "Full-time" },
   salary: Number,
   skills: [String],
