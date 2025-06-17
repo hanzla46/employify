@@ -252,27 +252,22 @@ const evaluateSubtask = async (req, res) => {
       });
 
       let promptText = `As a career advisor, evaluate the following submission for the task "${task.name}" and subtask "${subtask.name}". `;
-
-      // If there's a file, process it
       if (req.file) {
         const fileContent = req.file.buffer.toString();
         promptText += `The user has submitted a file with the following content:\n${fileContent}\n`;
       }
-
-      // If there's text, include it
       if (text) {
         promptText += `The user has provided the following explanation:\n${text}\n`;
       }
-
-      promptText += `\nProvide a concise evaluation of this submission. Assess:
+      promptText += `\nProvide a concise evaluation (phrases) of this submission. Assess:
 1. Areas of strength
 2. Areas for improvement.
-
-keep your response as short as possible, and do not include any additional information or instructions.`;
+3. Relevance.
+keep your response as short as possible, and do not include any additional information or instructions. dont add markdown or text formatting.`;
 
       const result = await model.generateContent(promptText);
       analysis = result.response.text();
-    } // Update the subtask with retry logic
+    }
     let retries = 3;
     while (retries > 0) {
       try {

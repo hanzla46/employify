@@ -410,7 +410,18 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   return (
     // Height needs to be explicitly set on the container for ReactFlow
     <div style={{ width: "100%", height: "700px" }}>
-      <Indicators />
+      {/* Calculate total progress */}
+      <Indicators
+        progress={
+          (nodes.reduce((total, node) => {
+            const subtasks = node.data.subtasks || [];
+            const completed = subtasks.filter((st) => st.completed).length;
+            return total + completed;
+          }, 0) /
+            nodes.reduce((total, node) => total + (node.data.subtasks?.length || 0), 0)) *
+          100
+        }
+      />
 
       <ReactFlow
         nodes={nodes}
@@ -446,35 +457,13 @@ const SkillsGraph = () => {
     setSelectedPath(pathObject);
   };
   const { contextLoading, setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
-    useContext(SkillsContext);
-  const [careerData, setCareerData] = useState({});
-
-  useEffect(() => {
-    if (contextLoading) return; // Wait for context to load
-    if (isPathSelected) return;
-    if (roadmap && roadmap.length > 0) {
-      return;
-    }
-    const fetchPaths = async () => {
-      setModifyLoading(true);
-      const result = await axios.get(url + "/roadmap/career-paths", {
-        withCredentials: true,
-        headers: {
-          Accept: "application/json",
-        },
-      });
-      setModifyLoading(false);
-      setCareerData(result.data.data);
-    };
-    fetchPaths();
-  }, [roadmap, isPathSelected, contextLoading]);
+    useContext(SkillsContext); // State for handling the roadmap data and UI
 
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(() => {
     const fetchRoadmap = async () => {
-      if (contextLoading) return; // Wait for context to load
       if (!isPathSelected) return;
       setModifyLoading(true);
       try {
@@ -581,13 +570,9 @@ const SkillsGraph = () => {
   };
   return (
     <>
+      {" "}
       {!isPathSelected ? (
-        <CareerPathSelector
-          setIsPathSelected={setIsPathSelected}
-          pathsData={careerData}
-          selectedPathName={selectedPath ? selectedPath.Path_name : null}
-          onPathSelect={handlePathSelection}
-        />
+        <CareerPathSelector setIsPathSelected={setIsPathSelected} onPathSelect={handlePathSelection} />
       ) : (
         <div>
           <ReactFlowProvider>
@@ -673,51 +658,51 @@ function InputArea({
   );
 }
 
-function Indicators() {
+function Indicators({ progress }) {
   return (
     <div className='fixed right-4 top-9 z-10 bg-white dark:bg-gray-800 rounded-md shadow-md p-3 pt-5 text-sm text-gray-800 dark:text-gray-200 flex flex-col space-y-3'>
-      {" "}
-      {/* Increased space-y */}
-      {/* Priority Indicators (Affects Background) */}
       <div>
-        <span className='font-semibold mr-2'>Priority (BG):</span> {/* Indicate it affects background */}
+        <span className='font-semibold mr-2'>Priority:</span>
         <span className='inline-flex items-center space-x-1 mr-3'>
-          {/* Using background color */}
-          <span className='block w-3 h-3 rounded-full bg-zinc-300'></span>
-          <span>Low</span>
+          <span className='w-12 h-5 rounded flex items-center justify-center bg-green-200 dark:bg-green-900 text-[10px] font-medium'>
+            LOW
+          </span>
+          <span className='text-xs'>Green</span>
         </span>
         <span className='inline-flex items-center space-x-1 mr-3'>
-          {/* Using background color */}
-          <span className='block w-3 h-3 rounded-full bg-sky-300'></span>
-          <span>Medium</span>
+          <span className='w-12 h-5 rounded flex items-center justify-center bg-sky-200 dark:bg-sky-900 text-[10px] font-medium'>MID</span>
+          <span className='text-xs'>Blue</span>
         </span>
         <span className='inline-flex items-center space-x-1'>
-          {/* Using background color */}
-          <span className='block w-3 h-3 rounded-full bg-red-200'></span>
-          <span>High</span>
+          <span className='w-12 h-5 rounded flex items-center justify-center bg-red-100 dark:bg-red-900 text-[10px] font-medium'>HIGH</span>
+          <span className='text-xs'>Red</span>
         </span>
       </div>
-      {/* Tag Indicators (Affects Border) */}
+
       <div>
-        <span className='font-semibold mr-2'>Tag (Border):</span> {/* Indicate it affects border */}
+        <span className='font-semibold mr-2'>Status:</span>
         <span className='inline-flex items-center space-x-1 mr-3'>
-          {/* Using border color and a transparent background */}
-          <span className='block w-3 h-3 rounded-full border-2 border-gray-400 bg-transparent'></span>{" "}
-          {/* Border for existing, transparent bg */}
-          <span>Existing</span>
+          <span className='w-12 h-5 rounded flex items-center justify-center border-2 border-gray-400 text-[10px] font-medium'>BASE</span>
+          <span className='text-xs'>Existing</span>
         </span>
         <span className='inline-flex items-center space-x-1 mr-3'>
-          {/* Using border color and a transparent background */}
-          <span className='block w-3 h-3 rounded-full border-2 border-blue-600 bg-transparent'></span>{" "}
-          {/* Border for updated, transparent bg */}
-          <span>Updated</span>
+          <span className='w-12 h-5 rounded flex items-center justify-center border-2 border-blue-600 text-[10px] font-medium'>MOD</span>
+          <span className='text-xs'>Updated</span>
         </span>
         <span className='inline-flex items-center space-x-1'>
-          {/* Using border color and a transparent background */}
-          <span className='block w-3 h-3 rounded-full border-2 border-green-600 bg-transparent'></span>{" "}
-          {/* Border for new, transparent bg */}
-          <span>New</span>
+          <span className='w-12 h-5 rounded flex items-center justify-center border-2 border-green-600 text-[10px] font-medium'>NEW</span>
+          <span className='text-xs'>Added</span>
         </span>
+      </div>
+
+      <div>
+        <span className='font-semibold mr-2'>Progress:</span>
+        <div className='flex items-center gap-2 mt-1'>
+          <div className='h-1.5 flex-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
+            <div className='h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500' style={{ width: `${progress}%` }} />
+          </div>
+          <span className='text-xs'>{Math.round(progress)}%</span>
+        </div>
       </div>
     </div>
   );

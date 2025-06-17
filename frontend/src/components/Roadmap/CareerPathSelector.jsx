@@ -1,9 +1,49 @@
-import React from "react";
-import PropTypes from "prop-types"; // Optional, but good practice
+import React, { useState, useEffect, useContext } from "react";
+import PropTypes from "prop-types";
+import axios from "axios";
 import FancyButton from "../Button";
 import { Spinner } from "../../lib/Spinner";
-function CareerPathSelector({ pathsData, selectedPathName, onPathSelect, setIsPathSelected }) {
-  if (!pathsData || !pathsData.paths || pathsData.paths.length === 0) {
+import { SkillsContext } from "../../Context/SkillsContext";
+import { handleError, handleSuccess } from "../../utils";
+
+const url = import.meta.env.VITE_API_URL;
+
+function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
+  const [loading, setLoading] = useState(true);
+  const [pathsData, setPathsData] = useState({ paths: [] });
+  const [selectedPathName, setSelectedPathName] = useState(null);
+  const { roadmap, contextLoading } = useContext(SkillsContext);
+
+  useEffect(() => {
+    const fetchPaths = async () => {
+      try {
+        if (contextLoading) {
+          handleError("Context is still loading, please wait.");
+          return;
+        }
+        if (roadmap && roadmap.length > 0) {
+          handleSuccess("Using existing roadmap data, skipping career paths fetch");
+          setLoading(false);
+          return;
+        }
+
+        const result = await axios.get(url + "/roadmap/career-paths", {
+          withCredentials: true,
+          headers: {
+            Accept: "application/json",
+          },
+        });
+        setPathsData(result.data.data);
+      } catch (error) {
+        handleError("Failed to fetch career paths");
+        console.error("Error fetching paths:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPaths();
+  }, [contextLoading, roadmap]);
+  if (!pathsData || !pathsData.paths || pathsData.paths.length === 0 || loading) {
     return (
       <p className='text-center text-gray-500'>
         <Spinner />
@@ -11,10 +51,16 @@ function CareerPathSelector({ pathsData, selectedPathName, onPathSelect, setIsPa
       </p>
     );
   }
-
   const handleSelectionChange = (event) => {
     const selectedValue = event.target.value;
+    setSelectedPathName(selectedValue);
     const fullSelectedPath = pathsData.paths.find((p) => p.Path_name === selectedValue);
+    onPathSelect(fullSelectedPath || null);
+  };
+
+  const handleDivClick = (pathName) => {
+    setSelectedPathName(pathName);
+    const fullSelectedPath = pathsData.paths.find((p) => p.Path_name === pathName);
     onPathSelect(fullSelectedPath || null);
   };
 
@@ -91,30 +137,9 @@ function CareerPathSelector({ pathsData, selectedPathName, onPathSelect, setIsPa
   );
 }
 
-// --- PropTypes remain the same ---
 CareerPathSelector.propTypes = {
-  pathsData: PropTypes.shape({
-    paths: PropTypes.arrayOf(
-      PropTypes.shape({
-        Path_name: PropTypes.string.isRequired,
-        Stages: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-        Timeline: PropTypes.string,
-        Salary_range: PropTypes.string,
-        Industries: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-        Risk_level: PropTypes.string,
-        AI_impact: PropTypes.string,
-        Required_skills: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-        Accelerators: PropTypes.oneOfType([PropTypes.string, PropTypes.arrayOf(PropTypes.string)]),
-        Notes: PropTypes.string,
-      })
-    ),
-  }).isRequired,
-  selectedPathName: PropTypes.string,
   onPathSelect: PropTypes.func.isRequired,
-};
-
-CareerPathSelector.defaultProps = {
-  selectedPathName: null,
+  setIsPathSelected: PropTypes.func.isRequired,
 };
 
 export default CareerPathSelector;

@@ -15,9 +15,14 @@ Critically evaluate the user's profile to identify strengths to leverage and gap
 
 *   **Career Goal:** ${profile.careerGoal ? profile.careerGoal : "Being Backend Developer and getting remote job"}
 *   **Current Skills:** 
-    *   **Hard Skills:** ${profile.hardSkills
-      .map((skill) => `${skill.name} (${skill.experience} years experience)`)
-      .join(", ")}
+    *   **Hard Skills:**
+${profile.hardSkills
+  .map(
+    (skill) =>
+      `        - ${skill.name} (${skill.experience} years experience)\n` +
+      `          Subskills: ${skill.subskills ? skill.subskills.map((sub) => `${sub})`).join(", ") : "None"}`
+  )
+  .join("\n")}
     *   **Soft Skills:** ${profile.softSkills
       .map((skill) => `${skill.name} (${skill.proficiency} proficiency)`)
       .join(", ")}
@@ -162,8 +167,15 @@ Given a user's profile, simulate **ALL realistic and high-potential career paths
 
 ---  
 **User Data:**  
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
+Hard Skills: ${profile.hardSkills
+    .map(
+      (skill) =>
+        `${skill.name} (${skill.experience} years) - Subskills: [${
+          skill.subskills ? skill.subskills.map((sub) => `${sub})`).join(", ") : "None"
+        }]`
+    )
+    .join("\n")}
+Soft Skills: ${profile.softSkills.map((skill) => `${skill.name} (${skill.proficiency})`).join(", ")}  
 Work Experience: ${profile.jobs || "None / Beginner"}  
 Projects: ${profile.projects}  
 Education: ${profile.education}
@@ -185,7 +197,6 @@ Output format:
 "AI_impact": "Low (building AI > replaced by AI)",
 "Required_skills": ["Deep Learning", "Prompt Engineering", "Product Management"],
 "Accelerators": ["Tensorflow Certification", "Build AI SaaS MVP"],
-"Notes": "Pivoting to AI Product Management requires strong communication skills and product intuition."
 },
 // more career paths
 ]

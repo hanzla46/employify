@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { Dialog } from "@headlessui/react";
+import { handleError } from "../../utils";
 const url = import.meta.env.VITE_API_URL;
 
 export default function EvaluationModalUI({ evaluationModal, setEvaluationModal, setNodes }) {
@@ -127,8 +128,14 @@ export default function EvaluationModalUI({ evaluationModal, setEvaluationModal,
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setIsLoading(true);
     try {
+      if (evaluationModal.inputMessage.length < 4 && !evaluationModal.file) {
+        handleError("Please enter a message or upload a file before submitting.");
+        setIsLoading(false);
+        return;
+      }
       // Log the modal state for debugging
       console.log("Evaluation Modal State:", {
         taskId: evaluationModal.taskId,
@@ -218,7 +225,7 @@ export default function EvaluationModalUI({ evaluationModal, setEvaluationModal,
           ...prev.messages,
           {
             sender: "system",
-            text: "Failed to evaluate subtask. Please try again.",
+            text: "Failed to evaluate subtask. Please try again." + error,
             error: true,
           },
         ],
@@ -238,6 +245,15 @@ export default function EvaluationModalUI({ evaluationModal, setEvaluationModal,
   }, [setEvaluationModal]);
   return (
     <Dialog open={evaluationModal.open} onClose={closeModal} className='relative z-50'>
+      {/* adding a close button too */}
+      <button
+        type='button'
+        onClick={closeModal}
+        className='absolute top-2 right-2 text-sm font-medium text-gray-700 dark:text-gray-300
+                  bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200
+                  dark:hover:bg-gray-600 transition-colors'>
+        ❌
+      </button>
       <div className='fixed inset-0 bg-black/30 backdrop-blur-sm' aria-hidden='true' />
       <div className='fixed inset-0 flex items-center justify-center p-4'>
         <Dialog.Panel className='mx-auto max-w-2xl w-full rounded-xl bg-white dark:bg-gray-800 p-6 shadow-xl'>
