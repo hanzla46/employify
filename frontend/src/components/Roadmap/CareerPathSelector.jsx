@@ -12,6 +12,11 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
   const [loading, setLoading] = useState(true);
   const [pathsData, setPathsData] = useState({ paths: [] });
   const [selectedPathName, setSelectedPathName] = useState(null);
+  const [preferences, setPreferences] = useState({
+    difficulty: "intermediate", // beginner, intermediate, advanced
+    timeframe: "6months", // 3months, 6months, 1year
+    focus: "balanced", // practical, theoretical, balanced
+  });
   const { roadmap, contextLoading } = useContext(SkillsContext);
 
   useEffect(() => {
@@ -55,18 +60,58 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
     const selectedValue = event.target.value;
     setSelectedPathName(selectedValue);
     const fullSelectedPath = pathsData.paths.find((p) => p.Path_name === selectedValue);
-    onPathSelect(fullSelectedPath || null);
+    onPathSelect({ ...fullSelectedPath, preferences } || null);
   };
 
   const handleDivClick = (pathName) => {
     setSelectedPathName(pathName);
     const fullSelectedPath = pathsData.paths.find((p) => p.Path_name === pathName);
-    onPathSelect(fullSelectedPath || null);
+    onPathSelect({ ...fullSelectedPath, preferences } || null);
   };
 
   return (
     <div>
       <h2 className='text-2xl font-semibold text-center text-gray-800 dark:text-gray-200 mb-6'>Choose Your Desired Career Path:</h2>
+
+      {/* Add preference controls */}
+      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow'>
+        <div>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Difficulty Level</label>
+          <select
+            value={preferences.difficulty}
+            onChange={(e) => setPreferences((prev) => ({ ...prev, difficulty: e.target.value }))}
+            className='w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'>
+            <option value='beginner'>Beginner</option>
+            <option value='intermediate'>Intermediate</option>
+            <option value='advanced'>Advanced</option>
+          </select>
+        </div>
+
+        <div>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Timeframe</label>
+          <select
+            value={preferences.timeframe}
+            onChange={(e) => setPreferences((prev) => ({ ...prev, timeframe: e.target.value }))}
+            className='w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'>
+            <option value='3months'>3 Months</option>
+            <option value='6months'>6 Months</option>
+            <option value='1year'>1 Year</option>
+          </select>
+        </div>
+
+        <div>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Learning Focus</label>
+          <select
+            value={preferences.focus}
+            onChange={(e) => setPreferences((prev) => ({ ...prev, focus: e.target.value }))}
+            className='w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'>
+            <option value='practical'>Practical (Hands-on Projects)</option>
+            <option value='theoretical'>Theoretical (In-depth Learning)</option>
+            <option value='balanced'>Balanced</option>
+          </select>
+        </div>
+      </div>
+
       <form className='flex flex-wrap gap-5 m-auto'>
         {pathsData.paths.map((path, index) => (
           <div

@@ -3,18 +3,52 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const mime = require("mime-types");
 const getRoadmapPrompt = async (profile, selectedPath) => {
   try {
+    const { preferences } = selectedPath;
+    const difficultyLevel = preferences?.difficulty || "intermediate";
+    const timeframe = preferences?.timeframe || "6months";
+    const focus = preferences?.focus || "balanced";
+
+    const getTimeframeTaskCount = (tf) => {
+      switch (tf) {
+        case "3months":
+          return "9-12";
+        case "6months":
+          return "12-16";
+        case "1year":
+          return "17-22";
+        default:
+          return "15-20";
+      }
+    };
+
     const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
       selectedPath.Path_name || "Being Backend Developer and getting remote job"
     }**, considering their unique background and the transformative impact of AI on their target field.
 
-The roadmap should be intensely practical, focusing on high-impact actions that differentiate the user in a competitive market. It must go beyond basic skill acquisition and provide concrete steps for networking effectively, building a compelling portfolio/presence, and navigating the specific path to their desired outcome (e.g., landing a specific job role, securing freelance clients, launching a startup, obtaining funding).
+Consider these User Learning Preferences when generating the roadmap:
 
-Critically evaluate the user's profile to identify strengths to leverage and gaps to fill. Avoid redundant suggestions for skills or experiences the user clearly possesses at a sufficient level; instead, focus on *advancing*, *refining*, or *applying* those skills in novel, AI-augmented ways.
+1. Difficulty Level: ${difficultyLevel}
+   - Adjust task complexity, depth, and prerequisites accordingly
+   - For beginner: More foundational concepts, detailed guidance, basic projects
+   - For intermediate: Mix of basics and advanced topics, moderate complexity
+   - For advanced: Complex projects, cutting-edge tech, open-ended challenges
 
-### **User Profile Snapshot:**
+2. Timeframe: ${timeframe}
+   - Generate ${getTimeframeTaskCount(timeframe)} tasks total
+   - Adjust task durations to fit within this timeframe
+   - For 3 months: Focus on quick wins and essential skills
+   - For 6 months: Balanced approach with both quick and long-term goals
+   - For 1 year: Include more comprehensive and in-depth learning
 
-*   **Career Goal:** ${profile.careerGoal ? profile.careerGoal : "Being Backend Developer and getting remote job"}
-*   **Current Skills:** 
+3. Learning Focus: ${focus}
+   - For practical focus: 70% hands-on projects, 30% theory
+   - For theoretical focus: 60% deep learning, 40% practical application
+   - For balanced: Equal mix of theory and practice
+
+The roadmap should be intensely practical, focusing on high-impact actions that differentiate the user in a competitive market. It must go beyond basic skill acquisition and provide concrete steps for networking effectively, building a compelling portfolio/presence, and navigating the specific path to their desired outcome.
+
+
+*** User Profile: *** 
     *   **Hard Skills:**
 ${profile.hardSkills
   .map(
@@ -26,12 +60,9 @@ ${profile.hardSkills
     *   **Soft Skills:** ${profile.softSkills
       .map((skill) => `${skill.name} (${skill.proficiency} proficiency)`)
       .join(", ")}
-*   **Job Experience:** ${profile.jobs.map((job) => `${job.title} at ${job.company} for 1 year`).join(", ")}
+*   **Job Experience:** ${profile.jobs.map((job) => `${job.title} at ${job.company} for 6 months`).join(", ")}
 *   **Projects Completed:** ${profile.projects.map((project) => project.name).join(", ")}
 *   **Education:** ${profile.education.map((edu) => edu.degree).join(", ")}
-
-### User Profile summary:
-${profile.profileSummary ? profile.profileSummary : "No summary found!"}
 
 
 ### Most Important
@@ -75,16 +106,6 @@ Accelerators: ${selectedPath.Accelerators} \n
     *   **Realism & Iteration:** Include tasks related to seeking feedback (e.g., from mentors, peers, potential clients/employers), iterating on work (projects, resume, strategy), and explicitly stating the need to potentially adjust the plan based on outcomes and market shifts.
     *   **Soft Skill Development:** Integrate soft skill practice *within* relevant tasks (e.g., a "Present Project Findings" subtask under a Portfolio project) OR create dedicated 'Soft Skill Enhancement' tasks with specific practice methods (e.g., "Practice STAR method for interviews," "Run mock client negotiation," "Join Toastmasters/public speaking group").
     
-4. **Possible Changes:**
-   * Generate an array called 'changes' with 5-10 highly relevant, *predictive* user-requested edits they might make after seeing the roadmap. DO NOT be generic. Think like a skeptical user reviewing the output. Each change MUST be clearly tied to a specific task, subtask, or roadmap pattern, and reflect a real need for customization.
-   * Each change should be a string with no quotes/brakets.
-   * Examples of high-quality predictive changes:
-     * - Replace a subtask that says [Use ChatGPT for code review] with [Use CodeWhisperer for backend-specific suggestions]
-     * - Add a new task focused on [Job Search Strategy for Remote Roles in Europe] because the roadmap only covers local
-     * - Change estimated time from [2 weeks] to [5 days] for task user already has 90% experience in
-     * - Resequence a [Portfolio Building] task to come AFTER [AI-Enhanced Learning] so projects reflect updated skills
-   * Only suggest changes that would make the roadmap **more accurate, strategic, or user-relevant.** Do not include wishy-washy or vague changes. This section is to anticipate user intent and make roadmap *editable* smartly. 
-    
 3.  **Output Format (Strict JSON):** Adhere strictly to the following JSON structure. Ensure the entire output is a single valid JSON object.
 
     \`\`\`json
@@ -109,9 +130,6 @@ Accelerators: ${selectedPath.Accelerators} \n
           "priority": "medium"
         }
         // ... more task objects ...
-      ],
-      "changes": [
-         "change1","change2","change3",
       ],
     }
     \`\`\`

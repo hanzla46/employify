@@ -25,8 +25,10 @@ const generateRoadmap = async (req, res) => {
   try {
     const user = req.user;
     console.log("Generating roadmap...");
-    const selectedPath = req.body.selectedPath;
-    console.log(selectedPath);
+    const { selectedPath } = req.body;
+    const { preferences } = selectedPath; // Extract preferences from selected path
+    console.log("Path:", selectedPath);
+    console.log("Preferences:", preferences);
     const profile = await Profile.findOne({ userId: user._id });
     if (!profile) {
       return res.status(404).json({ success: false, message: "Profile not found" });
@@ -55,16 +57,16 @@ const generateRoadmap = async (req, res) => {
     }
     const extractedJson = match[1];
     const roadmapData = await safeJsonParse(extractedJson);
-    const { tasks, changes } = roadmapData;
+    const { tasks } = roadmapData;
     console.log(roadmapData);
-    const roadmap = new Roadmap({ userId: user._id, tasks: tasks, changes: changes });
+    const roadmap = new Roadmap({ userId: user._id, tasks: tasks, changes: [] });
     await roadmap.save();
     return res.status(200).json({
       success: true,
       data: {
         tasks: tasks,
       },
-      changes,
+      changes: [],
       prompt,
       result,
     });
