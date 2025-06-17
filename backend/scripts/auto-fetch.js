@@ -1,6 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
 const mongoose = require("mongoose");
+const cron = require('node-cron');
 const Job = require("../models/JobModel");
 const MarketAnalysis = require("../models/MarketAnalysisModel");
 
@@ -42,6 +43,80 @@ function extractSkills(description = "") {
     console.error("Error extracting skills:", error);
   }
   return Array.from(skills);
+}
+
+// Logging function for cleanup process
+async function logCleanupStats() {
+  try {
+    const totalJobs = await Job.countDocuments();
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+    const oldJobs = await Job.countDocuments({ postedAt: { $lt: tenDaysAgo } });
+    const recentJobs = await Job.countDocuments({ postedAt: { $gte: tenDaysAgo } });
+    
+    console.log('Job Database Statistics:');
+    console.log('------------------------');
+    console.log(`Total jobs: ${totalJobs}`);
+    console.log(`Jobs older than 10 days: ${oldJobs}`);
+    console.log(`Recent jobs (≤10 days): ${recentJobs}`);
+    console.log('------------------------');
+  } catch (error) {
+    console.error('Error logging cleanup stats:', error);
+  }
+}
+
+// Cleanup old jobs and update market analysis
+async function cleanupOldJobs() {
+  try {
+    console.log("Starting job cleanup process...");
+    await logCleanupStats();
+
+    // Calculate date threshold (10 days ago)
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
+    // Find jobs to be deleted
+    const oldJobs = await Job.find({ postedAt: { $lt: tenDaysAgo } });
+    console.log(`Found ${oldJobs.length} jobs older than 10 days`);
+
+    // Before deleting, update market analysis
+    if (oldJobs.length > 0) {
+      // Get all skills from jobs to be deleted
+      const skillsToUpdate = new Set();
+      oldJobs.forEach((job) => {
+        const jobSkills = extractSkills(job.description);
+        jobSkills.forEach((skill) => skillsToUpdate.add(skill));
+      });
+
+      // Update market analysis for affected skills
+      for (const skill of skillsToUpdate) {
+        const analysis = await MarketAnalysis.findOne({ skill: skill.toLowerCase() });
+        if (analysis) {
+          // Get fresh job count excluding old jobs
+          const currentJobs = await Job.find({
+            description: new RegExp(skill, "i"),
+            postedAt: { $gte: tenDaysAgo },
+          });
+
+          // Update market analysis with current data
+          analysis.marketDemand.totalJobs = currentJobs.length;
+          analysis.marketDemand.lastUpdated = new Date();
+          await analysis.save();
+        }
+      }
+
+      // Delete old jobs
+      const deleteResult = await Job.deleteMany({ postedAt: { $lt: tenDaysAgo } });
+      console.log(`Deleted ${deleteResult.deletedCount} old jobs`);
+    }
+
+    console.log("Job cleanup process completed successfully");
+    // Log stats after cleanup
+    console.log("\nAfter cleanup:");
+    await logCleanupStats();
+  } catch (error) {
+    console.error("Error during job cleanup:", error);
+  }
 }
 
 // Extract requirements that co-occur with a skill
@@ -232,25 +307,43 @@ const autoFetchJobs = async () => {
   console.log("Job fetching and market analysis complete 🔥🧠");
 };
 
-// Script entry point
-(async () => {
+// Schedule jobs
+async function scheduleJobs() {
   try {
     const MONGODB_URL = process.env.MONGODB_URL;
     if (!MONGODB_URL) {
       throw new Error("MONGODB_URL not found in environment variables");
     }
 
-    console.log("Connecting to MongoDB...");
-    await mongoose.connect(MONGODB_URL, {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
-    console.log("Connected to MongoDB 🐱‍👤");
+    // Connect to MongoDB
+    await mongoose.connect(MONGODB_URL);
+    console.log("Connected to MongoDB successfully");
 
+    // Schedule job cleanup to run daily at midnight
+    cron.schedule('0 0 * * *', async () => {
+      console.log('Running scheduled job cleanup...');
+      await cleanupOldJobs();
+    });
+
+    // Schedule job fetching to run every 6 hours
+    cron.schedule('0 */6 * * *', async () => {
+      console.log('Running scheduled job fetch...');
+      await autoFetchJobs();
+    });
+
+    // Run initial cleanup and fetch
+    await cleanupOldJobs();
     await autoFetchJobs();
+
   } catch (error) {
-    console.error("Script failed:", error);
-  } finally {
+    console.error('Error in job scheduling:', error);
+    process.exit(1);
+  }
+}
+
+// Script entry point
+if (require.main === module) {
+  let cleanup = async () => {
     try {
       await mongoose.connection.close();
       console.log("MongoDB connection closed");
@@ -258,5 +351,14 @@ const autoFetchJobs = async () => {
       console.error("Error closing MongoDB connection:", error);
     }
     process.exit();
-  }
-})();
+  };
+
+  // Handle process termination
+  process.on('SIGTERM', cleanup);
+  process.on('SIGINT', cleanup);
+
+  scheduleJobs().catch(error => {
+    console.error('Failed to start job scheduler:', error);
+    cleanup();
+  });
+}

@@ -20,7 +20,14 @@ const getJobs = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await Profile.findOne({ userId });
-    console.log("profile for jobs" + profile);
+
+    // Get jobs not older than 10 days
+    const tenDaysAgo = new Date();
+    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+
+    // Base query to exclude old jobs
+    const baseQuery = { postedAt: { $gte: tenDaysAgo } };
+
     if (
       !profile ||
       !profile.jobKeywords ||
@@ -28,52 +35,58 @@ const getJobs = async (req, res) => {
       !profile.profileSummary ||
       profile.profileSummary.length <= 0
     ) {
-      console.log("sending all jobs");
-      const jobs = await Job.find();
+      console.log("sending all recent jobs");
+      const jobs = await Job.find(baseQuery);
       return res.status(200).json({ message: "fetched all jobs", jobs: jobs });
     }
+
     let skillRegex = null;
     if (profile.jobKeywords && profile.jobKeywords.length > 0) {
       const skillWords = profile.jobKeywords.map((s) => s.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
       const pattern = skillWords.join("|");
       skillRegex = new RegExp(pattern, "i");
-    }    const locationOrRemoteConditions = [{ isRemote: true }];
+    }
+
+    const locationOrRemoteConditions = [{ isRemote: true }];
     if (profile.location) {
       const userCityRegex = new RegExp(profile.location.city.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       // Match either job.location or job.city with user's city
-      locationOrRemoteConditions.push({ 
-        $or: [
-          { location: { $regex: userCityRegex } },
-          { city: { $regex: userCityRegex } }
-        ] 
+      locationOrRemoteConditions.push({
+        $or: [{ location: { $regex: userCityRegex } }, { city: { $regex: userCityRegex } }],
       });
-      
+
       const userCountryRegex = new RegExp(profile.location.country.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
       locationOrRemoteConditions.push({
         location: { $regex: userCountryRegex },
       });
     }
     const finalQuery = {
-      $and: [skillRegex ? { description: { $regex: skillRegex } } : { _id: null }, { $or: locationOrRemoteConditions }],
+      $and: [
+        baseQuery,
+        skillRegex ? { description: { $regex: skillRegex } } : { _id: null },
+        { $or: locationOrRemoteConditions },
+      ],
     };
     const matchingJobs = await Job.find(finalQuery).lean();
     console.log(`Found ${matchingJobs.length} matching jobs for user ${userId}.`);
 
     // Split jobs into chunks of 50
     const jobChunks = chunkArray(matchingJobs, 50);
-    console.log(`Split jobs into ${jobChunks.length} chunks of 50 jobs each`);    // Process each chunk in parallel and ensure we get analysis for each job
+    console.log(`Split jobs into ${jobChunks.length} chunks of 50 jobs each`); // Process each chunk in parallel and ensure we get analysis for each job
     const analysisResults = await Promise.all(
       jobChunks.map(async (chunk) => {
         const chunkAnalysis = await CalculateRelevancyScores(chunk, profile);
         // Make sure we have analysis for each job in the chunk
-        return chunk.map(job => {
-          const analysis = chunkAnalysis.find(a => a.id === job._id.toString());
-          return analysis || {
-            id: job._id.toString(),
-            score: 0,
-            why: [],
-            missing: []
-          };
+        return chunk.map((job) => {
+          const analysis = chunkAnalysis.find((a) => a.id === job._id.toString());
+          return (
+            analysis || {
+              id: job._id.toString(),
+              score: 0,
+              why: [],
+              missing: [],
+            }
+          );
         });
       })
     );

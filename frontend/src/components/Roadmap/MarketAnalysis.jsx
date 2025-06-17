@@ -270,20 +270,60 @@ export const useMarketAnalysis = () => {
 
 // Market Analysis Button Component
 export const MarketAnalysisButton = ({ subtaskLabel, onAnalysis, isLoading }) => {
+  const [showSkillDropdown, setShowSkillDropdown] = React.useState(false);
   const skills = extractSkillsFromText(subtaskLabel);
+  const dropdownRef = React.useRef(null);
+
+  React.useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setShowSkillDropdown(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   if (skills.length === 0) return null;
 
+  const handleSkillSelect = (skill) => {
+    onAnalysis(skill);
+    setShowSkillDropdown(false);
+  };
+
   return (
-    <button
-      onClick={() => onAnalysis(skills[0])}
-      disabled={isLoading}
-      className='px-3 py-1 rounded text-xs font-medium bg-purple-100 hover:bg-purple-200 
-                dark:bg-purple-900/20 dark:hover:bg-purple-800/30 text-purple-700 dark:text-purple-300 
-                transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed'>
-      {isLoading ? <Loader2 size={12} className='animate-spin' /> : <BarChart size={12} />}
-      {isLoading ? "Loading..." : "Market Insights"}
-    </button>
+    <div className='relative' style={{ zIndex: 50 }} ref={dropdownRef}>
+      <div className='absolute inset-0 z-0' onClick={() => setShowSkillDropdown(false)} />
+      <button
+        onClick={() => (skills.length === 1 ? onAnalysis(skills[0]) : setShowSkillDropdown(!showSkillDropdown))}
+        disabled={isLoading}
+        className='px-3 py-1 rounded text-xs font-medium bg-purple-100 hover:bg-purple-200 
+                  dark:bg-purple-900/20 dark:hover:bg-purple-800/30 text-purple-700 dark:text-purple-300 
+                  transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed relative z-50'>
+        {isLoading ? <Loader2 size={12} className='animate-spin' /> : <BarChart size={12} />}
+        <span>{isLoading ? "Loading..." : "Market Insights"}</span>
+        {skills.length > 1 && !isLoading && <span className='ml-1 text-xs opacity-75'>({skills.length})</span>}
+      </button>
+
+      {showSkillDropdown && skills.length > 1 && (
+        <div
+          className='absolute left-28 mt-1 py-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700'
+          style={{ zIndex: 100 }}>
+          <div className='px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700'>
+            Select skill to analyze
+          </div>
+          {skills.map((skill, index) => (
+            <button
+              key={index}
+              onClick={() => handleSkillSelect(skill)}
+              className='w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-purple-50 dark:hover:bg-purple-900/20 transition-colors'>
+              {skill}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 import { useEffect } from "react";

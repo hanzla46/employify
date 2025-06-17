@@ -587,7 +587,16 @@ const SkillsGraph = () => {
               onMarketAnalysis={handleMarketAnalysis}
             />
           </ReactFlowProvider>
-
+          <InputArea
+            modifyLoading={modifyLoading}
+            modify={modify}
+            handleSuggestionClick={handleSuggestionClick}
+            showSuggestions={showSuggestions}
+            suggestedChanges={suggestedChanges}
+            modificationText={modificationText}
+            setModificationText={setModificationText}
+            setShowSuggestions={setShowSuggestions}
+          />
           {showSourcesModal && (
             <div className='w-1/3 fixed top-20 right-8 z-50 bg-white dark:bg-gray-800 border-2 border-gray-300 rounded-lg shadow-lg p-6'>
               <span className='absolute top-3 left-3'>Sources</span>
