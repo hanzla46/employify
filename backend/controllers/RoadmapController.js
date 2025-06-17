@@ -37,8 +37,11 @@ const generateRoadmap = async (req, res) => {
     console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.0-flash-lite",
+      model: "gemini-2.5-flash-preview-05-20",
       generation_config: {
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
         temperature: 2,
         response_mime_type: "application/json",
       },
@@ -174,4 +177,192 @@ const getAllCareerPaths = async (req, res) => {
     console.log(error);
   }
 };
-module.exports = { generateRoadmap, get, getAllCareerPaths, modify };
+
+const evaluateSubtask = async (req, res) => {
+  try {
+    const user = req.user;
+    console.log("Full request body:", req.body);
+    const { taskId, subtaskId, text } = req.body;
+    console.log("Parsed values - taskId:", taskId, "subtaskId:", subtaskId, "text:", text);
+    console.log(
+      "File info:",
+      req.file
+        ? {
+            originalname: req.file.originalname,
+            mimetype: req.file.mimetype,
+            size: req.file.size,
+          }
+        : "No file provided"
+    ); // Input validation with type coercion
+    const parsedTaskId = parseInt(taskId);
+    const parsedSubtaskId = parseInt(subtaskId);
+
+    if (!parsedTaskId || !parsedSubtaskId) {
+      return res.status(400).json({
+        success: false,
+        message: "Task ID and subtask ID are required and must be valid numbers",
+        error: "MISSING_REQUIRED_FIELDS",
+        debug: { receivedTaskId: taskId, receivedSubtaskId: subtaskId },
+      });
+    } // File validation is now handled by fileUpload middleware
+    if (req.file) {
+      console.log("File received:", {
+        filename: req.file.originalname,
+        mimetype: req.file.mimetype,
+        size: req.file.size,
+      });
+    }
+
+    const roadmap = await Roadmap.findOne({ userId: user._id });
+    if (!roadmap) {
+      return res.status(404).json({
+        success: false,
+        message: "Roadmap not found",
+      });
+    }
+    const task = roadmap.tasks.find((t) => t.id === parsedTaskId);
+    if (!task) {
+      return res.status(404).json({
+        success: false,
+        message: "Task not found",
+        debug: { taskId: parsedTaskId, availableTaskIds: roadmap.tasks.map((t) => t.id) },
+      });
+    }
+
+    const subtask = task.subtasks.find((st) => st.id === parsedSubtaskId);
+    if (!subtask) {
+      return res.status(404).json({
+        success: false,
+        message: "Subtask not found",
+      });
+    }
+
+    let analysis = "";
+
+    if (req.file || text) {
+      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash-preview-05-20",
+        generation_config: {
+          thinkingConfig: {
+            thinkingBudget: 0,
+          },
+          temperature: 0.4,
+        },
+      });
+
+      let promptText = `As a career advisor, evaluate the following submission for the task "${task.name}" and subtask "${subtask.name}". `;
+
+      // If there's a file, process it
+      if (req.file) {
+        const fileContent = req.file.buffer.toString();
+        promptText += `The user has submitted a file with the following content:\n${fileContent}\n`;
+      }
+
+      // If there's text, include it
+      if (text) {
+        promptText += `The user has provided the following explanation:\n${text}\n`;
+      }
+
+      promptText += `\nProvide a concise evaluation of this submission. Assess:
+1. Areas of strength
+2. Areas for improvement.
+
+keep your response as short as possible, and do not include any additional information or instructions.`;
+
+      const result = await model.generateContent(promptText);
+      analysis = result.response.text();
+    } // Update the subtask with retry logic
+    let retries = 3;
+    while (retries > 0) {
+      try {
+        subtask.completed = true;
+        subtask.evaluation = {
+          text: text || "",
+          fileUrl: req.file ? req.file.path : "",
+          analysis: analysis,
+          submittedAt: new Date(),
+          score: analysis ? calculateScore(analysis) : null,
+        };
+
+        await roadmap.save();
+
+        return res.status(200).json({
+          success: true,
+          message: "Subtask evaluated successfully",
+          data: {
+            task: taskId,
+            subtask: subtaskId,
+            completed: true,
+            evaluation: subtask.evaluation,
+          },
+        });
+      } catch (saveError) {
+        retries--;
+        if (retries === 0) {
+          throw new Error("Failed to save evaluation after multiple attempts");
+        }
+        await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait 1s before retry
+      }
+    }
+  } catch (error) {
+    console.error("Error evaluating subtask:", error);
+
+    // Determine error type and send appropriate response
+    if (error.message === "Failed to save evaluation after multiple attempts") {
+      return res.status(500).json({
+        success: false,
+        message: "Database error while saving evaluation",
+        error: "DB_SAVE_ERROR",
+      });
+    }
+
+    if (error.name === "ValidationError") {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid data provided",
+        error: "VALIDATION_ERROR",
+        details: error.errors,
+      });
+    }
+
+    return res.status(500).json({
+      success: false,
+      message: "An unexpected error occurred while evaluating the subtask",
+      error: "INTERNAL_SERVER_ERROR",
+    });
+  }
+};
+
+// Helper function to calculate score based on analysis
+function calculateScore(analysis) {
+  // Simple scoring based on common positive/negative phrases
+  const positiveIndicators = [
+    "demonstrates understanding",
+    "well done",
+    "good job",
+    "excellent",
+    "complete",
+    "successful",
+  ];
+
+  const negativeIndicators = ["incomplete", "insufficient", "needs improvement", "lacking", "missing"];
+
+  let score = 50; // Base score
+
+  positiveIndicators.forEach((indicator) => {
+    if (analysis.toLowerCase().includes(indicator)) {
+      score += 10;
+    }
+  });
+
+  negativeIndicators.forEach((indicator) => {
+    if (analysis.toLowerCase().includes(indicator)) {
+      score -= 10;
+    }
+  });
+
+  return Math.min(Math.max(score, 0), 100); // Ensure score is between 0 and 100
+}
+
+module.exports = { generateRoadmap, get, getAllCareerPaths, modify, evaluateSubtask };

@@ -226,11 +226,11 @@ const getBestResumeData = async (profile, job) => {
   const modelName = "gemini-2.5-flash-preview-05-20";
   const config = {
     thinkingConfig: {
-      thinkingBudget: 1024,
+      thinkingBudget: 2024,
     },
     responseMimeType: "text/plain",
     generationConfig: {
-      temperature: 0.0,
+      temperature: 1,
       topP: 1.0,
       topK: 1,
     },
@@ -361,15 +361,22 @@ const getBestResumeData = async (profile, job) => {
   try {
     console.log("Starting resume selection...");
     const contents = [
-      {
+      // Add each PDF file as a separate content part
+      ...pdfFiles.map((file) => ({
         role: "user",
         parts: [
-          ...pdfFiles.map((file) => ({
+          {
             fileData: {
               fileUri: file.uri,
               mimeType: file.mimeType,
             },
-          })),
+          },
+        ],
+      })),
+      // Add the prompt as the final content part
+      {
+        role: "user",
+        parts: [
           {
             text: selectionPrompt,
           },
@@ -402,7 +409,7 @@ const getBestResumeData = async (profile, job) => {
 
   // Clean up all generated PDF files
   resumes.forEach((resume) => {
-    fs.unlinkSync(resume.filePath);
+    // fs.unlinkSync(resume.filePath);
     console.log(`Deleted temporary file: ${resume.filePath}`);
   });
 
@@ -472,7 +479,10 @@ You are a **modern frontend engineer and UX-centric resume stylist**. Your task 
 - Include sections according to the reference resume.
 - CSS should be perfectly aligned with the design.
 - Use clear section dividers, consistent padding/margin.
-- Integrate job description keywords naturally.
+- Integrate job description keywords naturally. Dont change title exact to job title but align content with it.
+- In education data, if you dont get fieldof study than add appropriate field by yourself for example computer science  for BS software engineering.
+- subskills of each skill does not need to be added in resume.
+- Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
 
 📄 FINAL OUTPUT:
 - Return a **standalone HTML document** with embedded <style> in <head>.
@@ -481,7 +491,11 @@ You are a **modern frontend engineer and UX-centric resume stylist**. Your task 
 💡 This resume must follow the **modern resume example** attached. Style, spacing, and layout should be visibly aligned.
 
 👤 USER PROFILE:
-Name: John Doe  
+Name: Muhammad Shoaib
+Email: mshoaibarid@gmail.com
+address: Phalia, Mandi Bahauddin, Pakistan
+phone: +923445450151
+languages: english, punjabi, urdu
 Hard Skills: ${profile.hardSkills}  
 Soft Skills: ${profile.softSkills}  
 Work Experience: ${profile.jobs}  
@@ -504,6 +518,10 @@ You are a **traditional resume architect** crafting high-quality, timeless resum
 - Keep color palette monochrome: black, gray, soft lines.
 - Full-width sections, right-aligned dates, uppercase section headers.
 - Strictly print-ready: no animations, perfect alignment.
+- Integrate job description keywords naturally. Dont change title exact to job title but align content with it.
+- In education data, if you dont get fieldof study than add appropriate field by yourself for example computer science  for BS software engineering.
+subskills of each skill does not need to be added in resume.
+- Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
 
 🧱 STRUCTURE:
 - Semantic HTML with <header>, <section>, etc.
@@ -518,7 +536,11 @@ You are a **traditional resume architect** crafting high-quality, timeless resum
 💡 Match layout and formatting exactly to the **classic resume example** provided.
 
 👤 USER PROFILE:
-Name: John Doe  
+Name: Muhammad Shoaib
+Email: mshoaibarid@gmail.com
+address: Phalia, Mandi Bahauddin, Pakistan
+phone: +923445450151
+languages: english, punjabi, urdu 
 Hard Skills: ${profile.hardSkills}  
 Soft Skills: ${profile.softSkills}  
 Work Experience: ${profile.jobs}  
@@ -541,6 +563,10 @@ You are a **creative resume designer** known for building stunning, unconvention
 - Modern font: Poppins, Fira Sans, or equivalent.
 - Use sidebars, flex layouts, highlight blocks.
 - Print-optimized but creative — think startup, design agency, or tech-forward role.
+- Integrate job description keywords naturally. Dont change title exact to job title but align content with it.
+- In education data, if you dont get fieldof study than add appropriate field by yourself for example computer science  for BS software engineering.
+subskills of each skill does not need to be added in resume.
+- Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
 
 🧱 STRUCTURE:
 - Use semantic HTML tags.
@@ -555,7 +581,11 @@ You are a **creative resume designer** known for building stunning, unconvention
 💡 Mirror the aesthetic and structural DNA of the **creative resume sample** provided.
 
 👤 USER PROFILE:
-Name: John Doe  
+Name: Muhammad Shoaib
+Email: mshoaibarid@gmail.com
+address: Phalia, Mandi Bahauddin, Pakistan
+phone: +923445450151
+languages: english, punjabi, urdu  
 Hard Skills: ${profile.hardSkills}  
 Soft Skills: ${profile.softSkills}  
 Work Experience: ${profile.jobs}  
@@ -578,7 +608,11 @@ You are a senior frontend engineer and resume designer. Your task is to create a
 (See modern style rules...)
 
 👤 USER PROFILE:
-Name: John Doe  
+Name: Muhammad Shoaib
+Email: mshoaibarid@gmail.com
+address: Phalia, Mandi Bahauddin, Pakistan
+phone: +923445450151
+languages: english, punjabi, urdu
 Hard Skills: ${profile.hardSkills}  
 Soft Skills: ${profile.softSkills}  
 Work Experience: ${profile.jobs}  

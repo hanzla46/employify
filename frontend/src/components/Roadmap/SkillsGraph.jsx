@@ -17,7 +17,7 @@ import { SkillsContext } from "../../Context/SkillsContext";
 import EvaluationModalUI from "./EvaluationModalUI.jsx";
 import { Atom } from "react-loading-indicators";
 import { handleError, handleSuccess } from "../../utils";
-import { Send, Mic, Smile, Check, FolderCheck } from "lucide-react";
+import { Send, Mic, Smile, Check, FolderCheck, ChevronDown, ChevronRight, Loader2, Circle } from "lucide-react";
 const url = import.meta.env.VITE_API_URL;
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -63,84 +63,168 @@ const getLayoutedElements = (nodes, edges, direction = "LR") => {
 };
 
 // --- Custom Node Component ---
-const TaskNode = ({ data, setGraph }) => {
+const TaskNode = ({ data }) => {
   const [expanded, setExpanded] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+
+  const completedSubtasks = data.subtasks?.filter((st) => st.completed)?.length || 0;
+  const totalSubtasks = data.subtasks?.length || 0;
+  const progress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
 
   return (
     <div
-      className={`p-4 rounded-lg border-4 shadow-xl m-8 ${data.priority === "low" ? "bg-green-200" : ""} ${
-        data.priority === "medium" ? "bg-sky-200" : ""
-      } ${data.priority === "high" ? "bg-red-100" : ""} ${data.tag === "new" ? "border-green-600" : ""} ${
-        data.tag === "updated" ? "border-blue-600" : ""
-      } ${data.tage !== "new" && data.tag !== "updated" ? "border-gray-400" : ""}`}
-      style={{ maxWidth: `${NODE_WIDTH - 10}px` }}>
-      <Handle
-        type='target'
-        position={Position.Left}
-        // Optional: Add a unique id if you had multiple handles on the same side/position
-        // id="a"
-        style={{ background: "#3B82F6", left: 24 }} // Example styling
-      />
-      <Handle
-        type='source'
-        position={Position.Right}
-        // Optional: Add a unique id
-        // id="b"
-        style={{ background: "#3B82F6", right: 24 }} // Example styling
-      />
+      className={`p-4 rounded-lg border-4 shadow-xl m-8 transition-all duration-300 
+        ${data.priority === "low" ? "bg-green-200 dark:bg-green-900" : ""}
+        ${data.priority === "medium" ? "bg-sky-200 dark:bg-sky-900" : ""}
+        ${data.priority === "high" ? "bg-red-100 dark:bg-red-900" : ""}
+        ${data.tag === "new" ? "border-green-600" : ""}
+        ${data.tag === "updated" ? "border-blue-600" : ""}
+        ${data.tag !== "new" && data.tag !== "updated" ? "border-gray-400" : ""}
+        ${isHovered ? "transform scale-[1.02]" : ""}`}
+      style={{ maxWidth: `${NODE_WIDTH - 10}px` }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}>
+      <Handle type='target' position={Position.Left} style={{ background: "#3B82F6", left: 24 }} />
+      <Handle type='source' position={Position.Right} style={{ background: "#3B82F6", right: 24 }} />
 
-      <div
-        className={`p-1 rounded-lg float-right font-bold text-xl bg-gray-300 ${
-          data.tag === "new" ? "text-green-700 inline" : "text-blue-700 inline"
-        } ${data.tag === "existing" ? "hidden" : ""}`}>
-        {data.tag}
+      {/* Progress Bar */}
+      <div className='absolute top-0 left-0 right-0 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-t overflow-hidden'>
+        <div
+          className='h-full transition-all duration-500 ease-out'
+          style={{
+            width: `${progress}%`,
+            backgroundColor: `rgb(${255 * (1 - progress / 100)}, ${255 * (progress / 100)}, 100)`,
+          }}
+        />
       </div>
-      <div className='font-bold text-lg mb-2'>{data.label}</div>
-      <div className='text-sm text-gray-600 mb-3'>{data.description}</div>
-      <div className='text-xs text-gray-500 mt-1 mb-1 border-t pt-1'>
-        Category: {data.category || "N/A"} | Diff: {data.difficulty || "N/A"} | Est: {data.estimated_time || "N/A"}
-      </div>
-      {data.subtasks && data.subtasks.length > 0 && (
-        <button
-          className='bg-blue-500 hover:bg-blue-600 text-white px-2 py-1 rounded text-sm mb-1 mt-1 transition-colors duration-150'
-          onClick={() => setExpanded(!expanded)}>
-          {expanded ? "Hide Subtasks" : `Show ${data.subtasks.length} Subtasks`}
-        </button>
-      )}
-      {expanded && (
-        <div className='mt-1 border-t pt-2'>
-          <div className='text-sm font-semibold mb-1'>Subtasks:</div>
-          {data.subtasks.map((subtask, index) => (
-            <div
-              key={subtask.id || index} // Use subtask.id if available and unique
-              className='flex items-center justify-between flex-col mb-2 p-2 rounded border border-blue-300'>
-              <div className='flex flex-row'>
-                <div className='inline mr-1'> {subtask.completed ? <Check /> : <FolderCheck />} </div>
-                <div className='text-sm mr-2 inline'>{subtask.label}</div>
-              </div>
-              <div className='flex flex-row justify-between mt-2'>
-                {" "}
-                <button
-                  className={`${
-                    !subtask.completed ? "bg-green-500 hover:bg-green-600" : "bg-red-400 hover:bg-red-500"
-                  } text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150`}
-                  onClick={() => data.onSubtaskComplete(subtask.id, subtask.label, data.label)}>
-                  {!subtask.completed ? subtask.buttonText : "Reset"}
-                </button>
-                <button
-                  className='bg-green-500 hover:bg-green-600 text-white px-2 py-1 m-1 rounded text-xs whitespace-nowrap transition-colors duration-150 w-16'
-                  onClick={() => {
-                    console.log("Sources:", subtask.sources);
-                    data.showSources(subtask.sources);
-                  }}>
-                  Sources
-                </button>
-              </div>
-            </div>
-          ))}
+
+      <div className='relative mt-2'>
+        <div
+          className={`p-1 rounded-lg float-right text-sm font-semibold ${
+            data.tag === "new"
+              ? "text-green-700 bg-green-100 dark:text-green-300 dark:bg-green-900"
+              : data.tag === "updated"
+              ? "text-blue-700 bg-blue-100 dark:text-blue-300 dark:bg-blue-900"
+              : "hidden"
+          }`}>
+          {data.tag}
         </div>
-      )}
-      {data.ai_impact && <div className='text-xs text-purple-700 mt-1 italic'>Importance: {data.ai_impact}</div>}
+
+        <div className='font-bold text-lg mb-2 dark:text-white'>{data.label}</div>
+        <div className='text-sm text-gray-600 dark:text-gray-300 mb-3'>{data.description}</div>
+
+        <div className='text-xs space-x-2 mt-1 mb-1 border-t pt-1 dark:text-gray-400'>
+          <span className='inline-flex items-center'>
+            <span className='font-medium mr-1'>Progress:</span>
+            <span className={`${progress === 100 ? "text-green-500" : "text-blue-500"}`}>{Math.round(progress)}%</span>
+          </span>
+          <span>•</span>
+          <span>{data.category || "N/A"}</span>
+          <span>•</span>
+          <span>{data.difficulty || "N/A"}</span>
+          <span>•</span>
+          <span>{data.estimated_time || "N/A"}</span>
+        </div>
+
+        {data.subtasks?.length > 0 && (
+          <>
+            <button
+              className='bg-blue-500 hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-700 
+                text-white px-3 py-1.5 rounded text-sm mb-1 mt-1 transition-colors duration-150
+                flex items-center gap-2 shadow-sm hover:shadow'
+              onClick={() => setExpanded(!expanded)}>
+              {expanded ? (
+                <>
+                  <ChevronDown size={16} />
+                  Hide Subtasks
+                </>
+              ) : (
+                <>
+                  <ChevronRight size={16} />
+                  Show {data.subtasks.length} Subtasks
+                </>
+              )}
+            </button>
+
+            {expanded && (
+              <div className='mt-3 space-y-2'>
+                {data.subtasks.map((subtask, index) => (
+                  <div
+                    key={subtask.id || index}
+                    className={`p-3 rounded-lg border transition-all duration-300 transform
+                      ${
+                        subtask.completed
+                          ? "border-green-500 bg-green-50 dark:bg-green-900/20 scale-100"
+                          : subtask.evaluating
+                          ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 animate-pulse scale-100"
+                          : "border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:scale-[1.02]"
+                      }`}>
+                    <div className='flex items-center justify-between'>
+                      <div className='flex items-center gap-2'>
+                        {subtask.completed ? (
+                          <div className='text-green-500 dark:text-green-400'>
+                            <Check size={18} />
+                          </div>
+                        ) : subtask.evaluating ? (
+                          <div className='text-blue-500 dark:text-blue-400 animate-spin'>
+                            <Loader2 size={18} />
+                          </div>
+                        ) : (
+                          <div className='text-gray-400 dark:text-gray-500'>
+                            <Circle size={18} />
+                          </div>
+                        )}
+                        <span className='text-sm dark:text-gray-200'>{subtask.label}</span>
+                      </div>
+
+                      <div className='flex items-center gap-2'>
+                        <button
+                          className={`px-3 py-1 rounded text-xs font-medium transition-all duration-150 ${
+                            subtask.completed ? "bg-red-500 hover:bg-red-600 text-white" : "bg-green-500 hover:bg-green-600 text-white"
+                          } disabled:opacity-50 disabled:cursor-not-allowed`}
+                          onClick={() => {
+                            console.log("Opening evaluation modal with:", {
+                              taskId: data.id,
+                              subtaskId: subtask.id,
+                              subtaskLabel: subtask.label,
+                              taskLabel: data.label,
+                            });
+                            data.onSubtaskComplete(data.id, subtask.id, subtask.label, data.label);
+                          }}
+                          disabled={subtask.evaluating}>
+                          {subtask.evaluating ? "Evaluating..." : subtask.completed ? "Reset" : subtask.buttonText}
+                        </button>
+
+                        <button
+                          onClick={() => data.showSources(subtask.sources)}
+                          className='px-3 py-1 rounded text-xs font-medium bg-gray-100 hover:bg-gray-200 
+                            dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors'>
+                          Sources
+                        </button>
+                      </div>
+                    </div>
+
+                    {subtask.evaluation && (
+                      <div
+                        className='mt-2 text-xs p-2 rounded bg-gray-50 dark:bg-gray-800 border 
+                        border-gray-100 dark:border-gray-700'>
+                        <div className='font-medium text-gray-700 dark:text-gray-300'>
+                          Last Submission: {new Date(subtask.evaluation.submittedAt).toLocaleDateString()}
+                        </div>
+                        {subtask.evaluation.analysis && (
+                          <div className='mt-1 text-gray-600 dark:text-gray-400'>{subtask.evaluation.analysis}</div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      {data.ai_impact && <div className='mt-2 text-xs text-purple-700 dark:text-purple-400 italic'>Importance: {data.ai_impact}</div>}
     </div>
   );
 };
@@ -164,16 +248,32 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
     file: null,
     inputMessage: "",
   });
+  const checkCompleted = useCallback((taskId, stId, subTaskName, taskName) => {
+    // Ensure IDs are numbers
+    const parsedTaskId = parseInt(taskId);
+    const parsedStId = parseInt(stId);
 
-  const checkCompleted = useCallback((stId, subTaskName, taskName) => {
+    if (isNaN(parsedTaskId) || isNaN(parsedStId)) {
+      console.error("Invalid IDs:", { taskId, stId });
+      return;
+    }
+
     setEvaluationModal({
       open: true,
-      stId,
+      stId: parsedStId,
+      taskId: parsedTaskId,
       subTaskName,
       taskName,
       messages: [],
       file: null,
       inputMessage: "",
+    });
+
+    console.log("Modal initialized with:", {
+      stId: parsedStId,
+      taskId: parsedTaskId,
+      subTaskName,
+      taskName,
     });
   }, []);
   const handleShowSourcesModal = useCallback(
@@ -216,6 +316,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       // Position will be set by Dagre
       position: { x: 0, y: 0 }, // Placeholder
       data: {
+        id: task.id.toString(), // Ensure ID is a string
         label: task.name || "Unnamed Task",
         tag: task.tag || "existing",
         description: task.description || "",
@@ -335,10 +436,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   );
 };
 import CareerPathSelector from "./CareerPathSelector";
-// import { useContext } from "react";
-// import { SkillsContext } from "../../Context/SkillsContext";
-// --- Wrapper Component with Provider ---
-// React Flow hooks like useNodesState require being inside a ReactFlowProvider
+
 const SkillsGraph = () => {
   const [showSourcesModal, setShowSourcesModal] = useState(false);
   const [sources, setSources] = useState("");
