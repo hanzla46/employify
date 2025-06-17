@@ -12,12 +12,13 @@ import ReactFlow, {
 } from "reactflow";
 import "reactflow/dist/style.css";
 import axios from "axios";
-import dagre from "dagre"; // Import dagre
+import dagre from "dagre";
 import { SkillsContext } from "../../Context/SkillsContext";
 import EvaluationModalUI from "./EvaluationModalUI.jsx";
+import { useMarketAnalysis, MarketAnalysisButton, MarketAnalysisModal } from "./MarketAnalysis";
 import { Atom } from "react-loading-indicators";
 import { handleError, handleSuccess } from "../../utils";
-import { Send, Mic, Smile, Check, FolderCheck, ChevronDown, ChevronRight, Loader2, Circle } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Loader2, Circle, Check, BarChart } from "lucide-react";
 const url = import.meta.env.VITE_API_URL;
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -193,17 +194,16 @@ const TaskNode = ({ data }) => {
                           }}
                           disabled={subtask.evaluating}>
                           {subtask.evaluating ? "Evaluating..." : subtask.completed ? "Reset" : subtask.buttonText}
-                        </button>
-
+                        </button>{" "}
                         <button
                           onClick={() => data.showSources(subtask.sources)}
                           className='px-3 py-1 rounded text-xs font-medium bg-gray-100 hover:bg-gray-200 
-                            dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors'>
+                              dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors'>
                           Sources
                         </button>
+                        <MarketAnalysisButton subtaskLabel={subtask.label} onAnalysis={data.onMarketAnalysis} />
                       </div>
                     </div>
-
                     {subtask.evaluation && (
                       <div
                         className='mt-2 text-xs p-2 rounded bg-gray-50 dark:bg-gray-800 border 
@@ -235,7 +235,7 @@ const nodeTypes = {
 };
 
 // --- Main Graph Component ---
-const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loading, error }) => {
+const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loading, error, onMarketAnalysis }) => {
   // Renamed to avoid conflict with provider wrapper
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
@@ -329,14 +329,13 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
           buttonText: st.buttonText || "Complete",
           sources: st.sources || "",
           completed: st.completed || false,
-        })),
-
-        // Pass other data for display in the node
+        })), // Pass other data for display in the node
         category: task.category,
         difficulty: task.difficulty,
         estimated_time: task.estimated_time,
         ai_impact: task.ai_impact || "",
         showSources: (sources) => handleShowSourcesModal(sources),
+        onMarketAnalysis: onMarketAnalysis,
       },
     }));
 
@@ -452,6 +451,8 @@ const SkillsGraph = () => {
   const [showSourcesModal, setShowSourcesModal] = useState(false);
   const [sources, setSources] = useState("");
   const [selectedPath, setSelectedPath] = useState(null);
+  const { marketAnalysisData, showMarketModal, selectedSkill, handleMarketAnalysis, closeMarketModal } = useMarketAnalysis();
+
   const handlePathSelection = (pathObject) => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
@@ -568,6 +569,7 @@ const SkillsGraph = () => {
       setModifyLoading(false);
     }
   };
+
   return (
     <>
       {" "}
@@ -582,22 +584,12 @@ const SkillsGraph = () => {
               graphData={graphData}
               loading={loading}
               error={error}
+              onMarketAnalysis={handleMarketAnalysis}
             />
           </ReactFlowProvider>
 
-          <InputArea
-            modifyLoading={modifyLoading}
-            modify={modify}
-            setModificationText={setModificationText}
-            showSuggestions={showSuggestions}
-            setShowSuggestions={setShowSuggestions}
-            suggestedChanges={suggestedChanges}
-            handleSuggestionClick={handleSuggestionClick}
-            modificationText={modificationText}
-          />
-
           {showSourcesModal && (
-            <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
+            <div className='w-1/3 fixed top-20 right-8 z-50 bg-white dark:bg-gray-800 border-2 border-gray-300 rounded-lg shadow-lg p-6'>
               <span className='absolute top-3 left-3'>Sources</span>
               <button className='absolute top-2 right-2 text-gray-500 hover:text-gray-700' onClick={() => setShowSourcesModal(false)}>
                 ❌
@@ -606,6 +598,10 @@ const SkillsGraph = () => {
                 <div dangerouslySetInnerHTML={{ __html: sources }}></div>
               </div>
             </div>
+          )}
+
+          {showMarketModal && marketAnalysisData && (
+            <MarketAnalysisModal data={marketAnalysisData} skillName={selectedSkill} onClose={closeMarketModal} />
           )}
         </div>
       )}

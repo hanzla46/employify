@@ -1,5 +1,6 @@
 const Profile = require("../models/ProfileModel");
 const Roadmap = require("../models/RoadmapModel");
+const MarketAnalysis = require("../models/MarketAnalysisModel");
 const { getRoadmapPrompt, getCareerPathPrompt } = require("../Services/RoadmapPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { parse, repair } = require("jsonrepair");
@@ -331,6 +332,40 @@ keep your response as short as possible, and do not include any additional infor
   }
 };
 
+const getMarketAnalysis = async (req, res) => {
+  try {
+    const { skill } = req.query;
+    if (!skill) {
+      return res.status(400).json({
+        success: false,
+        message: "Skill parameter is required",
+      });
+    }
+
+    const analysis = await MarketAnalysis.findOne({
+      skill: new RegExp(skill, "i"), // Case insensitive search
+    });
+
+    if (!analysis) {
+      return res.status(404).json({
+        success: false,
+        message: "No market data found for this skill",
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      data: analysis,
+    });
+  } catch (error) {
+    console.error("Error fetching market analysis:", error);
+    return res.status(500).json({
+      success: false,
+      message: "Failed to fetch market analysis",
+    });
+  }
+};
+
 // Helper function to calculate score based on analysis
 function calculateScore(analysis) {
   // Simple scoring based on common positive/negative phrases
@@ -362,4 +397,11 @@ function calculateScore(analysis) {
   return Math.min(Math.max(score, 0), 100); // Ensure score is between 0 and 100
 }
 
-module.exports = { generateRoadmap, get, getAllCareerPaths, modify, evaluateSubtask };
+module.exports = {
+  generateRoadmap,
+  get,
+  getAllCareerPaths,
+  modify,
+  evaluateSubtask,
+  getMarketAnalysis,
+};

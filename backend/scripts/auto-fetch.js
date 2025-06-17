@@ -1,31 +1,183 @@
 require("dotenv").config();
 const axios = require("axios");
 const mongoose = require("mongoose");
-const Job = require("../models/JobModel"); // 🧠 your Mongoose model
+const Job = require("../models/JobModel");
+const MarketAnalysis = require("../models/MarketAnalysisModel");
+
+// Skill extraction regex patterns
+const SKILL_PATTERNS = {
+  programming: /\b(JavaScript|Python|Java|C\+\+|Ruby|PHP|Go|Rust|Swift|Kotlin|TypeScript|C#|Scala|Dart|R)\b/gi,
+  frameworks: /\b(React|Angular|Vue|Django|Flask|Spring|Laravel|Express|Next\.js|Node\.js|ASP\.NET|FastAPI|NestJS)\b/gi,
+  databases: /\b(SQL|MongoDB|PostgreSQL|MySQL|Redis|Elasticsearch|DynamoDB|Cassandra|Oracle|Firebase)\b/gi,
+  cloud: /\b(AWS|Azure|GCP|Docker|Kubernetes|DevOps|Terraform|Jenkins|CircleCI|GitLab CI)\b/gi,
+  ai_ml:
+    /\b(Machine Learning|Deep Learning|TensorFlow|PyTorch|NLP|Computer Vision|AI|Artificial Intelligence|Data Science|Neural Networks)\b/gi,
+  tools:
+    /\b(Git|GitHub|VSCode|Jira|Confluence|Figma|Postman|Linux|Bash|PowerShell|Slack|Notion|Trello|Excel|Google Sheets)\b/gi,
+  business:
+    /\b(Project Management|Agile|Scrum|Waterfall|Lean|OKRs|KPIs|Business Analysis|Stakeholder Management|Budgeting|Forecasting|Change Management|Risk Management|Business Intelligence|Process Improvement)\b/gi,
+  finance:
+    /\b(Financial Analysis|Accounting|Bookkeeping|Budget Planning|Excel Modeling|Cash Flow Management|Cost Accounting|Auditing|Taxation|QuickBooks|Financial Reporting|GAAP|IFRS)\b/gi,
+  marketing:
+    /\b(SEO|Content Marketing|Social Media|Email Marketing|Google Analytics|Branding|Copywriting|PPC|Digital Marketing|Market Research|CRM|HubSpot|Marketing Automation|Ad Campaigns|Product Marketing)\b/gi,
+  sales:
+    /\b(Lead Generation|CRM|Salesforce|Negotiation|Cold Calling|B2B Sales|B2C Sales|Customer Relationship Management|Pipeline Management|Account Management|Sales Forecasting)\b/gi,
+  design:
+    /\b(UX Design|UI Design|Wireframing|Prototyping|Adobe XD|Sketch|Figma|Design Thinking|Graphic Design|Brand Design|User Research)\b/gi,
+  legal:
+    /\b(Contract Law|Compliance|Legal Research|Corporate Law|Intellectual Property|Risk Assessment|Legal Writing|Litigation|Regulatory Affairs)\b/gi,
+  admin:
+    /\b(Data Entry|Calendar Management|Travel Arrangements|Document Management|Office Management|Customer Support|Record Keeping|Reception Duties)\b/gi,
+};
+
+// Extract skills from job description
+function extractSkills(description = "") {
+  let skills = new Set();
+  try {
+    Object.values(SKILL_PATTERNS).forEach((pattern) => {
+      const matches = description.match(pattern) || [];
+      matches.forEach((skill) => skills.add(skill.toLowerCase()));
+    });
+  } catch (error) {
+    console.error("Error extracting skills:", error);
+  }
+  return Array.from(skills);
+}
+
+// Extract requirements that co-occur with a skill
+function extractRequirementsForSkill(description = "", skill = "") {
+  try {
+    const sentences = description.split(/[.!?]+/);
+    const requirements = sentences
+      .filter((sentence) => sentence.toLowerCase().includes(skill.toLowerCase()))
+      .map((sentence) => sentence.trim())
+      .filter((sentence) => sentence.length > 0);
+    return requirements;
+  } catch (error) {
+    console.error(`Error extracting requirements for skill ${skill}:`, error);
+    return [];
+  }
+}
+
+async function updateMarketAnalysis(jobs = []) {
+  if (!jobs || jobs.length === 0) {
+    console.log("No jobs provided for market analysis update");
+    return;
+  }
+
+  console.log(`Processing ${jobs.length} jobs for market analysis...`);
+  const skillData = new Map();
+
+  // Process each job
+  jobs.forEach((job) => {
+    try {
+      const skills = extractSkills(job.job_description);
+      console.log(`Found skills in job ${job._id}:`, skills);
+      const salary = job.salary_max || job.salary_min || 0;
+
+      skills.forEach((skill) => {
+        if (!skillData.has(skill)) {
+          skillData.set(skill, {
+            jobCount: 0,
+            salarySum: 0,
+            requirements: new Map(),
+            relatedTech: new Map(),
+          });
+        }
+
+        const data = skillData.get(skill);
+        data.jobCount++;
+        data.salarySum += salary;
+
+        // Extract requirements specific to this skill
+        const requirements = extractRequirementsForSkill(job.job_description, skill);
+        requirements.forEach((req) => {
+          data.requirements.set(req, (data.requirements.get(req) || 0) + 1);
+        });
+
+        // Count co-occurring technologies
+        skills.forEach((otherSkill) => {
+          if (otherSkill !== skill) {
+            data.relatedTech.set(otherSkill, (data.relatedTech.get(otherSkill) || 0) + 1);
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Error processing job:", error);
+    }
+  });
+
+  // Update database
+  for (const [skill, data] of skillData.entries()) {
+    try {
+      const requirements = Array.from(data.requirements.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 10)
+        .map(([req, freq]) => ({ requirement: req, frequency: freq }));
+
+      const trendingTech = Array.from(data.relatedTech.entries())
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5)
+        .map(([tech, freq]) => ({ name: tech, frequency: freq }));
+
+      const marketData = {
+        skill: skill.toLowerCase(),
+        jobRequirements: requirements,
+        marketDemand: {
+          totalJobs: data.jobCount,
+          averageSalary: Math.round(data.salarySum / data.jobCount),
+          trendingTechnologies: trendingTech,
+          lastUpdated: new Date(),
+        },
+      };
+
+      await MarketAnalysis.findOneAndUpdate({ skill: skill.toLowerCase() }, marketData, { upsert: true, new: true });
+      console.log(`Updated market analysis for skill: ${skill}`);
+    } catch (error) {
+      console.error(`Error updating market analysis for skill ${skill}:`, error);
+    }
+  }
+}
+
+// Main job fetching function
 const autoFetchJobs = async () => {
   const countries = ["PK", "US", "IN", "GB", "CA", "DE", "SG", "AU", "NL", "KE"];
   const queries = [
-    "Mobile App Developer",
     "Software Engineer",
+    "Full Stack Developer",
     "Frontend Developer",
     "Backend Developer",
-    "Full Stack Developer",
     "DevOps Engineer",
-    "Machine Learning Engineer",
     "AI Engineer",
+    "Machine Learning Engineer",
     "Data Scientist",
     "Data Engineer",
-    "Cloud Engineer",
-    "Computer Vision Engineer",
-    "NLP Engineer",
+    "Cloud Solutions Architect",
     "Cybersecurity Analyst",
-    "QA Engineer",
-    "Product Manager",
-    "System Architect",
     "Embedded Systems Engineer",
-    "Blockchain Developer",
-    "Computer Science Researcher",
+    "QA Automation Engineer",
+    "Site Reliability Engineer",
+    "Product Manager",
+    "Product Owner",
+    "UX Designer",
+    "UI Designer",
+    "Design Researcher",
+    "Technical Writer",
+    "Business Analyst",
+    "Operations Manager",
+    "Financial Analyst",
+    "Project Coordinator",
+    "Program Manager",
+    "Strategy Consultant",
+    "Compliance Analyst",
+    "Marketing Specialist",
+    "Growth Hacker",
+    "Digital Marketing Manager",
+    "SEO Analyst",
+    "Sales Development Representative",
+    "Customer Success Manager",
   ];
+
   const workModes = ["true", "false"];
 
   let keyIndex = 0;
@@ -37,109 +189,74 @@ const autoFetchJobs = async () => {
     return key;
   }
 
-  try {
-    for (const country of countries) {
-      for (const query of queries) {
-        for (const work_from_home of workModes) {
-          let page = 1;
-          while (page <= 100) {
+  for (const country of countries) {
+    for (const query of queries) {
+      for (const work_from_home of workModes) {
+        let page = 1;
+        while (page <= 100) {
+          try {
             const options = {
               method: "GET",
               url: "https://jsearch.p.rapidapi.com/search",
               params: {
                 query: `${query} jobs`,
                 page: page,
-                num_pages: 20,
-                country,
-                date_posted: "week",
-                work_from_home,
+                num_pages: "20",
+                work_from_home: work_from_home,
+                country: country,
               },
               headers: {
-                "x-rapidapi-key": getNextApiKey(),
-                "x-rapidapi-host": "jsearch.p.rapidapi.com",
+                "X-RapidAPI-Key": getNextApiKey(),
+                "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
               },
             };
 
-            const maxRetries = 5;
-            let retries = 0;
-            let data = null;
+            const response = await axios.request(options);
+            const jobs = response.data.data;
 
-            while (retries < maxRetries) {
-              try {
-                const response = await axios.request(options);
-                data = response.data;
-                break;
-              } catch (err) {
-                if (err.response && err.response.status === 502) {
-                  retries++;
-                  const waitTime = 1000 * retries;
-                  console.warn(
-                    `🛑 JSearch 502 error – retrying in ${waitTime / 1000}s (attempt ${retries}/${maxRetries})`
-                  );
-                  await new Promise((resolve) => setTimeout(resolve, waitTime));
-                } else {
-                  throw err;
-                }
-              }
-            }
-
-            if (!data) {
-              console.error("💀 All retries failed. Skipping this request...");
-              continue;
-            }
-
-            const jobs = data.data.map((job) => ({
-              title: job.job_title,
-              id: job.job_id,
-              company: {
-                name: job.employer_name,
-                logo: job.employer_logo,
-                website: job.employer_website,
-              },
-              type: job.job_employment_type,
-              salary: job.salary_min ? `${job.job_min_salary} - ${job.job_max_salary}` : 0,
-              description: job.job_description,
-              city: job.job_city,
-              location: job.job_location,
-              postedAt: new Date(job.job_posted_at_datetime_utc),
-              source: "jsearch",
-              externalLink: job.job_apply_link,
-              applyOptions: job.apply_options,
-              isRemote: work_from_home === "true",
-              qualifications: job.job_highlights?.Qualifications || [],
-              responsibilities: job.job_highlights?.Responsibilities || [],
-            }));
-
-            console.log(
-              `Pulled ${jobs.length} 🔥 jobs for ${query} in ${country} (remote=${work_from_home}) pages ${page}–${
-                page + 19
-              }`
-            );
-
-            try {
+            if (jobs && jobs.length > 0) {
               await Job.insertMany(jobs, { ordered: false });
-            } catch (err) {
-              if (err.name === "BulkWriteError" && err.code === 11000) {
-                console.warn("⚠️ Duplicate job(s) found, skipping those...");
-              } else {
-                console.error("❌ Unexpected DB error:", err.message);
-              }
+              await updateMarketAnalysis(jobs);
+              console.log(`Processed ${jobs.length} jobs from ${country} for query "${query}"`);
             }
 
-            page += 20;
-            await new Promise((r) => setTimeout(r, 1200)); // throttle ⚠️
+            page = page + 20;
+          } catch (error) {
+            console.error(`Error fetching jobs for ${country}, ${query}, page ${page}:`, error.message);
+            break;
           }
         }
       }
     }
-    console.log("All jobs fetched successfully 🔥🧠");
-  } catch (err) {
-    console.error("Automation meltdown 🔥:", err.message);
   }
+  console.log("Job fetching and market analysis complete 🔥🧠");
 };
+
+// Script entry point
 (async () => {
-  await mongoose.connect(process.env.MONGODB_URL);
-  console.log("Connected to MongoDB 🐱‍👤");
-  await autoFetchJobs();
-  process.exit(); // 🌚 peace out
+  try {
+    const MONGODB_URL = process.env.MONGODB_URL;
+    if (!MONGODB_URL) {
+      throw new Error("MONGODB_URL not found in environment variables");
+    }
+
+    console.log("Connecting to MongoDB...");
+    await mongoose.connect(MONGODB_URL, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("Connected to MongoDB 🐱‍👤");
+
+    await autoFetchJobs();
+  } catch (error) {
+    console.error("Script failed:", error);
+  } finally {
+    try {
+      await mongoose.connection.close();
+      console.log("MongoDB connection closed");
+    } catch (error) {
+      console.error("Error closing MongoDB connection:", error);
+    }
+    process.exit();
+  }
 })();
