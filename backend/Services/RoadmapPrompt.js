@@ -3,30 +3,66 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 const mime = require("mime-types");
 const getRoadmapPrompt = async (profile, selectedPath) => {
   try {
+    const { preferences } = selectedPath;
+    const difficultyLevel = preferences?.difficulty || "intermediate";
+    const timeframe = preferences?.timeframe || "6months";
+    const focus = preferences?.focus || "balanced";
+
+    const getTimeframeTaskCount = (tf) => {
+      switch (tf) {
+        case "3months":
+          return "9-12";
+        case "6months":
+          return "12-16";
+        case "1year":
+          return "17-22";
+        default:
+          return "15-20";
+      }
+    };
+
     const prompt = `You are an expert Career Strategist. Your mission is to generate a highly personalized, actionable, and strategic career roadmap for the user, presented as a directed graph in JSON format. This roadmap must guide the user realistically towards their specific career goal: **${
       selectedPath.Path_name || "Being Backend Developer and getting remote job"
     }**, considering their unique background and the transformative impact of AI on their target field.
 
-The roadmap should be intensely practical, focusing on high-impact actions that differentiate the user in a competitive market. It must go beyond basic skill acquisition and provide concrete steps for networking effectively, building a compelling portfolio/presence, and navigating the specific path to their desired outcome (e.g., landing a specific job role, securing freelance clients, launching a startup, obtaining funding).
+Consider these User Learning Preferences when generating the roadmap:
 
-Critically evaluate the user's profile to identify strengths to leverage and gaps to fill. Avoid redundant suggestions for skills or experiences the user clearly possesses at a sufficient level; instead, focus on *advancing*, *refining*, or *applying* those skills in novel, AI-augmented ways.
+1. Difficulty Level: ${difficultyLevel}
+   - Adjust task complexity, depth, and prerequisites accordingly
+   - For beginner: More foundational concepts, detailed guidance, basic projects
+   - For intermediate: Mix of basics and advanced topics, moderate complexity
+   - For advanced: Complex projects, cutting-edge tech, open-ended challenges
 
-### **User Profile Snapshot:**
+2. Timeframe: ${timeframe}
+   - Generate ${getTimeframeTaskCount(timeframe)} tasks total
+   - Adjust task durations to fit within this timeframe
+   - For 3 months: Focus on quick wins and essential skills
+   - For 6 months: Balanced approach with both quick and long-term goals
+   - For 1 year: Include more comprehensive and in-depth learning
 
-*   **Career Goal:** ${profile.careerGoal ? profile.careerGoal : "Being Backend Developer and getting remote job"}
-*   **Current Skills:** 
-    *   **Hard Skills:** ${profile.hardSkills
-      .map((skill) => `${skill.name} (${skill.experience} years experience)`)
-      .join(", ")}
+3. Learning Focus: ${focus}
+   - For practical focus: 70% hands-on projects, 30% theory
+   - For theoretical focus: 60% deep learning, 40% practical application
+   - For balanced: Equal mix of theory and practice
+
+The roadmap should be intensely practical, focusing on high-impact actions that differentiate the user in a competitive market. It must go beyond basic skill acquisition and provide concrete steps for networking effectively, building a compelling portfolio/presence, and navigating the specific path to their desired outcome.
+
+
+*** User Profile: *** 
+    *   **Hard Skills:**
+${profile.hardSkills
+  .map(
+    (skill) =>
+      `        - ${skill.name} (${skill.experience} years experience)\n` +
+      `          Subskills: ${skill.subskills ? skill.subskills.map((sub) => `${sub})`).join(", ") : "None"}`
+  )
+  .join("\n")}
     *   **Soft Skills:** ${profile.softSkills
       .map((skill) => `${skill.name} (${skill.proficiency} proficiency)`)
       .join(", ")}
-*   **Job Experience:** ${profile.jobs.map((job) => `${job.title} at ${job.company} for 1 year`).join(", ")}
+*   **Job Experience:** ${profile.jobs.map((job) => `${job.title} at ${job.company} for 6 months`).join(", ")}
 *   **Projects Completed:** ${profile.projects.map((project) => project.name).join(", ")}
 *   **Education:** ${profile.education.map((edu) => edu.degree).join(", ")}
-
-### User Profile summary:
-${profile.profileSummary ? profile.profileSummary : "No summary found!"}
 
 
 ### Most Important
@@ -149,8 +185,15 @@ Given a user's profile, simulate **ALL realistic and high-potential career paths
 
 ---  
 **User Data:**  
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
+Hard Skills: ${profile.hardSkills
+    .map(
+      (skill) =>
+        `${skill.name} (${skill.experience} years) - Subskills: [${
+          skill.subskills ? skill.subskills.map((sub) => `${sub})`).join(", ") : "None"
+        }]`
+    )
+    .join("\n")}
+Soft Skills: ${profile.softSkills.map((skill) => `${skill.name} (${skill.proficiency})`).join(", ")}  
 Work Experience: ${profile.jobs || "None / Beginner"}  
 Projects: ${profile.projects}  
 Education: ${profile.education}
@@ -172,7 +215,6 @@ Output format:
 "AI_impact": "Low (building AI > replaced by AI)",
 "Required_skills": ["Deep Learning", "Prompt Engineering", "Product Management"],
 "Accelerators": ["Tensorflow Certification", "Build AI SaaS MVP"],
-"Notes": "Pivoting to AI Product Management requires strong communication skills and product intuition."
 },
 // more career paths
 ]

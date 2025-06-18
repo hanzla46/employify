@@ -7,6 +7,12 @@ const SubtaskSchema = new mongoose.Schema(
     buttonText: String,
     sources: String,
     completed: { type: Boolean, default: false },
+    evaluation: {
+      text: String,
+      fileUrl: String,
+      analysis: String,
+      submittedAt: Date,
+    },
   },
   { _id: false }
 );

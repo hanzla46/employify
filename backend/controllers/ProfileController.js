@@ -183,4 +183,50 @@ const evaluateProfile = async (req, res) => {
     res.status(500).json({ message: "Internal server error", success: false });
   }
 };
-module.exports = { add, check, getQuestions, evaluateProfile };
+
+const getSubskills = async (req, res) => {
+  try {
+    const { skillName } = req.params;
+    const normalizedSkillName = skillName.trim();
+
+    // use gemini ai to fetch subskills
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.0-flash-lite",
+      generation_config: {
+        temperature: 1,
+        response_mime_type: "application/json",
+      },
+    });
+    // only useful subskills that are usually used in the industry
+    const prompt = `List only the most relevant and commonly required subskills for the skill "${normalizedSkillName}" in JSON format like this:
+\`\`\`json
+{
+  "subskills": ["Subskill1", "Subskill2", "Subskill3"]
+}
+\`\`\`
+Focus on subskills that are:
+- Frequently mentioned in job descriptions for this skill
+- Widely used in professional, real-world projects
+- Valued by employers in the industry
+
+⚠️ Do NOT include niche, outdated, or overly generic subskills. If the skill is not recognized or lacks common subskills, return an empty array. No additional text or formatting.`;
+
+    const result = await model.generateContent(prompt);
+    const content = result.response.candidates[0].content.parts[0].text;
+    const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
+    const subskills = JSON.parse(jsonString).subskills;
+    res.json({
+      success: true,
+      subskills,
+    });
+  } catch (error) {
+    console.error("Error in getSubskills:", error);
+    res.status(500).json({
+      success: false,
+      message: "Failed to fetch subskills",
+    });
+  }
+};
+
+module.exports = { add, check, getQuestions, evaluateProfile, getSubskills };

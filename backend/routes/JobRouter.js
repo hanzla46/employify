@@ -1,4 +1,5 @@
-const { fetchJobsJSearch, getJobs, generateCL, generateResume } = require("../controllers/FetchJobsController");
+const { fetchJobsJSearch, autoFetchJobs } = require("../controllers/FetchJobsController");
+const { getJobs, generateCL, generateResume } = require("../controllers/JobsController");
 const ensureAuthenticated = require("../middlewares/Auth");
 const router = require("express").Router();
 router.get("/fetchJSearch", fetchJobsJSearch);

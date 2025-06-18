@@ -1,9 +1,20 @@
-const { generateRoadmap, get, getAllCareerPaths, modify } = require("../controllers/RoadmapController");
-
+const {
+  generateRoadmap,
+  get,
+  getAllCareerPaths,
+  modify,
+  evaluateSubtask,
+  getMarketAnalysis,
+} = require("../controllers/RoadmapController");
 const router = require("express").Router();
+const { fileUpload } = require("../middlewares/uploadMulter");
 const ensureAuthenticated = require("../middlewares/Auth");
+
 router.post("/generate", ensureAuthenticated, generateRoadmap);
 router.get("/get", ensureAuthenticated, get);
 router.get("/career-paths", ensureAuthenticated, getAllCareerPaths);
 router.get("/modify", ensureAuthenticated, modify);
+router.get("/market-analysis", ensureAuthenticated, getMarketAnalysis);
+router.post("/evaluate-subtask", ensureAuthenticated, fileUpload.single("file"), evaluateSubtask);
+
 module.exports = router;

@@ -1,4 +1,4 @@
-import React, { createContext, useEffect, useState , useContext} from "react";
+import React, { createContext, useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
 const url = import.meta.env.VITE_API_URL;
@@ -9,6 +9,7 @@ export const JobsProvider = ({ children }) => {
   const [jobs, setJobs] = useState([]);
   const [savedJobs, setSavedJobs] = useState([]);
   const [filteredJobs, setFilteredJobs] = useState(jobs);
+  const [contextLoading, setContextLoading] = useState(true);
   const { user } = useContext(AuthContext);
   useEffect(() => {
     if (!user) return;
@@ -29,13 +30,13 @@ export const JobsProvider = ({ children }) => {
       } catch (err) {
         console.error("Failed to fetch jobs 😵", err);
       }
+      setContextLoading(false);
     }
     fetchJobs();
   }, [user]);
   return (
-    <JobsContext.Provider value={{ jobs, setJobs, savedJobs, setSavedJobs, filteredJobs,setFilteredJobs }}>
+    <JobsContext.Provider value={{ contextLoading, jobs, setJobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs }}>
       {children}
     </JobsContext.Provider>
   );
 };
-

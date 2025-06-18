@@ -9,11 +9,12 @@ const JobSchema = new mongoose.Schema({
     website: String,
   },
   location: String,
+  city: String,
   type: { type: String, default: "Full-time" },
   salary: Number,
   skills: [String],
   description: String,
-  postedAt: { type: Date, default: Date.now },
+  postedAt: { type: Date, default: Date.now, index: true }, // Added index
   source: {
     type: String,
     enum: ["jsearch", "fantastic_jobs", "manual"],

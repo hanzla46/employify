@@ -13,7 +13,7 @@ import axios from "axios";
 export function Jobs() {
   const { hasProfile } = useContext(SkillsContext);
   const { user } = useContext(AuthContext);
-  const { jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
+  const { contextLoading, jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: "",
@@ -29,6 +29,9 @@ export function Jobs() {
   const [jobActionStates, setJobActionStates] = useState({});
   const [activeResumeDropdown, setActiveResumeDropdown] = useState(null); // Stores jobId or null
   const [isOpenedsavedJobs, setIsOpenedSavedJobs] = useState(false);
+  const [whyExpanded, setWhyExpanded] = useState({});
+  const [missingExpanded, setMissingExpanded] = useState({});
+
   useEffect(() => {
     if (isOpenedsavedJobs) {
       return;
@@ -349,7 +352,10 @@ export function Jobs() {
                               <h2 className='text-xl font-bold text-gray-900 dark:text-white hover:text-primary-600 transition-colors'>
                                 {job.title}
                               </h2>
-                              <a href={job.company.website} className='block underline text-gray-600 dark:text-gray-300 mb-2'>
+                              <a
+                                href={job.company.website}
+                                target='_blank'
+                                className='block underline text-gray-600 dark:text-gray-300 mb-2'>
                                 {job.company.name}
                               </a>
 
@@ -357,7 +363,7 @@ export function Jobs() {
                               <div className='inline-flex items-center bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/10 dark:to-amber-600/10 border border-amber-400/30 rounded-full px-3 py-1 mb-3'>
                                 <Sparkles className='h-4 w-4 text-amber-400 mr-1' />
                                 <span className='text-sm font-medium text-amber-700 dark:text-amber-300'>
-                                  AI Match: {job.score ? job.score + "%" : "N/A"}
+                                  AI Match: {job.matchAnalysis.score ? job.matchAnalysis.score + "%" : "N/A"}
                                 </span>
                               </div>
                             </div>
@@ -382,25 +388,71 @@ export function Jobs() {
                           </div>
 
                           {/* Job Metadata */}
-                          <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-2'>
-                            <div className='max-w-52 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                          <div className='flex flex-wrap justify-around mb-2'>
+                            <div className='w-auto flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
                               <MapPin className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
-                              <span className='truncate'>
+                              <span className='truncate inline-block w-auto'>
                                 {job.location} {job.isRemote && "(Remote)"}
                               </span>
                             </div>
 
-                            <div className='max-w-60 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                            <div className='w-auto flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
                               <Briefcase className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
-                              <span>{job.type}</span>
+                              <span className='inline-block w-auto'>{job.type}</span>
                             </div>
 
-                            <div className='max-w-36 flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
+                            <div className='w-auto flex items-center text-gray-700 dark:text-gray-300 bg-gray-50 dark:bg-gray-700/50 rounded-lg px-3 py-2'>
                               <Clock className='h-4 w-4 mr-2 text-gray-500 dark:text-gray-400 flex-shrink-0' />
-                              <span>{timeAgo(job.postedAt)}</span>
+                              <span className='inline-block w-auto'>{timeAgo(job.postedAt)}</span>
                             </div>
                           </div>
+                          <div className='flex flex-row gap-2 justify-around'>
+                            {/* WHY Section */}
+                            {job.matchAnalysis?.why?.length > 0 && (
+                              <div className='mb-4 w-[45%]'>
+                                <button
+                                  onClick={() => setWhyExpanded((prev) => ({ ...prev, [job.id]: !prev[job.id] }))}
+                                  className='w-full flex justify-between items-center p-3 bg-green-50 dark:bg-green-900/20 rounded-lg text-green-700 dark:text-green-300 hover:bg-green-100 dark:hover:bg-green-900/30 transition-colors'>
+                                  <span className='font-medium'>Why You Match</span>
+                                  <ChevronDown className={`h-5 w-5 transition-transform ${whyExpanded[job.id] ? "rotate-180" : ""}`} />
+                                </button>
+                                {whyExpanded[job.id] && (
+                                  <div className='mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-green-200 dark:border-green-900'>
+                                    <ul className='list-disc pl-5 space-y-1'>
+                                      {job.matchAnalysis.why.map((item, index) => (
+                                        <li key={index} className='text-gray-600 dark:text-gray-300'>
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            )}
 
+                            {/* WHAT'S MISSING Section */}
+                            {job.matchAnalysis?.missing?.length > 0 && (
+                              <div className='mb-4 w-[45%]'>
+                                <button
+                                  onClick={() => setMissingExpanded((prev) => ({ ...prev, [job.id]: !prev[job.id] }))}
+                                  className='w-full flex justify-between items-center p-3 bg-amber-50 dark:bg-amber-900/20 rounded-lg text-amber-700 dark:text-amber-300 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors'>
+                                  <span className='font-medium'>What's Missing</span>
+                                  <ChevronDown className={`h-5 w-5 transition-transform ${missingExpanded[job.id] ? "rotate-180" : ""}`} />
+                                </button>
+                                {missingExpanded[job.id] && (
+                                  <div className='mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-amber-200 dark:border-amber-900'>
+                                    <ul className='list-disc pl-5 space-y-1'>
+                                      {job.matchAnalysis.missing.map((item, index) => (
+                                        <li key={index} className='text-gray-600 dark:text-gray-300'>
+                                          {item}
+                                        </li>
+                                      ))}
+                                    </ul>
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </div>
                           {/* Expandable Section */}
                           {expandedJob === job.id && (
                             <div className='mt-3 pt-4 border-t border-gray-200 dark:border-gray-700'>
@@ -607,9 +659,18 @@ export function Jobs() {
             )}
 
             {/* Loading state */}
-            {jobs.length === 0 && (
+            {contextLoading && (
               <div className='flex items-center justify-center h-64'>
-                <Loader2 className='animate-spin h-10 w-10 text-primary-600 dark:text-primary-400' />
+                <Loader2 className='animate-spin h-16 w-16 text-primary-600 dark:text-primary-400' />
+              </div>
+            )}
+            {!contextLoading && jobs.length === 0 && (
+              <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-10 text-center'>
+                <div className='text-gray-500 dark:text-gray-400 mb-4'>
+                  <Search className='h-10 w-10 mx-auto mb-2' />
+                  <p className='text-lg font-medium'>Something went wrong</p>
+                </div>
+                <p className='text-gray-600 dark:text-gray-300 mb-6'>Please refresh the page</p>
               </div>
             )}
           </div>

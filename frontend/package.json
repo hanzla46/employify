@@ -11,6 +11,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@babel/runtime": "^7.27.6",
+    "@headlessui/react": "^2.2.4",
     "@radix-ui/react-label": "^2.1.2",
     "@radix-ui/react-select": "^2.1.6",
     "@radix-ui/react-slider": "^1.2.3",
@@ -18,11 +20,13 @@
     "@tailwindcss/vite": "^4.0.13",
     "@vercel/speed-insights": "^1.2.0",
     "aos": "^2.3.4",
+    "audiobuffer-to-wav": "^1.0.0",
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
+    "core-js": "^3.43.0",
     "dagre": "^0.8.5",
     "dotenv": "^16.4.7",
-    "framer-motion": "^12.9.1",
+    "framer-motion": "^12.18.1",
     "html-react-parser": "^5.2.2",
     "lucide-react": "^0.344.0",
     "react": "^18.3.1",
@@ -38,7 +42,7 @@
     "sonner": "^2.0.1"
   },
   "devDependencies": {
-    "@babel/plugin-transform-runtime": "^7.26.9",
+    "@babel/plugin-transform-runtime": "^7.27.4",
     "@eslint/js": "^9.9.1",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.18",
