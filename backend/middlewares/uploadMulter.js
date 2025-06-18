@@ -12,7 +12,7 @@ const upload = multer({
 
     if (fieldname === "video" && (mimetype === "video/webm" || mimetype === "video/mp4")) {
       cb(null, true);
-    } else if (fieldname === "audio" && mimetype === "audio/wav") {
+    } else if (fieldname === "audio" && (mimetype === "audio/wav" || mimetype === "audio/webm")) {
       cb(null, true);
     } else {
       cb(new Error(`Invalid file type for ${fieldname}: ${mimetype}`), false);

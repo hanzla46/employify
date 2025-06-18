@@ -59,6 +59,7 @@ const continueInterview = async (req, res) => {
     console.log("Continue Interview Request:", req.body);
     const video = req.files?.video?.[0];
     const audio = req.files?.audio?.[0];
+
     const userId = req.user._id;
     const { question, written, answer, category } = req.body;
 
@@ -80,11 +81,13 @@ const continueInterview = async (req, res) => {
 
     const QId = interview.questions.length;
     if (video) {
+      console.log("Video received - Size:", video.size / 1024 / 1024, "MB, Type:", video.mimetype);
       ProcessVideo(video, QId, userId);
     } else {
       console.log("No video file uploaded.");
     }
     if (audio) {
+      console.log("Audio received - Size:", audio.size / 1024 / 1024, "MB, Type:", audio.mimetype);
       ProcessAudio(audio, QId, userId);
     } else {
       console.log("No audio file uploaded.");
@@ -97,7 +100,7 @@ const continueInterview = async (req, res) => {
     const content = result.response.candidates[0].content.parts[0].text;
     const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
     const parsedResult = JSON.parse(jsonString);
-
+    console.log("Parsed Result:", parsedResult);
     const {
       overallAnalysis,
       currentAnalysis,
@@ -107,7 +110,7 @@ const continueInterview = async (req, res) => {
       score,
       overallScore,
       completed,
-      weknesses,
+      weaknesses,
     } = parsedResult;
 
     if (interview.questions.length > 1) {
@@ -115,7 +118,7 @@ const continueInterview = async (req, res) => {
       lastQuestion.score = score;
       lastQuestion.analysis = currentAnalysis;
     }
-    interview.weknesses = weknesses;
+    interview.weaknesses = weaknesses;
     interview.aiSummary = overallAnalysis;
     await interview.save();
 
@@ -126,7 +129,7 @@ const continueInterview = async (req, res) => {
       category: question_category,
       hypotheticalResponse: hypothetical_response,
       success: true,
-      completed: completed,
+      completed,
       score,
       overallScore,
       prompt,

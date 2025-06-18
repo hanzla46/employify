@@ -5,8 +5,7 @@ const questionSchema = new mongoose.Schema({
   answer: { type: String, required: true },
   category: { type: String, required: true },
   score: { type: String, default: "0" },
-  analysis: { type: String, default: "" },
-  facialAnalysis: {
+  analysis: { type: String, default: "" },  facialAnalysis: {
     timestamp: { type: Date, default: Date.now },
     emotions: [
       {
@@ -15,6 +14,14 @@ const questionSchema = new mongoose.Schema({
       },
     ],
     expressionAnalysis: { type: String, default: "" },
+  },
+  audioAnalysis: {
+    timestamp: { type: Date, default: Date.now },
+    transcript: { type: String, default: "" },
+    clarity: { type: String, default: "" },
+    confidence: { type: String, default: "" },
+    paceAndTone: { type: String, default: "" },
+    fillerWords: [{ type: String }]
   },
 });
 
@@ -26,7 +33,7 @@ const interviewSchema = new mongoose.Schema({
   questions: { type: [questionSchema], default: [] },
   overallScore: { type: String, default: "0" },
   aiSummary: { type: String, default: "" },
-  weknesses: { type: String, default: "" },
+  weaknesses: { type: String, default: "" },
 });
 
 module.exports = mongoose.model("Interview", interviewSchema);

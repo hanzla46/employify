@@ -10,8 +10,10 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     const filePath = path.join(__dirname, "uploads", safeFileName);
     await fs.writeFile(filePath, videoFile.buffer);
 
-    const ai = new GoogleGenAI(process.env.GEMINI_API);
-    const modelName = "gemini-2.0-flash";
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API,
+    });
+    const modelName = "gemini-2.5-flash";
     let files;
     let config;
     try {
@@ -97,50 +99,93 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     // DO NOT re-throw here. We want the main interview flow to continue.
   }
 };
-async function ProcessAudio(audio, QId, userId) {
-  const filePath = path.join(__dirname, `../audioUploads/${QId}_${userId}.wav`);
-  fs.writeFileSync(filePath, audio.buffer);
-  const API_KEY = process.env.ASSEMBLY_AI_KEY;
-
+async function ProcessAudio(audioFile, QId, userId) {
   try {
-    const uploadRes = await axios({
-      method: "post",
-      url: "https://api.assemblyai.com/v2/upload",
-      headers: {
-        authorization: API_KEY,
-        "transfer-encoding": "chunked",
-      },
-      data: fs.createReadStream(filePath),
+    console.log("Processing the audio...");
+
+    // Convert audio buffer to base64
+    const base64Audio = audioFile.buffer.toString("base64");
+
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API,
     });
-    const audioUrl = uploadRes.data.upload_url;
-    const transcriptRes = await axios.post(
-      "https://api.assemblyai.com/v2/transcript",
-      { audio_url: audioUrl },
-      { headers: { authorization: API_KEY } }
-    );
-    const transcriptId = transcriptRes.data.id;
-    let result;
-    while (true) {
-      const poll = await axios.get(`https://api.assemblyai.com/v2/transcript/${transcriptId}`, {
-        headers: { authorization: API_KEY },
+    const modelName = "gemini-2.5-flash";
+
+    // Prepare the content with inline data
+    const contents = [
+      {
+        role: "user",
+        parts: [
+          {
+            inlineData: {
+              data: base64Audio,
+              mimeType: audioFile.mimetype,
+            },
+          },
+          {
+            text: "Analyze this audio recording of an interview answer. Provide a detailed analysis including: 1) A transcript of what was said 2) Analysis of speaking clarity and confidence 3) Analysis of pace and tone 4) Any detected filler words or hesitations. Format the response in JSON with these sections.",
+          },
+        ],
+      },
+    ];
+
+    let parsedResult = null;
+    try {
+      console.log("Generating content from audio...");
+      const result = await ai.models.generateContent({
+        model: modelName,
+        contents: contents,
       });
-      if (poll.data.status === "completed") {
-        result = poll.data;
-        console.log(" TRANSCRIPT:", result.text);
-        break;
-      } else if (poll.data.status === "error") {
-        throw new Error(`AssemblyAI Error: ${poll.data.error}`);
+
+      const response = result.response;
+      const text = response.text();
+      console.log("Raw audio analysis response:", text);
+
+      const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+      if (!jsonMatch || jsonMatch[1] === undefined) {
+        console.error("Could not find JSON block in response:", text);
+        throw new Error("Model response did not contain expected JSON block.");
       }
 
-      await new Promise((r) => setTimeout(r, 3000));
-    }
+      parsedResult = JSON.parse(jsonMatch[1]);
+      console.log("Parsed audio analysis:", parsedResult);
 
-    // 🔄 Save result to DB / notify frontend / etc.
-    console.log("🎯 Final audio transcript:", result.text);
-  } catch (err) {
-    console.error("🔥 AssemblyAI error:", err.message);
-  } finally {
-    fs.existsSync(filePath) && fs.unlinkSync(filePath);
+      // Find the ongoing interview and update it
+      const interview = await Interview.findOne({
+        userId,
+        status: "ongoing",
+      }).sort({ createdAt: -1 });
+
+      if (!interview) {
+        console.error("No ongoing interview found for user:", userId);
+        return;
+      }
+
+      const questionIndex = QId - 1;
+      if (!interview.questions[questionIndex]) {
+        console.error("No question found for QId:", QId);
+        return;
+      }
+
+      // Add audio analysis to the specific question
+      interview.questions[questionIndex].audioAnalysis = {
+        timestamp: new Date(),
+        transcript: parsedResult.transcript || "",
+        clarity: parsedResult.clarity || "",
+        confidence: parsedResult.confidence || "",
+        paceAndTone: parsedResult.paceAndTone || "",
+        fillerWords: parsedResult.fillerWords || [],
+      };
+
+      await interview.save();
+      console.log("Audio analysis added to question:", QId);
+    } catch (error) {
+      console.error("Error generating content from audio:", error);
+      throw error;
+    }
+  } catch (error) {
+    console.error("Error processing audio with Gemini:", error);
+    // DO NOT re-throw here. We want the main interview flow to continue.
   }
 }
 

@@ -93,7 +93,7 @@ const GeneratePrompt = (interview) => {
     "score": "[scores of the latest question assessment. out of 10]",
     "overallScore": "[The updated overall score of the candidate's whole interview. out of 100]",
     "weknesses": "[user weaknesses. keep it short]",
-    "completed": "[true/false] when you have asked 11-12 questions, it should be true, otherwise false."
+    "completed": "['true'/'false'] when you have asked 11-12 questions, it should be true, otherwise false."
   }
   \`\`\`
 

@@ -130,8 +130,8 @@ export function About() {
             animate={{ y: 0, opacity: 1 }}
             transition={{ duration: 0.5, delay: 0.4 }}
             className='text-xl text-gray-700 dark:text-gray-300 max-w-3xl mx-auto leading-relaxed'>
-            We're on a mission to revolutionize career development through artificial intelligence, making professional
-            growth accessible and personalized for everyone.
+            We're on a mission to revolutionize career development through artificial intelligence, making professional growth accessible
+            and personalized for everyone.
           </motion.p>
 
           <motion.div
@@ -228,21 +228,20 @@ export function About() {
                   <h2 className='text-3xl font-bold mb-6 dark:text-white'>Our Story</h2>
                   <div className='space-y-4'>
                     <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
-                      Founded in 2024, Employify emerged from a simple observation: traditional career development
-                      methods weren't keeping pace with rapidly evolving industries and job markets.
+                      Founded in 2024, Employify emerged from a simple observation: traditional career development methods weren't keeping
+                      pace with rapidly evolving industries and job markets.
                     </p>
                     <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
-                      We combined advanced AI technology with expert career guidance to create a platform that adapts to
-                      each individual's unique career journey, providing personalized support at every step.
+                      We combined advanced AI technology with expert career guidance to create a platform that adapts to each individual's
+                      unique career journey, providing personalized support at every step.
                     </p>
                     <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
-                      Our AI-driven tools analyze job market trends, individual skills, and career aspirations to
-                      provide actionable insights that help users make informed decisions about their professional
-                      development.
+                      Our AI-driven tools analyze job market trends, individual skills, and career aspirations to provide actionable
+                      insights that help users make informed decisions about their professional development.
                     </p>
                     <p className='text-gray-700 dark:text-gray-300 leading-relaxed'>
-                      Today, Employify is helping thousands of professionals worldwide navigate their career paths with
-                      confidence, powered by our founding team of Hanzla, Hina, and Izhar!
+                      Today, Employify is helping thousands of professionals worldwide navigate their career paths with confidence, powered
+                      by our founding team of Hanzla, Hina, and Izhar!
                     </p>
                   </div>
 
@@ -320,19 +319,13 @@ export function About() {
                       <div className='p-6'>
                         <p className='text-gray-600 dark:text-gray-300 mb-4'>{member.bio}</p>
                         <div className='flex space-x-3'>
-                          <a
-                            href={member.social.linkedin}
-                            className='text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400'>
+                          <a href={member.social.linkedin} className='text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400'>
                             <Linkedin size={20} />
                           </a>
-                          <a
-                            href={member.social.twitter}
-                            className='text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400'>
+                          <a href={member.social.twitter} className='text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400'>
                             <Twitter size={20} />
                           </a>
-                          <a
-                            href={member.social.github}
-                            className='text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400'>
+                          <a href={member.social.github} className='text-gray-500 hover:text-indigo-600 dark:hover:text-indigo-400'>
                             <Github size={20} />
                           </a>
                         </div>
@@ -384,8 +377,8 @@ export function About() {
             <div className='relative p-10 text-center text-white'>
               <h2 className='text-3xl font-bold mb-6'>Join Our Team</h2>
               <p className='text-indigo-100 max-w-2xl mx-auto mb-8 text-lg'>
-                We're always looking for talented individuals who share our passion for revolutionizing career
-                development. Join us in building the future of work.
+                We're always looking for talented individuals who share our passion for revolutionizing career development. Join us in
+                building the future of work.
               </p>
               <div className='flex flex-wrap justify-center gap-4'>
                 <button className='bg-white text-[var(--color-primary-700)] px-8 py-3 rounded-full font-medium hover:bg-indigo-50 transition-colors'>
@@ -418,9 +411,7 @@ export function About() {
                     <Mail className='text-indigo-600 dark:text-indigo-400 mt-1 mr-3' size={20} />
                     <div>
                       <p className='font-medium dark:text-white'>Email Us</p>
-                      <a
-                        href='mailto:hello@employify.com'
-                        className='text-indigo-600 dark:text-indigo-400 hover:underline'>
+                      <a href='mailto:hello@employify.com' className='text-indigo-600 dark:text-indigo-400 hover:underline'>
                         hello@employify.com
                       </a>
                     </div>
@@ -449,9 +440,7 @@ export function About() {
                       />
                     </div>
                     <div>
-                      <label
-                        htmlFor='email'
-                        className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                      <label htmlFor='email' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                         Email
                       </label>
                       <input
@@ -463,9 +452,7 @@ export function About() {
                     </div>
                   </div>
                   <div>
-                    <label
-                      htmlFor='subject'
-                      className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                    <label htmlFor='subject' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                       Subject
                     </label>
                     <input
@@ -476,9 +463,7 @@ export function About() {
                     />
                   </div>
                   <div>
-                    <label
-                      htmlFor='message'
-                      className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+                    <label htmlFor='message' className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
                       Message
                     </label>
                     <textarea
@@ -505,31 +490,28 @@ export function About() {
               <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md'>
                 <h3 className='text-lg font-semibold mb-3 dark:text-white'>How does Employify work?</h3>
                 <p className='text-gray-600 dark:text-gray-300'>
-                  Employify uses advanced AI to analyze your skills, experience, and career goals, then provides
-                  personalized recommendations for career development paths and opportunities.
+                  Employify uses advanced AI to analyze your skills, experience, and career goals, then provides personalized
+                  recommendations for career development paths and opportunities.
                 </p>
               </div>
               <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md'>
                 <h3 className='text-lg font-semibold mb-3 dark:text-white'>Is my data secure?</h3>
                 <p className='text-gray-600 dark:text-gray-300'>
-                  We take data security seriously. All user data is encrypted and never shared with third parties
-                  without explicit permission.
+                  We take data security seriously. All user data is encrypted and never shared with third parties without explicit
+                  permission.
                 </p>
               </div>
               <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md'>
-                <h3 className='text-lg font-semibold mb-3 dark:text-white'>
-                  Do you offer custom enterprise solutions?
-                </h3>
+                <h3 className='text-lg font-semibold mb-3 dark:text-white'>Do you offer custom enterprise solutions?</h3>
                 <p className='text-gray-600 dark:text-gray-300'>
-                  Yes, we offer tailored solutions for organizations looking to enhance their talent development
-                  programs.
+                  Yes, we offer tailored solutions for organizations looking to enhance their talent development programs.
                 </p>
               </div>
               <div className='bg-white dark:bg-gray-800 rounded-xl p-6 shadow-md'>
                 <h3 className='text-lg font-semibold mb-3 dark:text-white'>How often is your data updated?</h3>
                 <p className='text-gray-600 dark:text-gray-300'>
-                  Our job market data and industry trends are updated weekly to ensure you receive the most current
-                  information for your career planning.
+                  Our job market data and industry trends are updated weekly to ensure you receive the most current information for your
+                  career planning.
                 </p>
               </div>
             </div>

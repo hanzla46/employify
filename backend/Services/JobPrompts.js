@@ -409,7 +409,7 @@ const getBestResumeData = async (profile, job) => {
 
   // Clean up all generated PDF files
   resumes.forEach((resume) => {
-    // fs.unlinkSync(resume.filePath);
+    fs.unlinkSync(resume.filePath);
     console.log(`Deleted temporary file: ${resume.filePath}`);
   });
 
