@@ -60,11 +60,7 @@ const generateRoadmap = async (req, res) => {
     const roadmapData = await safeJsonParse(extractedJson);
     const { tasks } = roadmapData;
     console.log(roadmapData);
-<<<<<<< HEAD
-    const roadmap = new Roadmap({ userId: user._id, tasks: tasks });
-=======
     const roadmap = new Roadmap({ userId: user._id, tasks: tasks, changes: [] });
->>>>>>> 178be160e05e3886e7f27c0aff7cac5030484ea5
     await roadmap.save();
     return res.status(200).json({
       success: true,

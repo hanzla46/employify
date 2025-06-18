@@ -457,44 +457,14 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-<<<<<<< HEAD
-  const {  setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
-    useContext(SkillsContext);
-  const [careerData, setCareerData] = useState({});
-
-  useEffect(() => {
-    // if (contextLoading) return; // Wait for context to load
-    if (!isPathSelected) return;
-    if (roadmap && roadmap.length > 0) {
-      return;
-    }
-    const fetchPaths = async () => {
-      setModifyLoading(true);
-      const result = await axios.get(url + "/roadmap/career-paths", {
-        withCredentials: true,
-        headers: {
-          Accept: "application/json",
-        },
-      });
-      setModifyLoading(false);
-      setCareerData(result.data.data);
-    };
-    fetchPaths();
-  }, [roadmap, isPathSelected]);
-=======
   const { contextLoading, setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
     useContext(SkillsContext); // State for handling the roadmap data and UI
->>>>>>> 178be160e05e3886e7f27c0aff7cac5030484ea5
 
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   useEffect(() => {
     const fetchRoadmap = async () => {
-<<<<<<< HEAD
-      // if (contextLoading) return; // Wait for context to load
-=======
->>>>>>> 178be160e05e3886e7f27c0aff7cac5030484ea5
       if (!isPathSelected) return;
       setModifyLoading(true);
       try {
