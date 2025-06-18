@@ -530,7 +530,7 @@ const SkillsGraph = () => {
       setGraphData({ tasks: roadmap });
       setLoading(false);
     }
-  }, [isPathSelected, roadmap, contextLoading]);
+  }, [isPathSelected, roadmap]);
 
   const [modificationText, setModificationText] = useState("");
   const [showSuggestions, setShowSuggestions] = useState(false);

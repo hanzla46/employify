@@ -8,7 +8,7 @@ axios.defaults.headers.common["Accept"] = "application/json";
 export const SkillsContext = createContext();
 export const SkillsProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
-  const [contextLoading, setContextLoading] = useState(true);
+  // const [contextLoading, setContextLoading] = useState(true);
   const [roadmap, setRoadmap] = useState([]);
   const [suggestedChanges, setSuggestedChanges] = useState(["change1", "change2", "change3"]);
   const [hasProfile, setHasProfile] = useState(false);
@@ -66,7 +66,7 @@ export const SkillsProvider = ({ children }) => {
   return (
     <SkillsContext.Provider
       value={{
-        contextLoading,
+        // contextLoading,
         roadmap,
         setRoadmap,
         evaluated,
