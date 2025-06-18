@@ -32,6 +32,7 @@
     "node-cron": "^4.1.0",
     "nodemon": "^3.1.9",
     "path": "^0.12.7",
-    "puppeteer": "^24.10.0"
+    "puppeteer": "^24.10.0",
+    "timers": "^0.1.1"
   }
 }

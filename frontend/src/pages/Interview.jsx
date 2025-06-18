@@ -1,4 +1,6 @@
+import "regenerator-runtime/runtime";
 import { useRef, useState, useEffect, useContext } from "react";
+import { useReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
 import { Bot, Video, Mic, Send, CheckCircle, PauseCircle, Info, Sparkles, AlertCircle, BarChart } from "lucide-react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
@@ -9,74 +11,20 @@ import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";
 import { useSearchParams } from "react-router-dom";
 import FancyButton from "../components/Button";
-// regenrator runtime
-import "regenerator-runtime/runtime";
 const url = import.meta.env.VITE_API_URL;
 
 export function Interview() {
   useEffect(() => {
-    const testRecording = async () => {
-      try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
-        const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-        recorder.start(1000);
-        console.log("Recording started successfully!");
-        stream.getTracks().forEach((track) => track.stop()); // Clean up test stream
-      } catch (error) {
-        console.error("Test failed:", error);
-      }
-    };
-    testRecording();
-  }, []);
-
-  useEffect(() => {
     document.title = "Interview | Employify AI";
-    return () => {
-      // Cleanup
-      SpeechRecognition.stopListening();
-    };
   }, []);
-
-  // Existing state
   const [jobOrMock, setJobOrMock] = useState("mock");
   const { jobs } = useContext(JobsContext);
   const [jobId, setJobId] = useState("");
   const [job, setJob] = useState(null);
   const [searchParams] = useSearchParams();
-  const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
-  const [question, setQuestion] = useState("");
-  const [questionCount, setQuestionCount] = useState(0);
-  const [category, setCategory] = useState("");
-  const [written, setWritten] = useState("");
-  const [score, setScore] = useState();
-  const [isStarted, setIsStarted] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [summary, setSummary] = useState("");
-  const [overallAnalysis, setOverallAnalysis] = useState("");
-  const [interviewData, setInterviewData] = useState({
-    position: "",
-    company: "",
-    experience: "",
-    focusArea: "",
-    intensity: "",
-    feedbackStyle: "",
-  });
-  const [infoBox, setInfoBox] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const textareaRef = useRef(null);
-
-  // New recording state
-  const mediaChunks = useRef([]); // Use useRef to avoid stale closures
-  const [mediaRecorder, setMediaRecorder] = useState(null);
-  const [mediaBlob, setMediaBlob] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState(null); // Add previewUrl state
-  const videoRef = useRef(null);
-
-  // Job selection effect
   useEffect(() => {
     setJobId(searchParams.get("jobId") || "");
   }, [searchParams]);
-
   useEffect(() => {
     if (jobId) {
       const matchingJob = jobs.find((item) => item["id"] === jobId);
@@ -90,8 +38,37 @@ export function Interview() {
       setJob(null);
     }
   }, [jobId, jobs]);
-
-  // Question audio effect
+  const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
+  const [isAudioRecording, setIsAudioRecording] = useState(false);
+  const [question, setQuestion] = useState("");
+  const [category, setCategory] = useState("");
+  const [written, setWritten] = useState("");
+  const [score, setScore] = useState();
+  const [isStarted, setIsStarted] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(false);
+  const [isVideoRecording, setIsVideoRecording] = useState(false);
+  const [recordedBlob, setRecordedBlob] = useState(null);
+  const [summary, setSummary] = useState("");
+  const [overallAnalysis, setOverallAnalysis] = useState("");
+  const [interviewData, setInterviewData] = useState({
+    position: "",
+    company: "",
+    experience: "",
+    focusArea: "",
+    intensity: "",
+    feedbackStyle: "",
+  });
+  const [infoBox, setInfoBox] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const {
+    status,
+    startRecording: startVideoRecording,
+    stopRecording: stopVideoRecording,
+    mediaBlobUrl,
+    previewStream,
+    clearBlobUrl,
+  } = useReactMediaRecorder({ video: true, audio: true });
+  // question audio
   useEffect(() => {
     if (!question) return;
     const synth = window.speechSynthesis;
@@ -103,85 +80,83 @@ export function Interview() {
     synth.cancel();
     synth.speak(utterance);
   }, [question]);
-
-  // Setup combined audio+video recording
-  const setupMediaRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
-      const recorder = new MediaRecorder(stream, { mimeType: "video/webm" });
-      // Set ondataavailable handler. onstop will be set just-in-time.
-      recorder.ondataavailable = (e) => {
-        console.log("[MEDIA] ondataavailable, chunk size:", e.data.size);
-        if (e.data.size > 0) mediaChunks.current.push(e.data);
-      };
-      if (videoRef.current) videoRef.current.srcObject = stream;
-      return recorder;
-    } catch (error) {
-      console.error("Media setup error:", error);
-      handleError("Media setup failed: " + error.message);
-      return null;
-    }
-  };
-
-  // Cleanup effect
+  //video blob
   useEffect(() => {
-    return () => {
-      if (mediaRecorder) {
-        mediaRecorder.stream.getTracks().forEach((track) => track.stop());
+    const handleBlob = async () => {
+      if (mediaBlobUrl) {
+        const blob = await fetch(mediaBlobUrl).then((res) => res.blob());
+        if (blob && blob.type.startsWith("video/")) {
+          setRecordedBlob(blob);
+        } else {
+          handleError("Invalid video blob: " + blob.type);
+        }
       }
-      SpeechRecognition.stopListening();
     };
-  }, [mediaRecorder]);
+    handleBlob();
+  }, [mediaBlobUrl]);
+  //key event
+  const textareaRef = useRef(null);
+  useEffect(() => {
+    if (!isStarted) return;
+    const handleKeyPress = (event) => {
+      if (event.key === "Enter") {
+        if (document.activeElement === textareaRef.current) {
+          return;
+        }
+        if (loading) return;
+        sendResponse();
+      }
+    };
+    window.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [isStarted]);
 
-  // Start interview
   const startInterview = async () => {
-    setLoading(true);
     try {
-      if (!MediaRecorder || !MediaRecorder.isTypeSupported("video/webm")) {
-        handleError("Your browser does not support recording. Please try Chrome or Firefox.");
-        setLoading(false);
-        return;
-      }
-      // Initialize combined media recorder
-      const recorder = await setupMediaRecording();
-      if (!recorder) {
-        handleError("Failed to initialize media recording");
-        setLoading(false);
-        return;
-      }
-      setMediaRecorder(recorder);
-      // Start backend interview process
-      const response = await axios.post(url + "/interview/start", { interviewData, jobOrMock, job }, { withCredentials: true });
+      const response = await axios.post(
+        url + "/interview/start",
+        { interviewData, jobOrMock, job },
+        {
+          withCredentials: true,
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json", // Correct for startInterview
+          },
+        }
+      );
       if (response.data.success) {
-        recorder.start(1000); // Collect data every second
-        SpeechRecognition.startListening({ continuous: true });
-        setQuestionCount(1);
         setQuestion(response.data.question);
         setCategory(response.data.category);
+        handleSuccess("Interview started successfully!");
         setIsStarted(true);
+        // Removed auto-start of video recording
+        // startVideoRecording();
+        // setIsVideoRecording(true);
+        SpeechRecognition.startListening({ continuous: true });
+        setIsAudioRecording(true);
         setInfoBox(false);
-        // Scroll to top
         const section = document.getElementById("top");
-        if (section) section.scrollIntoView({ behavior: "smooth" });
+        if (section) {
+          section.scrollIntoView({ behavior: "smooth" });
+        }
+      } else {
+        handleError("Error: " + response.data.message);
       }
     } catch (error) {
-      console.error("Failed to start interview:", error);
-      if (mediaRecorder) {
-        mediaRecorder.stream.getTracks().forEach((track) => track.stop());
-      }
+      console.error("Failed to start interview:", error.message);
       if (error.response) {
         handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
       } else if (error.request) {
         handleError("No response received from server.");
       } else {
-        handleError("Error setting up interview: " + error.message);
+        handleError("Error setting up request: " + error.message);
       }
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
-  // Send response
   const sendResponse = async () => {
     if (!transcript && !written) {
       handleError("Response can't be empty");
@@ -189,45 +164,28 @@ export function Interview() {
     }
     setLoading(true);
     SpeechRecognition.stopListening();
-
+    setIsAudioRecording(false);
+    setIsVideoRecording(false);
+    await stopVideoRecording();
+    const formData = new FormData();
+    if (recordedBlob) {
+      formData.append("video", recordedBlob, "recording.webm");
+    }
+    formData.append("question", question);
+    formData.append("category", category);
+    formData.append("answer", transcript);
+    formData.append("written", written);
+    for (let [key, value] of formData.entries()) {
+      console.log(key, value);
+    }
     try {
-      // Stop the recording and get the blob using a Promise to handle the async nature
-      const blob = await new Promise((resolve) => {
-        if (!mediaRecorder || mediaRecorder.state === "inactive") {
-          resolve(null);
-          return;
-        }
-        // Set a one-time onstop handler to process the chunks
-        mediaRecorder.onstop = () => {
-          const newBlob = new Blob(mediaChunks.current, { type: "video/webm" });
-          mediaChunks.current = []; // Clear chunks for the next recording
-          resolve(newBlob);
-        };
-        mediaRecorder.stop();
-      });
-
-      setMediaBlob(blob); // Update state for preview URL
-
-      console.log("[SEND] Final media blob size (bytes):", blob?.size);
-      if (blob && blob.size === 0) {
-        handleError("Recording failed or is empty. Please check permissions and try again.");
-        setLoading(false);
-        return;
-      }
-
-      const formData = new FormData();
-      if (blob) formData.append("media", blob, "recording.webm");
-      formData.append("question", question);
-      formData.append("category", category);
-      formData.append("answer", transcript);
-      formData.append("written", written);
       const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+        },
       });
-
       if (response.data.success) {
-        setQuestionCount(questionCount + 1);
         setQuestion(response.data.question);
         setCategory(response.data.category);
         setScore(response.data.score);
@@ -235,16 +193,26 @@ export function Interview() {
         setOverallAnalysis(response.data.overallAnalysis);
         resetTranscript();
         setWritten("");
-        // Restart recording for next question
-        if (mediaRecorder) mediaRecorder.start(1000);
+        clearBlobUrl();
+        setRecordedBlob(null);
+        setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
-        if (response.data.completed === "true") {
+        // Removed auto-start of video recording after response
+        // startVideoRecording();
+        // setIsVideoRecording(true);
+        if (response.data.completed == true || response.data.completed == "true") {
           setIsCompleted(true);
           setIsStarted(false);
+          return;
         }
+      } else {
+        console.error("Failed to continue interview:", response.data.message);
+        handleError("Failed to continue interview: " + response.data.message);
+        setLoading(false);
       }
     } catch (error) {
       console.error("Error sending response:", error);
+      setLoading(false);
       if (error.response) {
         handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
       } else if (error.request) {
@@ -257,50 +225,38 @@ export function Interview() {
     }
   };
 
-  // Toggle recording
-  const toggleMediaRecording = async () => {
-    if (!mediaRecorder) return;
-    if (mediaRecorder.state === "recording") {
-      mediaRecorder.pause(); // Use pause() instead of stop()
-      SpeechRecognition.stopListening();
-    } else if (mediaRecorder.state === "paused") {
-      mediaRecorder.resume(); // Use resume()
+  //audio
+  const RecordAudio = async () => {
+    if (isAudioRecording) {
+      await SpeechRecognition.stopListening();
+      setIsAudioRecording(false);
+      return;
+    }
+    if (!isAudioRecording) {
       SpeechRecognition.startListening({ continuous: true });
+      setIsAudioRecording(true);
+    }
+  };
+  if (!browserSupportsSpeechRecognition) {
+    return <p>no access</p>;
+  }
+
+  //video recording
+  const handleVideoRecord = () => {
+    if (isVideoRecording) {
+      stopVideoRecording();
+      setIsVideoRecording(false);
+    }
+    if (!isVideoRecording) {
+      startVideoRecording();
+      setIsVideoRecording(true);
     }
   };
 
-  // Key event handler
-  useEffect(() => {
-    if (!isStarted) return;
-
-    const handleKeyPress = (event) => {
-      if (event.key === "Enter" && document.activeElement !== textareaRef.current && !loading) {
-        sendResponse();
-      }
-    };
-
-    window.addEventListener("keydown", handleKeyPress);
-    return () => window.removeEventListener("keydown", handleKeyPress);
-  }, [isStarted, loading]);
-
-  // Update previewUrl when mediaBlob changes
-  useEffect(() => {
-    if (mediaBlob && mediaBlob.size > 0) {
-      const url = URL.createObjectURL(mediaBlob);
-      setPreviewUrl(url);
-      return () => URL.revokeObjectURL(url);
-    } else {
-      setPreviewUrl(null);
-    }
-  }, [mediaBlob]);
-
-  if (!browserSupportsSpeechRecognition) {
-    return <p>Your browser doesn't support speech recognition</p>;
-  }
-
-  const isRecording = mediaRecorder && mediaRecorder.state === "recording";
-  const isPaused = mediaRecorder && mediaRecorder.state === "paused";
-
+  //everything starts from here
+  const start = () => {
+    startInterview();
+  };
   return (
     <div className='min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-800 dark:via-indigo-950/30 dark:to-gray-700'>
       <div className='container mx-auto px-4 py-10 pb-2 pt-16'>
@@ -308,11 +264,12 @@ export function Interview() {
           <div className='flex items-center justify-between mb-2'>
             {isStarted && (
               <div className='px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-md border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 font-medium flex items-center'>
-                <div className={`w-3 h-3 rounded-full mr-2 ${isRecording ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-                {isRecording ? "Recording" : "Paused"}
+                <div className={`w-3 h-3 rounded-full mr-2 ${isAudioRecording ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
+                {isAudioRecording || isVideoRecording ? "Recording" : "Paused"}
               </div>
             )}
           </div>
+
           <ProtectedRoute>
             <div
               id='top'
@@ -320,17 +277,19 @@ export function Interview() {
               <InterviewHeader
                 isStarted={isStarted}
                 isCompleted={isCompleted}
-                handleMediaRecord={toggleMediaRecording}
+                RecordAudio={RecordAudio}
+                videoRecording={isVideoRecording}
+                isAudioRecording={isAudioRecording}
+                handleVideoRecord={handleVideoRecord}
                 sendResponse={sendResponse}
-                isRecording={isRecording}
-                isPaused={isPaused}
                 loading={loading}
-                mediaBlob={mediaBlob}
               />
+
               {infoBox && (
                 <div className='p-3'>
                   <div className='grid grid-cols-1 md:grid-cols-19 gap-2'>
                     <div className='md:col-span-6'>
+                      {" "}
                       <InstructionsCard
                         title='Interview Best Practices'
                         icon={<BarChart className='h-5 w-5 text-indigo-500' />}
@@ -349,7 +308,7 @@ export function Interview() {
                       </div>
                       <div className='p-6'>
                         <DialogForm
-                          start={startInterview}
+                          start={start}
                           setInterviewData={setInterviewData}
                           interviewData={interviewData}
                           job={job}
@@ -360,7 +319,9 @@ export function Interview() {
                         />
                       </div>
                     </div>
+
                     <div className='md:col-span-6'>
+                      {" "}
                       <InstructionsCard
                         title='Prepare for Common Questions'
                         icon={<AlertCircle className='h-5 w-5 text-indigo-500' />}
@@ -376,10 +337,11 @@ export function Interview() {
                   </div>
                 </div>
               )}
+
               {isStarted && (
                 <div className='grid grid-cols-1 md:grid-cols-12 gap-4 p-6'>
                   <div className='md:col-span-5'>
-                    <QuestionAndScore questionCount={questionCount} question={question} score={score} summary={summary} />
+                    <QuestionAndScore question={question} score={score} summary={summary} />
                   </div>
                   <div className='md:col-span-4'>
                     <ResponsesComponent
@@ -391,24 +353,19 @@ export function Interview() {
                     />
                   </div>
                   <div className='md:col-span-3 md:float-left flex flex-col justify-normal'>
-                    <VideoComponent
-                      stream={mediaRecorder?.stream}
-                      isRecording={isRecording}
-                      isPaused={isPaused}
-                      mediaBlob={mediaBlob}
-                      previewUrl={previewUrl}
-                    />
-                    <div className='mt-5 relative group'>
-                      <FancyButton disabled={questionCount < 4} text={"End Interview"} />
-                      {questionCount < 4 && (
-                        <span className='pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-200 absolute -top-8 left-1/2 -translate-x-1/2 bg-gray-800 text-white text-xs rounded px-2 py-1 shadow-lg z-10 whitespace-nowrap'>
-                          Answer at least 4 Questions
-                        </span>
-                      )}
+                    <VideoComponent stream={previewStream} isVideoRecording={isVideoRecording} />
+                    <div
+                      className='mt-5'
+                      onClick={() => {
+                        setIsCompleted(true);
+                        setIsStarted(false);
+                      }}>
+                      <FancyButton text={"End Interview"} />{" "}
                     </div>
                   </div>
                 </div>
               )}
+
               {isCompleted && (
                 <div className='flex flex-col items-center justify-center py-16 px-6'>
                   <div className='h-20 w-20 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center mb-6'>
@@ -439,7 +396,16 @@ export function Interview() {
   );
 }
 
-function InterviewHeader({ isStarted, isCompleted, handleMediaRecord, sendResponse, isRecording, isPaused, loading, mediaBlob }) {
+function InterviewHeader({
+  isStarted,
+  isCompleted,
+  handleVideoRecord,
+  RecordAudio,
+  sendResponse,
+  isAudioRecording,
+  videoRecording,
+  loading,
+}) {
   return (
     <div className='bg-gradient-to-r from-indigo-600 to-[var(--color-primary-400)] p-3'>
       <div className='flex flex-col md:flex-row justify-between items-center'>
@@ -452,27 +418,29 @@ function InterviewHeader({ isStarted, isCompleted, handleMediaRecord, sendRespon
             <p className='text-indigo-100'>AI-powered practice for your next big opportunity</p>
           </div>
         </div>
+
         {isStarted && !isCompleted && (
           <div className='flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg'>
             <button
               disabled={loading}
-              aria-label='Toggle recording'
+              aria-label='Toggle microphone'
               className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
-                isRecording ? "bg-red-500 text-white hover:bg-red-600" : "bg-green-500 text-white hover:bg-green-600"
+                isAudioRecording ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"
               }`}
-              onClick={handleMediaRecord}>
-              {isRecording ? <PauseCircle className='h-5 w-5' /> : <Mic className='h-5 w-5' />}
+              onClick={RecordAudio}>
+              <Mic className='h-5 w-5' />
             </button>
-            {mediaBlob && (
-              <a
-                href={URL.createObjectURL(mediaBlob)}
-                target='_blank'
-                rel='noopener noreferrer'
-                className='p-3 bg-white text-indigo-600 rounded-full hover:bg-indigo-50 transition-all duration-300 shadow-md'
-                title='Preview last recording'>
-                <Video className='h-5 w-5' />
-              </a>
-            )}
+
+            <button
+              disabled={loading}
+              aria-label='Toggle video'
+              onClick={handleVideoRecord}
+              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
+                videoRecording ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"
+              }`}>
+              <Video className='h-5 w-5' />
+            </button>
+
             {loading ? (
               <Spinner />
             ) : (
@@ -489,8 +457,6 @@ function InterviewHeader({ isStarted, isCompleted, handleMediaRecord, sendRespon
     </div>
   );
 }
-
-// InstructionsCard remains the same
 
 function InstructionsCard({ title, items, icon }) {
   return (
@@ -515,9 +481,7 @@ function InstructionsCard({ title, items, icon }) {
   );
 }
 
-// QuestionAndScore remains the same
-
-function QuestionAndScore({ question, score, summary, questionCount }) {
+function QuestionAndScore({ question, score, summary }) {
   const scoreValue = score ? parseInt(score) : 0;
 
   const getScoreColor = (score) => {
@@ -537,7 +501,7 @@ function QuestionAndScore({ question, score, summary, questionCount }) {
       <div className='bg-gradient-to-r from-indigo-600 to-purple-600 p-4'>
         <h3 className='text-lg font-medium text-white flex items-center'>
           <Sparkles className='h-5 w-5 mr-2' />
-          Current Question     <b>{questionCount}</b>
+          Current Question
         </h3>
       </div>
 
@@ -567,14 +531,13 @@ function QuestionAndScore({ question, score, summary, questionCount }) {
   );
 }
 
-function VideoComponent({ stream, isRecording, isPaused, mediaBlob, previewUrl }) {
+function VideoComponent({ stream, isVideoRecording }) {
   const videoRef = useRef(null);
   useEffect(() => {
     if (videoRef.current && stream) {
       videoRef.current.srcObject = stream;
     }
   }, [stream]);
-
   return (
     <div className='h-max flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden border border-indigo-100 dark:border-indigo-900/50'>
       <div className='bg-gradient-to-r from-indigo-600 to-purple-600 p-4 flex items-center justify-between'>
@@ -582,16 +545,17 @@ function VideoComponent({ stream, isRecording, isPaused, mediaBlob, previewUrl }
           <Video className='h-5 w-5 mr-2' />
           Your Camera
         </h3>
-        {isRecording && (
+        {isVideoRecording && (
           <div className='flex items-center px-3 py-1 bg-black/30 rounded-full'>
             <div className='h-3 w-3 rounded-full bg-red-500 animate-pulse mr-2'></div>
             <span className='text-xs text-white'>Recording</span>
           </div>
         )}
       </div>
+
       <div className='relative flex-grow bg-gray-900 flex items-center justify-center'>
         {stream ? <video ref={videoRef} autoPlay muted playsInline className='w-full h-64 object-cover transform -scale-x-100' /> : ""}
-        {isPaused && (
+        {!isVideoRecording && (
           <div className='absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm'>
             <div className='p-6 bg-black/60 rounded-full'>
               <PauseCircle className='h-16 w-16 text-white/90' />
@@ -599,12 +563,7 @@ function VideoComponent({ stream, isRecording, isPaused, mediaBlob, previewUrl }
           </div>
         )}
       </div>
-      {mediaBlob && previewUrl && (
-        <div className='p-2 text-center'>
-          <video controls src={previewUrl} className='w-full rounded-lg mt-2' />
-          <div className='text-xs text-gray-500 mt-1'>Preview last answer</div>
-        </div>
-      )}
+
       <div className='p-1 bg-indigo-50 dark:bg-indigo-900/20 text-center border-t border-indigo-100 dark:border-indigo-900/50'>
         <p className='text-sm text-gray-600 dark:text-gray-400 flex items-center justify-center'>
           <Info className='h-4 w-4 mr-2 text-indigo-500' />
@@ -615,7 +574,6 @@ function VideoComponent({ stream, isRecording, isPaused, mediaBlob, previewUrl }
   );
 }
 
-// ResponsesComponent remains the same
 function ResponsesComponent({ written, setWritten, transcript, resetTranscript, textareaRef }) {
   const adjustHeight = () => {
     if (!textareaRef.current) return;

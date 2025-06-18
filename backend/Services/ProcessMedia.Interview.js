@@ -2,6 +2,7 @@ const Interview = require("../models/InterviewModel");
 const { GoogleGenAI } = require("@google/genai");
 const path = require("path");
 const fs = require("fs").promises;
+const { setTimeout } = require("timers/promises");
 
 const ProcessVideo = async (videoFile, QId, userId) => {
   try {
@@ -19,6 +20,7 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     try {
       console.log("Starting video file upload...");
       files = [await ai.files.upload({ file: filePath })];
+      await waitForFileActive(ai, files[0].name);
       await fs.unlink(filePath);
       config = {
         responseMimeType: "text/plain",
@@ -48,17 +50,19 @@ const ProcessVideo = async (videoFile, QId, userId) => {
     let parsedResult = null;
     try {
       console.log("Generating content from video...");
-      const result = await ai.models.generateContent({
+      const result = await ai.models.generateContentStream({
         model: modelName,
         contents: contents,
+        config: config,
       });
-      console.log("video result: " + result);
-      const response = result.response;
-      const text = response.text();
-      console.log("Raw response text:", text);
-      const jsonMatch = text.match(/```json\n([\s\S]*?)\n```/);
+      let content = "";
+      for await (const chunk of result) {
+        content += chunk.text;
+      }
+      console.log("Raw response text:", content);
+      const jsonMatch = content.match(/```json\n([\s\S]*?)\n```/);
       if (!jsonMatch || jsonMatch[1] === undefined) {
-        console.error("Could not find JSON block in response:", text);
+        console.error("Could not find JSON block in response:", content);
         throw new Error("Model response did not contain expected JSON block.");
       }
       const jsonString = jsonMatch[1];
@@ -187,6 +191,28 @@ async function ProcessAudio(audioFile, QId, userId) {
     console.error("Error processing audio with Gemini:", error);
     // DO NOT re-throw here. We want the main interview flow to continue.
   }
+}
+
+// --- Helper Function to Poll File Status ---
+async function waitForFileActive(ai, fileName) {
+  let file = await ai.files.get({ name: fileName });
+  let retries = 0;
+  const maxRetries = 20; // Safety break to prevent infinite loops
+  const delay = 5000; // 5 seconds
+
+  while (file.state === "PROCESSING" && retries < maxRetries) {
+    console.log(`Polling file status: ${file.state}... (Attempt ${retries + 1})`);
+    await setTimeout(delay); // Wait for 5 seconds
+    file = await ai.files.get({ name: fileName });
+    retries++;
+  }
+
+  if (file.state !== "ACTIVE") {
+    console.error("File processing failed or timed out. Final state:", file.state);
+    throw new Error(`File ${fileName} is not in ACTIVE state. Current state: ${file.state}`);
+  }
+
+  return file;
 }
 
 module.exports = { ProcessVideo, ProcessAudio };
