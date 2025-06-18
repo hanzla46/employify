@@ -1,13 +1,9 @@
 const axios = require("axios");
 const Profile = require("../models/ProfileModel.js");
 const Job = require("../models/JobModel");
+const User = require("../models/User.js");
 const fs = require("fs");
-const {
-  CalculateRelevancyScores,
-  getCoverLetterData,
-  getNormalResumeData,
-  getBestResumeData,
-} = require("../Services/JobPrompts.js");
+const { CalculateRelevancyScores, getCoverLetterData, getResumeData } = require("../Services/JobPrompts.js");
 // Helper function to split array into chunks
 const chunkArray = (array, size) => {
   const chunks = [];
@@ -142,24 +138,18 @@ const generateResume = async (req, res) => {
   try {
     const userId = req.user._id;
     const profile = await Profile.findOne({ userId });
-    const { jobId, quality } = req.query;
-    console.log("params: " + jobId + "  " + quality);
+    const user = await User.findOne({ _id: userId });
+    profile.name = user.name;
+    profile.email = user.email;
+    const { jobId } = req.query;
+    console.log("params: " + jobId);
     const job = await Job.findOne({ id: jobId });
-    if (quality.toLowerCase() === "normal") {
-      const resumeBuffer = await getNormalResumeData(profile, job);
-      res.set({
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="NormalResume_${job.id}_123.pdf"`,
-      });
-      res.end(resumeBuffer);
-    } else if (quality.toLowerCase() === "best") {
-      const resumeBuffer = await getBestResumeData(profile, job);
-      res.set({
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="BestResume_${job.id}_123.pdf"`,
-      });
-      res.end(resumeBuffer);
-    }
+    const resumeBuffer = await getResumeData(profile, job);
+    res.set({
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="NormalResume_${job.id}_123.pdf"`,
+    });
+    res.end(resumeBuffer);
   } catch (error) {
     console.log("error while generating resume: " + error);
     res.status(500).json({ message: "Server Error!" });

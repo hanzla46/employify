@@ -676,7 +676,12 @@ const ProfileForm = ({ setHasProfile }) => {
         {/* Job Experience Tab Content */}
         <div className={activeTab === "job" ? "block" : "hidden"}>
           <div className='mb-4'>
-            <p className='text-sm text-gray-600 dark:text-gray-400'>Add your work experience and employment history.</p>
+            <p className='text-sm text-gray-600 dark:text-gray-400'>
+              Add your work experience and employment history.{" "}
+              <span className='font-semibold text-primary-600 dark:text-primary-400'>
+                (Optional for beginners – you can skip this section if you have no work experience)
+              </span>
+            </p>
           </div>
           {renderJobs()}
           <button
@@ -691,6 +696,12 @@ const ProfileForm = ({ setHasProfile }) => {
               />
             </svg>
             Add Another Job
+          </button>
+          <button
+            type='button'
+            onClick={() => setJobs([])}
+            className='ml-2 px-3 py-1 text-xs bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors'>
+            I have no work experience
           </button>
         </div>
 

@@ -1,6 +1,7 @@
 import React, { createContext, useEffect, useState, useContext } from "react";
 import axios from "axios";
 import { AuthContext } from "./AuthContext";
+import { SkillsContext } from "./SkillsContext";
 const url = import.meta.env.VITE_API_URL;
 
 export const JobsContext = createContext();
@@ -11,10 +12,12 @@ export const JobsProvider = ({ children }) => {
   const [filteredJobs, setFilteredJobs] = useState(jobs);
   const [contextLoading, setContextLoading] = useState(true);
   const { user } = useContext(AuthContext);
+  const { hasProfile } = useContext(SkillsContext);
   useEffect(() => {
     if (!user) return;
     async function fetchJobs() {
       try {
+        setContextLoading(true);
         const response = await axios.get(url + "/jobs/getJobs", {
           withCredentials: true,
           headers: {
@@ -33,7 +36,7 @@ export const JobsProvider = ({ children }) => {
       setContextLoading(false);
     }
     fetchJobs();
-  }, [user]);
+  }, [user, hasProfile]);
   return (
     <JobsContext.Provider value={{ contextLoading, jobs, setJobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs }}>
       {children}

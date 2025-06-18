@@ -126,8 +126,7 @@ export function Jobs() {
     setJobActionStates((prev) => {
       const currentJobFullState = prev[jobId] || {
         coverLetter: { status: "idle" },
-        resumeNormal: { status: "idle" },
-        resumeBest: { status: "idle" },
+        resume: { status: "idle" },
       };
       const currentActionSpecificState = currentJobFullState[actionKey] || { status: "idle" };
 
@@ -170,15 +169,12 @@ export function Jobs() {
     }
   };
 
-  const handleGetResume = async (job, quality) => {
+  const handleGetResume = async (job) => {
     const { id, title, company } = job;
     const jobId = id;
-    const actionKey = quality === "Normal" ? "resumeNormal" : "resumeBest";
-    updateJobActionState(jobId, actionKey, { status: "loading" });
-    setActiveResumeDropdown(null); // Close dropdown after selection
-
+    updateJobActionState(jobId, "resume", { status: "loading" });
     try {
-      const res = await axios.get(url + `/jobs/generateResume?quality=${quality}&jobId=${id}`, {
+      const res = await axios.get(url + `/jobs/generateResume?jobId=${id}`, {
         responseType: "blob",
         withCredentials: true,
       });
@@ -190,15 +186,15 @@ export function Jobs() {
         throw new Error(errorData.message);
       }
       const fileBlob = res.data;
-      updateJobActionState(jobId, actionKey, {
+      updateJobActionState(jobId, "resume", {
         status: "loaded",
         file: fileBlob,
-        fileName: `${title.replace(/\W+/g, "_")}_${company.name.replace(/\W+/g, "_")}_Resume_${quality}.pdf`,
+        fileName: `${title.replace(/\W+/g, "_")}_${company.name.replace(/\W+/g, "_")}_Resume.pdf`,
       });
-      handleSuccess(`${quality} resume generated!`);
+      handleSuccess(`Resume generated for: ${title} at ${company.name}`);
     } catch (error) {
-      console.error(`Failed to get ${quality} resume:`, error);
-      updateJobActionState(jobId, actionKey, { status: "error", file: null });
+      console.error(`Failed to get resume:`, error);
+      updateJobActionState(jobId, "resume", { status: "error", file: null });
     }
   };
 
@@ -327,8 +323,7 @@ export function Jobs() {
             <div className='space-y-6'>
               {filteredJobs.map((job) => {
                 const clState = jobActionStates[job.id]?.coverLetter || { status: "idle" };
-                const resumeNormalState = jobActionStates[job.id]?.resumeNormal || { status: "idle" };
-                const resumeBestState = jobActionStates[job.id]?.resumeBest || { status: "idle" };
+                const resumeState = jobActionStates[job.id]?.resume || { status: "idle" };
 
                 return (
                   <div
@@ -538,81 +533,24 @@ export function Jobs() {
                             "Get Cover Letter"
                           )}
                         </button>
-                        <div className='flex-1 relative'>
-                          <button
-                            onClick={() => setActiveResumeDropdown(activeResumeDropdown === job.id ? null : job.id)}
-                            disabled={resumeNormalState.status === "loading" || resumeBestState.status === "loading" || !hasProfile}
-                            className={`w-full disabled:opacity-60 ${baseActionBtnClass} ${resumeBtnColors} ${
-                              resumeNormalState.status === "loading" || resumeBestState.status === "loading" ? disabledBtnClass : ""
-                            }`}>
-                            {resumeNormalState.status === "loading" || resumeBestState.status === "loading" ? (
-                              <>
-                                <Loader2 className='animate-spin h-5 w-5 mr-2' /> Generating Resume...
-                              </>
-                            ) : (
-                              <>
-                                Get Resume{" "}
-                                <ChevronDown
-                                  className={`h-5 w-5 ml-2 transition-transform ${activeResumeDropdown === job.id ? "rotate-180" : ""}`}
-                                />
-                              </>
-                            )}
-                          </button>
-                          {activeResumeDropdown === job.id && (
-                            <div className='absolute bottom-full mb-2 w-full rounded-md shadow-lg bg-white dark:bg-gray-900 ring-1 ring-black dark:ring-gray-700 ring-opacity-5 p-1 space-y-1 z-20'>
-                              {/* Normal Quality Resume Button */}
-                              <button
-                                onClick={() =>
-                                  resumeNormalState.status === "loaded"
-                                    ? handleDownloadFile(job.id, "resumeNormal")
-                                    : handleGetResume(job, "Normal")
-                                }
-                                disabled={resumeNormalState.status === "loading"}
-                                className={`${dropdownItemClass} ${
-                                  resumeNormalState.status === "loading"
-                                    ? dropdownItemDisabledClass
-                                    : "hover:bg-primary-50 dark:hover:bg-primary-700/30"
-                                }`}>
-                                {resumeNormalState.status === "loading" ? (
-                                  <>
-                                    <Loader2 className='animate-spin h-4 w-4 mr-2' /> Normal...
-                                  </>
-                                ) : resumeNormalState.status === "loaded" ? (
-                                  `Download Normal (${resumeNormalState.fileName?.split(".").pop() || "file"})`
-                                ) : resumeNormalState.status === "error" ? (
-                                  "Retry Normal"
-                                ) : (
-                                  "Normal Quality"
-                                )}
-                              </button>
-                              {/* Best Quality Resume Button */}
-                              <button
-                                onClick={() =>
-                                  resumeBestState.status === "loaded"
-                                    ? handleDownloadFile(job.id, "resumeBest")
-                                    : handleGetResume(job, "Best")
-                                }
-                                disabled={resumeBestState.status === "loading"}
-                                className={`${dropdownItemClass} ${
-                                  resumeBestState.status === "loading"
-                                    ? dropdownItemDisabledClass
-                                    : "hover:bg-primary-50 dark:hover:bg-primary-700/30"
-                                }`}>
-                                {resumeBestState.status === "loading" ? (
-                                  <>
-                                    <Loader2 className='animate-spin h-4 w-4 mr-2' /> Best...
-                                  </>
-                                ) : resumeBestState.status === "loaded" ? (
-                                  `Download Best (${resumeBestState.fileName?.split(".").pop() || "file"})`
-                                ) : resumeBestState.status === "error" ? (
-                                  "Retry Best"
-                                ) : (
-                                  "Best Quality"
-                                )}
-                              </button>
-                            </div>
+                        <button
+                          onClick={() => (resumeState.status === "loaded" ? handleDownloadFile(job.id, "resume") : handleGetResume(job))}
+                          disabled={resumeState.status === "loading" || !hasProfile}
+                          className={`disabled:opacity-60 ${baseActionBtnClass} ${resumeBtnColors} ${
+                            resumeState.status === "loading" ? disabledBtnClass : ""
+                          }`}>
+                          {resumeState.status === "loading" ? (
+                            <>
+                              <Loader2 className='animate-spin h-5 w-5 mr-2' /> Generating Resume...
+                            </>
+                          ) : resumeState.status === "loaded" ? (
+                            `Download Resume (${resumeState.fileName?.split(".").pop() || "file"})`
+                          ) : resumeState.status === "error" ? (
+                            "Error Resume. Retry?"
+                          ) : (
+                            "Get Resume"
                           )}
-                        </div>
+                        </button>
                       </div>
 
                       <div className='flex items-center w-full sm:w-auto'>

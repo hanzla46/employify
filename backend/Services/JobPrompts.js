@@ -159,8 +159,8 @@ const getCoverLetterData = async (summary, job) => {
   console.log("cover letter data: " + content);
   return content;
 };
-const getNormalResumeData = async (profile, job) => {
-  const prompt = generatePrompt(profile, job, "classic");
+const getResumeData = async (profile, job) => {
+  const prompt = generatePrompt(profile, job);
   console.log("prompt: " + prompt);
   const ai = new GoogleGenAI({
     apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
@@ -170,7 +170,7 @@ const getNormalResumeData = async (profile, job) => {
   let config;
   try {
     console.log("Starting generating resume...");
-    files = [await ai.files.upload({ file: path.join(__dirname, "example_resume_classic.png") })];
+    files = [await ai.files.upload({ file: path.join(__dirname, "example_resume_creative.png") })];
     config = {
       responseMimeType: "text/plain",
     };
@@ -219,203 +219,6 @@ const getNormalResumeData = async (profile, job) => {
   return buffer;
 };
 
-const getBestResumeData = async (profile, job) => {
-  const ai = new GoogleGenAI({
-    apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
-  });
-  const modelName = "gemini-2.5-flash-preview-05-20";
-  const config = {
-    thinkingConfig: {
-      thinkingBudget: 2024,
-    },
-    responseMimeType: "text/plain",
-    generationConfig: {
-      temperature: 1,
-      topP: 1.0,
-      topK: 1,
-    },
-  };
-  let exampleFile = "";
-
-  // Function to process a single style
-  const generateResumeForStyle = async (style) => {
-    const prompt = generatePrompt(profile, job, style);
-    if (style === "modern") {
-      exampleFile = "example_resume_modern.png";
-    } else if (style === "classic") {
-      exampleFile = "example_resume_classic.png";
-    } else if (style === "creative") {
-      exampleFile = "example_resume_creative.png";
-    } else {
-      exampleFile = "example_resume.png"; // Default case
-    }
-    // Upload the example resume image file
-    let files;
-    try {
-      files = [await ai.files.upload({ file: path.join(__dirname, exampleFile) })];
-      console.log(
-        `Example resume uploaded successfully for ${style}. File URI: ${files[0].uri}, File Name: ${files[0].name}`
-      );
-    } catch (error) {
-      console.error(`Error uploading example resume for ${style}:`, error);
-      throw new Error(`Failed to upload example resume for ${style}.`);
-    }
-
-    const contents = [
-      {
-        role: "user",
-        parts: [
-          {
-            fileData: {
-              fileUri: files[0].uri,
-              mimeType: files[0].mimeType,
-            },
-          },
-          {
-            text: prompt,
-          },
-        ],
-      },
-    ];
-
-    let content = "";
-    try {
-      console.log(`Generating content for ${style}...`);
-      const result = await ai.models.generateContent({
-        model: modelName,
-        contents: contents,
-        config: config,
-      });
-      content = result.candidates[0].content.parts[0].text;
-      content = content
-        .replace(/^```html\s*/, "")
-        .replace(/^```\s*/, "")
-        .replace(/```$/, "");
-      console.log(`Raw response text for ${style}: (First 100 chars) ${content.substring(0, 100)}...`);
-    } catch (error) {
-      console.error(`Error generating resume content for ${style}: `, error);
-      throw error;
-    }
-
-    const { buffer, filePath } = await generatePDF(content, `resume_${style}_${job.id}.pdf`);
-    // No need to unlink here, it's done in the main function
-
-    return { buffer, filePath, style };
-  };
-
-  // Parallel API calls for different styles
-  const resumePromises = [
-    generateResumeForStyle("modern"),
-    generateResumeForStyle("classic"),
-    generateResumeForStyle("creative"),
-  ];
-
-  let resumes;
-  try {
-    resumes = await Promise.all(resumePromises);
-  } catch (error) {
-    console.error("Error generating resumes in parallel:", error);
-    throw error;
-  }
-
-  //   Combine resume data for the selection prompt
-  const resumeData = resumes.map((resume) => ({
-    style: resume.style,
-    filePath: resume.filePath,
-  }));
-
-  // Upload all PDF files for visual comparison
-  const pdfFiles = [];
-  for (const resume of resumeData) {
-    try {
-      const file = await ai.files.upload({ file: resume.filePath });
-      pdfFiles.push({
-        style: resume.style,
-        uri: file.uri,
-        mimeType: file.mimeType,
-      });
-    } catch (error) {
-      console.error(`Error uploading PDF for ${resume.style}:`, error);
-      throw new Error(`Failed to upload PDF for ${resume.style}`);
-    }
-  }
-
-  // Prompt for choosing the best resume
-  const selectionPrompt = `
-    You have generated three resumes with different styles based on a user profile and job description. I have attached the PDF versions of each resume for you to visually analyze. Please analyze each resume based on the following criteria:
-
-    - **Visual Appeal:** How aesthetically pleasing and professional is the design? Is it clean, well-organized, and easy on the eyes?
-    - **Readability:** How easy is the content to read and understand? Is the typography clear, and is the information logically structured?
-    - **Suitability:** Does the design and content best reflect the user profile and job description? Does it highlight the most relevant skills and experiences?
-
-    Considering these factors, select the resume that you consider the visually best option for a modern job application, and provide its 'style' name.
-
-      1. First PDF: Modern style resume
-    2. Second PDF: Classic style resume
-    3. Third PDF: Creative style resume
-
-    Based on the evaluation of the PDF files attached, which of the resumes (modern, classic, or creative) is the best choice? Provide only the ONE WORD Style name of the best resume.
-    `;
-  let bestResumeStyle;
-
-  try {
-    console.log("Starting resume selection...");
-    const contents = [
-      // Add each PDF file as a separate content part
-      ...pdfFiles.map((file) => ({
-        role: "user",
-        parts: [
-          {
-            fileData: {
-              fileUri: file.uri,
-              mimeType: file.mimeType,
-            },
-          },
-        ],
-      })),
-      // Add the prompt as the final content part
-      {
-        role: "user",
-        parts: [
-          {
-            text: selectionPrompt,
-          },
-        ],
-      },
-    ];
-
-    const aiSelection = await ai.models.generateContent({
-      model: modelName,
-      contents: contents,
-      config: {
-        thinkingConfig: { thinkingBudget: 0 },
-        responseMimeType: "text/plain",
-      },
-    });
-
-    bestResumeStyle = aiSelection.candidates[0].content.parts[0].text.trim().toLowerCase();
-    console.log("Best resume style:", bestResumeStyle);
-  } catch (error) {
-    console.error("Error selecting the best resume:", error);
-    throw error;
-  }
-
-  // Find and return the selected resume buffer
-  const selectedResume = resumes.find((resume) => resume.style === bestResumeStyle);
-
-  if (!selectedResume) {
-    throw new Error("No resume found for the selected style.");
-  }
-
-  // Clean up all generated PDF files
-  resumes.forEach((resume) => {
-    fs.unlinkSync(resume.filePath);
-    console.log(`Deleted temporary file: ${resume.filePath}`);
-  });
-
-  return selectedResume.buffer;
-};
-
 //HELPER FUNCTIONS
 //func 1 - for pdf generation
 const generatePDF = async (htmlString, fileName = "output.pdf") => {
@@ -459,11 +262,8 @@ const generatePDF = async (htmlString, fileName = "output.pdf") => {
   };
 };
 // func 2
-const generatePrompt = (profile, job, style) => {
-  let promptBase = "";
-
-  if (style === "modern") {
-    promptBase = `
+const generatePrompt = (profile, job) => {
+  let promptBase = `
 You are a **modern frontend engineer and UX-centric resume stylist**. Your task is to generate a clean, modern, and fully responsive **HTML + embedded CSS** resume inspired by the attached **MODERN reference resume** design.
 
 📌 YOU MUST:
@@ -484,6 +284,8 @@ You are a **modern frontend engineer and UX-centric resume stylist**. Your task 
 - subskills of each skill does not need to be added in resume.
 - Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
 
+❌ DO NOT ADD ANY PLACEHOLDERS.
+
 📄 FINAL OUTPUT:
 - Return a **standalone HTML document** with embedded <style> in <head>.
 - **DO NOT** use markdown, placeholders, or explanations.
@@ -491,10 +293,9 @@ You are a **modern frontend engineer and UX-centric resume stylist**. Your task 
 💡 This resume must follow the **modern resume example** attached. Style, spacing, and layout should be visibly aligned.
 
 👤 USER PROFILE:
-Name: Muhammad Shoaib
-Email: mshoaibarid@gmail.com
-address: Phalia, Mandi Bahauddin, Pakistan
-phone: +923445450151
+Name: ${profile.name || "Muhammad Shoaib"}
+Email: ${profile.email || "mshoaibarid@gmail.com"}
+phone:  ${profile.phone || "+923445450151"}
 languages: english, punjabi, urdu
 Hard Skills: ${profile.hardSkills}  
 Soft Skills: ${profile.softSkills}  
@@ -508,124 +309,6 @@ Location: ${profile.location}
 Title: ${job.title}  
 Description: ${job.description}
     `;
-  } else if (style === "classic") {
-    promptBase = `
-You are a **traditional resume architect** crafting high-quality, timeless resumes for professional use. Your task is to create a **print-optimized HTML + CSS resume** that mirrors the attached **CLASSIC resume reference** design.
-
-📌 YOU MUST:
-- Replicate the layout, spacing, fonts, and structure of the reference resume.
-- Use a serif font stack (Georgia, Times New Roman).
-- Keep color palette monochrome: black, gray, soft lines.
-- Full-width sections, right-aligned dates, uppercase section headers.
-- Strictly print-ready: no animations, perfect alignment.
-- Integrate job description keywords naturally. Dont change title exact to job title but align content with it.
-- In education data, if you dont get fieldof study than add appropriate field by yourself for example computer science  for BS software engineering.
-subskills of each skill does not need to be added in resume.
-- Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
-
-🧱 STRUCTURE:
-- Semantic HTML with <header>, <section>, etc.
-- Include: Contact Info, Objective, Work Experience, Education, Skills, Projects.
-- Maintain formal, conservative tone.
-- Add keywords from job description subtly, without disrupting formality.
-
-📄 FINAL OUTPUT:
-- Return a **clean HTML document** with embedded CSS in the <head>.
-- Absolutely **no markdown**, placeholder text, or commentary.
-
-💡 Match layout and formatting exactly to the **classic resume example** provided.
-
-👤 USER PROFILE:
-Name: Muhammad Shoaib
-Email: mshoaibarid@gmail.com
-address: Phalia, Mandi Bahauddin, Pakistan
-phone: +923445450151
-languages: english, punjabi, urdu 
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
-Work Experience: ${profile.jobs}  
-Projects: ${profile.projects}  
-Education: ${profile.education}  
-Career Goal: ${profile.careerGoal}  
-Location: ${profile.location}
-
-🎯 JOB DESCRIPTION:
-Title: ${job.title}  
-Description: ${job.description}
-    `;
-  } else if (style === "creative") {
-    promptBase = `
-You are a **creative resume designer** known for building stunning, unconventional resume layouts that still pass ATS and print tests. Your goal is to deliver a visually striking resume in **HTML + CSS**, inspired by the attached **CREATIVE resume example**.
-
-📌 YOU MUST:
-- Take design and layout inspiration directly from the reference creative resume.
-- Use bold color schemes (e.g., accent colors like #FF5C00 or #4A90E2).
-- Modern font: Poppins, Fira Sans, or equivalent.
-- Use sidebars, flex layouts, highlight blocks.
-- Print-optimized but creative — think startup, design agency, or tech-forward role.
-- Integrate job description keywords naturally. Dont change title exact to job title but align content with it.
-- In education data, if you dont get fieldof study than add appropriate field by yourself for example computer science  for BS software engineering.
-subskills of each skill does not need to be added in resume.
-- Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
-
-🧱 STRUCTURE:
-- Use semantic HTML tags.
-- Layout may be 2-column or asymmetric.
-- Include: Contact, Summary, Skills, Work Experience, Projects, Education, Career Goal.
-- Infuse keywords from job post *seamlessly* without compromising the artistic vibe.
-
-📄 FINAL OUTPUT:
-- Provide **only a complete HTML page** with CSS in the <head>.
-- **No markdown**, dummy text, or commentary allowed.
-
-💡 Mirror the aesthetic and structural DNA of the **creative resume sample** provided.
-
-👤 USER PROFILE:
-Name: Muhammad Shoaib
-Email: mshoaibarid@gmail.com
-address: Phalia, Mandi Bahauddin, Pakistan
-phone: +923445450151
-languages: english, punjabi, urdu  
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
-Work Experience: ${profile.jobs}  
-Projects: ${profile.projects}  
-Education: ${profile.education}  
-Career Goal: ${profile.careerGoal}  
-Location: ${profile.location}
-
-🎯 JOB DESCRIPTION:
-Title: ${job.title}  
-Description: ${job.description}
-    `;
-  } else {
-    // fallback (modern default)
-    promptBase = `
-You are a senior frontend engineer and resume designer. Your task is to create a **professional HTML + CSS resume** based on the provided data.
-
-📌 Design should be clean, minimalist, and follow the **modern resume reference** provided.
-
-(See modern style rules...)
-
-👤 USER PROFILE:
-Name: Muhammad Shoaib
-Email: mshoaibarid@gmail.com
-address: Phalia, Mandi Bahauddin, Pakistan
-phone: +923445450151
-languages: english, punjabi, urdu
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
-Work Experience: ${profile.jobs}  
-Projects: ${profile.projects}  
-Education: ${profile.education}  
-Career Goal: ${profile.careerGoal}  
-Location: ${profile.location}
-
-🎯 JOB DESCRIPTION:
-Title: ${job.title}  
-Description: ${job.description}
-    `;
-  }
 
   return promptBase.trim();
 };
@@ -652,6 +335,5 @@ module.exports = {
   CalculateRelevancyScores,
   getKeywordsAndSummary,
   getCoverLetterData,
-  getNormalResumeData,
-  getBestResumeData,
+  getResumeData,
 };
