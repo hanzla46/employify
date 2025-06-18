@@ -216,6 +216,20 @@ export function Jobs() {
     }
   };
 
+  // Handler to add a missing skill to roadmap
+  const handleAddMissingSkill = async (skill) => {
+    try {
+      const res = await axios.post(url + "/roadmap/add-missing-skills", { skills: [skill] }, { withCredentials: true });
+      if (res.data.success) {
+        handleSuccess(`Added '${skill}' to your roadmap suggestions!`);
+      } else {
+        handleError(res.data.message || "Failed to add skill");
+      }
+    } catch (err) {
+      handleError("Server error: could not add skill");
+    }
+  };
+
   // Common button classes
   const baseActionBtnClass =
     "flex-1 inline-flex items-center justify-center px-2 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl text-white";
@@ -363,7 +377,8 @@ export function Jobs() {
                               <div className='inline-flex items-center bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/10 dark:to-amber-600/10 border border-amber-400/30 rounded-full px-3 py-1 mb-3'>
                                 <Sparkles className='h-4 w-4 text-amber-400 mr-1' />
                                 <span className='text-sm font-medium text-amber-700 dark:text-amber-300'>
-                                  AI Match: {job.matchAnalysis.score ? job.matchAnalysis.score + "%" : "N/A"}
+                                  AI Match:{" "}
+                                  {job.matchAnalysis && job.matchAnalysis.score !== undefined ? job.matchAnalysis.score + "%" : "N/A"}
                                 </span>
                               </div>
                             </div>
@@ -443,8 +458,14 @@ export function Jobs() {
                                   <div className='mt-2 p-3 bg-white dark:bg-gray-800 rounded-lg border border-amber-200 dark:border-amber-900'>
                                     <ul className='list-disc pl-5 space-y-1'>
                                       {job.matchAnalysis.missing.map((item, index) => (
-                                        <li key={index} className='text-gray-600 dark:text-gray-300'>
+                                        <li key={index} className='text-gray-600 dark:text-gray-300 flex items-center gap-2'>
                                           {item}
+                                          <button
+                                            className='ml-2 px-2 py-0.5 text-xs rounded bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-400 transition-colors'
+                                            onClick={() => handleAddMissingSkill(item)}
+                                            title='Add to Roadmap Suggestions'>
+                                            + Add
+                                          </button>
                                         </li>
                                       ))}
                                     </ul>

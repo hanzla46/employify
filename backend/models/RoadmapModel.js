@@ -46,6 +46,8 @@ const RoadmapSchema = new mongoose.Schema({
   userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   tasks: [TaskSchema],
   changes: [String],
+  missingSkills: [String], // New field to store missing skills added from job page
+  interactionCount: { type: Number, default: 0 }, // Track user interactions for roadmap update batching
 });
 
 const Roadmap = mongoose.model("Roadmap", RoadmapSchema);

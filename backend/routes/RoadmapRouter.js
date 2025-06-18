@@ -5,6 +5,7 @@ const {
   modify,
   evaluateSubtask,
   getMarketAnalysis,
+  addMissingSkills,
 } = require("../controllers/RoadmapController");
 const router = require("express").Router();
 const { fileUpload } = require("../middlewares/uploadMulter");
@@ -16,5 +17,6 @@ router.get("/career-paths", ensureAuthenticated, getAllCareerPaths);
 router.get("/modify", ensureAuthenticated, modify);
 router.get("/market-analysis", ensureAuthenticated, getMarketAnalysis);
 router.post("/evaluate-subtask", ensureAuthenticated, fileUpload.single("file"), evaluateSubtask);
+router.post("/add-missing-skills", ensureAuthenticated, addMissingSkills);
 
 module.exports = router;
