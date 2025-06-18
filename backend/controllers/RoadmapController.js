@@ -4,7 +4,7 @@ const MarketAnalysis = require("../models/MarketAnalysisModel");
 const { getRoadmapPrompt, getCareerPathPrompt } = require("../Services/RoadmapPrompt");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { parse, repair } = require("jsonrepair");
-
+const { updateUserProfile } = require("../controllers/ProfileController");
 async function safeJsonParse(rawContent) {
   try {
     // Attempt normal parse first
@@ -294,6 +294,7 @@ keep your response as short as possible, and do not include any additional infor
 
         await roadmap.save();
         updateRoadmap(user._id);
+        updateUserProfile(user._id, analysis, subtask.name);
         return res.status(200).json({
           success: true,
           message: "Subtask evaluated successfully",

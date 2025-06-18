@@ -228,5 +228,43 @@ Focus on subskills that are:
     });
   }
 };
-
-module.exports = { add, check, getQuestions, evaluateProfile, getSubskills };
+const updateUserProfile = async (userId, analysis, subtaskName) => {
+  try {
+    const profile = await Profile.findOne({ userId });
+    if (!profile) {
+      console.error("Profile not found for user:", userId);
+      return;
+    }
+    // Get current summary and keywords
+    const currentSummary = profile.profileSummary || "";
+    const currentKeywords = profile.jobKeywords || [];
+    // Prepare prompt for LLM
+    const prompt = `You are an expert career coach AI. The user's profile summary and keywords are below.\n\nCurrent Profile Summary:\n${currentSummary}\n\nCurrent Keywords:\n${currentKeywords.join(
+      ", "
+    )}\n\nA new subtask was completed: ${subtaskName}\n\nEvaluation/Feedback: ${analysis}\n\nUpdate the profile summary and keywords to reflect this new progress. Priortize existing data, just append it with new data. \n\nReturn ONLY JSON in this format:\n\n
+    \`\`\` json\n{\n  "profileSummary": "...updated summary...",\n  "jobKeywords": ["keyword1", "keyword2", ...]\n}\`\`\`\n`;
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-preview-05-20",
+      generation_config: {
+        temperature: 1,
+        response_mime_type: "application/json",
+      },
+    });
+    const result = await model.generateContent(prompt);
+    const content = result.response.candidates[0].content.parts[0].text;
+    const match = content.match(/```json\n([\s\S]*?)\n```/);
+    if (!match) {
+      console.error("LLM did not return valid JSON for profile update:", content);
+      return;
+    }
+    const updated = JSON.parse(match[1]);
+    if (updated.profileSummary) profile.profileSummary = updated.profileSummary;
+    if (updated.jobKeywords) profile.jobKeywords = updated.jobKeywords;
+    console.log("Updating profile with new summary and keywords:", updated);
+    await profile.save();
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+  }
+};
+module.exports = { add, check, getQuestions, evaluateProfile, getSubskills, updateUserProfile };
