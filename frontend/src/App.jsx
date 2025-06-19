@@ -17,6 +17,7 @@ import { SkillsProvider } from "./Context/SkillsContext.jsx";
 import { ToastContainer } from "./utils.js";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { JobsProvider } from "./Context/JobsContext.jsx";
+import Profile from "./pages/Profile";
 
 function App() {
   const [darkMode, setDarkMode] = useState(false);
@@ -53,6 +54,7 @@ function App() {
                   <Route path='/signup' element={<Signup />} />
                   <Route path='/interview' element={<Interview />} />
                   <Route path='/roadmap' element={<Roadmap />} />
+                  <Route path='/profile' element={<Profile />} />
                   <Route path='/jobs' element={<Jobs />} />
                   <Route path='/pricing' element={<Pricing />} />
                   <Route path='/about' element={<About />} />

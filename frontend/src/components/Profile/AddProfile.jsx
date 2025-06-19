@@ -1,13 +1,15 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { handleError, handleSuccess } from "../../utils";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Accept"] = "application/json";
 import { countryCityMap } from "./CountryCityData";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-const ProfileForm = ({ setHasProfile }) => {
+import { SkillsContext } from "../../Context/SkillsContext";
+import { useNavigate } from "react-router-dom";
+const ProfileForm = () => {
   const url = import.meta.env.VITE_API_URL;
-
+  const { hasProfile, setHasProfile } = useContext(SkillsContext);
   const fetchSubskills = async (skillName, skillId) => {
     if (skillName === "") return;
     try {
@@ -197,6 +199,12 @@ const ProfileForm = ({ setHasProfile }) => {
       handleError(error.response?.data?.message || "Failed to submit profile");
     }
   };
+  const navigate = useNavigate();
+  useEffect(() => {
+    if (hasProfile) {
+      navigate("/roadmap");
+    }
+  }, [hasProfile, navigate]);
 
   const renderHardSkills = () => {
     return hardSkills.map((skill, id) => (

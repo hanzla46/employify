@@ -479,7 +479,6 @@ const SkillsGraph = () => {
         setLoading(true);
         setModifyLoading(true);
         setError(null);
-        setCareerPath(selectedPath.Path_name);
         const result = await axios.post(
           url + "/roadmap/generate",
           { selectedPath },
@@ -491,6 +490,7 @@ const SkillsGraph = () => {
           }
         );
         if (result.data.success) {
+          setCareerPath(selectedPath.Path_name);
           console.log("API Roadmap data:", result.data.data);
           localStorage.setItem("roadmap", JSON.stringify(result.data.data)); // Store raw data in localStorage
           if (
