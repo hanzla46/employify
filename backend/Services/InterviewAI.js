@@ -1,6 +1,6 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const GeneratePrompt = (interview) => {
-  return `
+const ContinueInterviewAI = async (interview) => {
+  const prompt = `
   You are an advanced AI Interview Assistant, meticulously designed to enhance the interview process and provide insightful analysis of candidate performance. Your core responsibilities are:
 
   **1. Comprehensive Answer Analysis:**
@@ -99,8 +99,16 @@ const GeneratePrompt = (interview) => {
 
   Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "hypothetical_response", "score", "completed") must be strings. Avoid including any introductory or concluding text outside of the JSON object.
   `;
+  console.log("interview prompt: " + prompt);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
+  const parsedResult = JSON.parse(jsonString);
+  return parsedResult;
 };
-const GetInterviewInfo = async (profile, jobOrMock, job, interviewData, previousInterviews) => {
+const GetInterviewInfoAI = async (profile, jobOrMock, job, interviewData, previousInterviews) => {
   const jobInfo = `
 ### Job-Based Interview Context:
 - Role Title: ${job?.title}
@@ -181,4 +189,4 @@ Format your output as a clear, concise, professional summary in **one paragraph*
   return content;
 };
 
-module.exports = { GeneratePrompt, GetInterviewInfo };
+module.exports = { ContinueInterviewAI, GetInterviewInfoAI };

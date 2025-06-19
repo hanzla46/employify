@@ -1,7 +1,6 @@
 const Interview = require("../models/InterviewModel");
-const { GeneratePrompt, GetInterviewInfo } = require("../Services/InterviewPrompt");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { ProcessVideo, ProcessAudio } = require("../Services/ProcessMedia.Interview");
+const { ContinueInterviewAI, GetInterviewInfoAI } = require("../Services/InterviewAI");
+const { ProcessVideo } = require("../Services/ProcessMedia.Interview");
 const Profile = require("../models/ProfileModel");
 
 const startInterview = async (req, res) => {
@@ -16,7 +15,7 @@ const startInterview = async (req, res) => {
       userId,
       status: "completed",
     }).sort({ createdAt: -1 });
-    const infoSummary = await GetInterviewInfo(profile, jobOrMock, job, interviewData, previousInterviews);
+    const infoSummary = await GetInterviewInfoAI(profile, jobOrMock, job, interviewData, previousInterviews);
     if (infoSummary.startsWith("WRONG")) {
       return res.status(401).json({ message: "fake input!!!", success: false });
     }
@@ -86,21 +85,9 @@ const continueInterview = async (req, res) => {
     } else {
       console.log("No video file uploaded.");
     }
-    if (audio) {
-      console.log("Audio received - Size:", audio.size / 1024 / 1024, "MB, Type:", audio.mimetype);
-      ProcessAudio(audio, QId, userId);
-    } else {
-      console.log("No audio file uploaded.");
-    }
-    const prompt = GeneratePrompt(interview);
-    console.log("interview prompt: " + prompt);
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash-lite" });
-    const result = await model.generateContent(prompt);
-    const content = result.response.candidates[0].content.parts[0].text;
-    const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
-    const parsedResult = JSON.parse(jsonString);
-    console.log("Parsed Result:", parsedResult);
+    const result = await ContinueInterviewAI(interview);
+
+    console.log("Parsed Result:", result);
     const {
       overallAnalysis,
       currentAnalysis,
@@ -111,7 +98,7 @@ const continueInterview = async (req, res) => {
       overallScore,
       completed,
       weaknesses,
-    } = parsedResult;
+    } = result;
 
     if (interview.questions.length > 1) {
       let lastQuestion = interview.questions[interview.questions.length - 2];

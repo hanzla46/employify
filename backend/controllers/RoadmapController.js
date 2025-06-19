@@ -1,27 +1,9 @@
 const Profile = require("../models/ProfileModel");
 const Roadmap = require("../models/RoadmapModel");
 const MarketAnalysis = require("../models/MarketAnalysisModel");
-const { getRoadmapPrompt, getCareerPathPrompt } = require("../Services/RoadmapPrompt");
-const { GoogleGenerativeAI } = require("@google/generative-ai");
-const { parse, repair } = require("jsonrepair");
-const { updateUserProfile } = require("../controllers/ProfileController");
-async function safeJsonParse(rawContent) {
-  try {
-    // Attempt normal parse first
-    return JSON.parse(rawContent);
-  } catch (err) {
-    console.warn("⚠️ Normal JSON parse failed. Trying to REPAIR broken JSON...");
-    try {
-      // Try to repair broken JSON
-      const repaired = repair(rawContent);
-      console.log("🛠️ Successfully repaired JSON.");
-      return JSON.parse(repaired);
-    } catch (repairErr) {
-      console.error("💀 JSON Repair also failed.");
-      throw new Error("Completely invalid JSON, bro. LLM needs chittar therapy.");
-    }
-  }
-}
+const { generateRoadmapAI, modifyRoadmapAI, getCareerPathsAI, evaluateSubtaskAI } = require("../Services/RoadmapAI.js");
+const { updateRoadmap, updateUserProfile } = require("../Services/DynamicUpdates.js");
+
 const generateRoadmap = async (req, res) => {
   try {
     const user = req.user;
@@ -45,28 +27,7 @@ const generateRoadmap = async (req, res) => {
     }
     profile.careerGoal = selectedPath.Path_name;
     await profile.save();
-    const prompt = await getRoadmapPrompt(profile, selectedPath);
-    console.log(prompt);
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-preview-05-20",
-      generation_config: {
-        thinkingConfig: {
-          thinkingBudget: 0,
-        },
-        temperature: 2,
-        response_mime_type: "application/json",
-      },
-    });
-    const result = await model.generateContent(prompt);
-    const content = result.response.candidates[0].content.parts[0].text;
-    console.log("Generated content:", content);
-    const match = content.match(/```json\n([\s\S]*?)\n```/);
-    if (!match) {
-      throw new Error("💥 No valid JSON block found.");
-    }
-    const extractedJson = match[1];
-    const roadmapData = await safeJsonParse(extractedJson);
+    const roadmapData = await generateRoadmapAI(profile, selectedPath);
     const { tasks } = roadmapData;
     console.log(roadmapData);
     const roadmap = new Roadmap({ userId: user._id, tasks: tasks, changes: [] });
@@ -107,39 +68,7 @@ const modify = async (req, res) => {
     const query = req.query.text;
     const roadmap = await Roadmap.findOne({ userId });
     console.log("roadmap" + roadmap);
-    const prompt = `Improve this career roadmap. user want modifications: ${query} \n and roadmap task array is ${roadmap.tasks} \n\n\n
----
-Strictly Keep the schema same. you can add/remove/change the tasks or subtasks depending on the modifications requirements. if you change any task/subtask change their other data accordingly. Update tag of each task (new, updated etc).
----
-Strictly give json response like:
-\`\`\`json
-{
-tasks: [all tasks array with schema of existing tasks],
-}
-\`\`\`
-`;
-    console.log("modification prompt" + prompt);
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-preview-04-17",
-      generation_config: {
-        thinkingConfig: {
-          thinkingBudget: 0,
-        },
-        temperature: 1,
-        response_mime_type: "application/json",
-      },
-    });
-    const result = await model.generateContent(prompt);
-    const content = result.response.candidates[0].content.parts[0].text;
-    console.log("Generated content:", content);
-    const match = content.match(/```json\n([\s\S]*?)\n```/);
-    if (!match) {
-      console.log("💥 No valid JSON block found.");
-      return res.status(500).json({ success: false, message: "AI Engine Error!" });
-    }
-    const extractedJson = match[1];
-    const roadmapData = await safeJsonParse(extractedJson);
+    const roadmapData = await modifyRoadmapAI(roadmap, query);
     const { tasks } = roadmapData;
     console.log(roadmapData);
     await Roadmap.updateOne({ userId: userId }, { $set: { tasks: tasks } });
@@ -163,25 +92,7 @@ const getAllCareerPaths = async (req, res) => {
     console.log("userid" + userId);
     const profile = await Profile.findOne({ userId: userId });
     console.log(profile);
-    const prompt = getCareerPathPrompt(profile);
-    console.log(prompt);
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-preview-04-17",
-      generation_config: {
-        temperature: 2,
-        response_mime_type: "application/json",
-      },
-    });
-    const result = await model.generateContent(prompt);
-    const content = result.response.candidates[0].content.parts[0].text;
-    console.log("Generated content:", content);
-    const match = content.match(/```json\n([\s\S]*?)\n```/);
-    if (!match) {
-      throw new Error("💥 No valid JSON block found.");
-    }
-    const extractedJson = match[1];
-    const CareerPaths = await safeJsonParse(extractedJson);
+    const CareerPaths = await getCareerPathsAI(profile);
     const { paths } = CareerPaths;
     console.log(paths);
     res.status(200).json({ data: { paths }, success: true });
@@ -250,37 +161,8 @@ const evaluateSubtask = async (req, res) => {
       });
     }
 
-    let analysis = "";
+    let analysis = await evaluateSubtaskAI(subtask, text, req.file);
 
-    if (req.file || text) {
-      const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-      const model = genAI.getGenerativeModel({
-        model: "gemini-2.5-flash-preview-05-20",
-        generation_config: {
-          thinkingConfig: {
-            thinkingBudget: 0,
-          },
-          temperature: 0.4,
-        },
-      });
-
-      let promptText = `As a career advisor, evaluate the following submission for the task "${task.name}" and subtask "${subtask.name}". `;
-      if (req.file) {
-        const fileContent = req.file.buffer.toString();
-        promptText += `The user has submitted a file with the following content:\n${fileContent}\n`;
-      }
-      if (text) {
-        promptText += `The user has provided the following explanation:\n${text}\n`;
-      }
-      promptText += `\nProvide a concise evaluation (phrases) of this submission. Assess:
-1. Areas of strength
-2. Areas for improvement.
-3. Relevance.
-keep your response as short as possible, and do not include any additional information or instructions. dont add markdown or text formatting.`;
-
-      const result = await model.generateContent(promptText);
-      analysis = result.response.text();
-    }
     let retries = 3;
     while (retries > 0) {
       try {
@@ -402,88 +284,6 @@ const addMissingSkills = async (req, res) => {
   } catch (error) {
     console.error("Failed to add missing skills:", error.message);
     return res.status(500).json({ success: false, message: error.message });
-  }
-};
-
-//helper function to update roadmap dynamically
-const updateRoadmap = async (userId) => {
-  const roadmap = await Roadmap.findOne({ userId });
-  if (!roadmap) return;
-
-  roadmap.interactionCount = (roadmap.interactionCount || 0) + 1;
-  await roadmap.save();
-
-  // If threshold reached, trigger roadmap update
-  if (roadmap.interactionCount >= 4) {
-    // 1. Grab latest 4 interactions (subtask evaluations and missing skills)
-    let evaluations = [];
-    roadmap.tasks.forEach((task) => {
-      task.subtasks.forEach((subtask) => {
-        if (subtask.evaluation && subtask.evaluation.text) {
-          evaluations.push({
-            taskId: task.id,
-            subtaskId: subtask.id,
-            evaluation: { ...subtask.evaluation },
-            completed: subtask.completed,
-            subtaskRef: subtask, // for resetting below
-          });
-        }
-      });
-    });
-    evaluations.sort((a, b) => new Date(b.evaluation.submittedAt) - new Date(a.evaluation.submittedAt));
-    const missingSkills = roadmap.missingSkills || [];
-    const numNeeded = 4 - missingSkills.length;
-    const selectedEvaluations = evaluations.slice(0, Math.max(0, numNeeded));
-
-    // Prepare prompt for Gemini
-    const prompt = `You are an expert career coach AI. The user has made progress on their roadmap. Your job is to update ONLY the incomplete tasks/subtasks in the roadmap below, using the user's latest progress and missing skills.\n\n---\n\nCurrent Roadmap Tasks (JSON, exact schema, only incomplete tasks/subtasks):\n\n\`json\n${JSON.stringify(
-      roadmap.tasks,
-      null,
-      2
-    )}\n\`\n\n---\n\nRecent User Progress (subtask evaluations):\n${selectedEvaluations
-      .map(
-        (ev) =>
-          `Task ID: ${ev.taskId}, Subtask ID: ${ev.subtaskId}, Evaluation: ${
-            ev.evaluation.analysis || ev.evaluation.text
-          }`
-      )
-      .join("\n")}\n\n---\n\nMissing Skills the user wants to add:\n${missingSkills.join(
-      ", "
-    )}\n\n---\n\nUpdate the roadmap to reflect the user's new skills and progress. You may:\n- Add, remove, or update tasks/subtasks as needed.\n- Only modify tasks/subtasks that are not completed.\n- Keep the schema EXACTLY the same as input.\n- Return ONLY the updated tasks array in JSON, no extra text.\n\n
-    \`\`\` json\n{ "tasks":[updated tasks array]} \n\`\`\``;
-    console.log("Update prompt:", prompt);
-    // Call Gemini API
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-    const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-preview-05-20",
-      generation_config: {
-        thinkingBudget: 0,
-        temperature: 1,
-        response_mime_type: "application/json",
-      },
-    });
-    const result = await model.generateContent(prompt);
-    const content = result.response.candidates[0].content.parts[0].text;
-    const match = content.match(/```json\n([\s\S]*?)\n```/);
-    if (!match) return; // fail silently for now
-    const roadmapData = await safeJsonParse(match[1]);
-    if (!roadmapData.tasks || !Array.isArray(roadmapData.tasks)) {
-      console.error("Gemini response JSON did not contain a valid 'tasks' array:", roadmapData);
-      return; // do not overwrite tasks if invalid
-    }
-    roadmap.tasks = roadmapData.tasks;
-
-    // 2. Reset the evaluation objects we just used (but keep completed as true)
-    selectedEvaluations.forEach(({ subtaskRef, completed }) => {
-      subtaskRef.evaluation = undefined;
-      if (completed) subtaskRef.completed = true;
-    });
-    // 3. Reset missingSkills and interactionCount
-    roadmap.missingSkills = [];
-    roadmap.interactionCount = 0;
-    await roadmap.save();
-    console.log(`Roadmap dynamically updated successfully: ${roadmap.tasks.length} tasks`);
-    return;
   }
 };
 

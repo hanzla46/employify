@@ -3,7 +3,7 @@ const Profile = require("../models/ProfileModel.js");
 const Job = require("../models/JobModel");
 const User = require("../models/User.js");
 const fs = require("fs");
-const { CalculateRelevancyScores, getCoverLetterData, getResumeData } = require("../Services/JobPrompts.js");
+const { CalculateRelevancyScoresAI, getCoverLetterDataAI, getResumeDataAI } = require("../Services/JobsAI.js");
 // Helper function to split array into chunks
 const chunkArray = (array, size) => {
   const chunks = [];
@@ -71,7 +71,7 @@ const getJobs = async (req, res) => {
     console.log(`Split jobs into ${jobChunks.length} chunks of 50 jobs each`); // Process each chunk in parallel and ensure we get analysis for each job
     const analysisResults = await Promise.all(
       jobChunks.map(async (chunk) => {
-        const chunkAnalysis = await CalculateRelevancyScores(chunk, profile);
+        const chunkAnalysis = await CalculateRelevancyScoresAI(chunk, profile);
         // Make sure we have analysis for each job in the chunk
         return chunk.map((job) => {
           const analysis = chunkAnalysis.find((a) => a.id === job._id.toString());
@@ -121,7 +121,7 @@ const generateCL = async (req, res) => {
     } else {
       console.log("job found: " + job);
     }
-    const coverLetterText = await getCoverLetterData(summary, job);
+    const coverLetterText = await getCoverLetterDataAI(summary, job);
     const buffer = Buffer.from(coverLetterText, "utf-8");
     res.set({
       "Content-Type": "text/plain",
@@ -144,7 +144,7 @@ const generateResume = async (req, res) => {
     const { jobId } = req.query;
     console.log("params: " + jobId);
     const job = await Job.findOne({ id: jobId });
-    const resumeBuffer = await getResumeData(profile, job);
+    const resumeBuffer = await getResumeDataAI(profile, job);
     res.set({
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="NormalResume_${job.id}_123.pdf"`,

@@ -1,7 +1,8 @@
 const moment = require("moment");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const mime = require("mime-types");
-const getRoadmapPrompt = async (profile, selectedPath) => {
+const { parse, repair } = require("jsonrepair");
+const generateRoadmapAI = async (profile, selectedPath) => {
   try {
     const { preferences } = selectedPath;
     const difficultyLevel = preferences?.difficulty || "intermediate";
@@ -139,15 +140,36 @@ Accelerators: ${selectedPath.Accelerators} \n
 Generate the JSON roadmap and summary now based *specifically* on the user profile and the rules above. Be strategic, realistic, and relentlessly focused on helping the user achieve **${
       selectedPath.Path_name || "their career goal"
     }** and stand out in the modern, AI-influenced job market. Ensure the JSON is valid.`;
-    return prompt;
+    console.log(prompt);
+    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+    const model = genAI.getGenerativeModel({
+      model: "gemini-2.5-flash-preview-05-20",
+      generation_config: {
+        thinkingConfig: {
+          thinkingBudget: 0,
+        },
+        temperature: 2,
+        response_mime_type: "application/json",
+      },
+    });
+    const result = await model.generateContent(prompt);
+    const content = result.response.candidates[0].content.parts[0].text;
+    console.log("Generated content:", content);
+    const match = content.match(/```json\n([\s\S]*?)\n```/);
+    if (!match) {
+      throw new Error("💥 No valid JSON block found.");
+    }
+    const extractedJson = match[1];
+    const roadmapData = await safeJsonParse(extractedJson);
+    return roadmapData;
   } catch (error) {
     console.error("Error generating roadmap prompt:", error);
     return prompt;
     throw error;
   }
 };
-const getCareerPathPrompt = (profile) => {
-  return `You are an expert career strategist and global job market analyst.
+const getCareerPathsAI = async (profile) => {
+  const prompt = `You are an expert career strategist and global job market analyst.
 
 Given a user's profile, simulate **ALL realistic and high-potential career paths** they can pursue — from safe jobs to bold moves, from stable employment to freelance/startup gigs. Tailor suggestions to their **current skill set, education, career goals, AND location**.
 
@@ -221,6 +243,107 @@ Output format:
 }
 \`\`\`
 `;
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash-preview-04-17",
+    generation_config: {
+      temperature: 2,
+      response_mime_type: "application/json",
+    },
+  });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  console.log("Generated content:", content);
+  const match = content.match(/```json\n([\s\S]*?)\n```/);
+  if (!match) {
+    throw new Error("💥 No valid JSON block found.");
+  }
+  const extractedJson = match[1];
+  const CareerPaths = await safeJsonParse(extractedJson);
+  return CareerPaths;
 };
 
-module.exports = { getRoadmapPrompt, getCareerPathPrompt };
+const modifyRoadmapAI = async (roadmap, query) => {
+  const prompt = `Improve this career roadmap. user want modifications: ${query} \n and roadmap task array is ${roadmap.tasks} \n\n\n
+---
+Strictly Keep the schema same. you can add/remove/change the tasks or subtasks depending on the modifications requirements. if you change any task/subtask change their other data accordingly. Update tag of each task (new, updated etc).
+---
+Strictly give json response like:
+\`\`\`json
+{
+tasks: [all tasks array with schema of existing tasks],
+}
+\`\`\`
+`;
+  console.log("modification prompt" + prompt);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash-preview-04-17",
+    generation_config: {
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
+      temperature: 1,
+      response_mime_type: "application/json",
+    },
+  });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  console.log("Generated content:", content);
+  const match = content.match(/```json\n([\s\S]*?)\n```/);
+  if (!match) {
+    console.log("💥 No valid JSON block found.");
+    return res.status(500).json({ success: false, message: "AI Engine Error!" });
+  }
+  const extractedJson = match[1];
+  const roadmapData = await safeJsonParse(extractedJson);
+  return roadmapData;
+};
+const evaluateSubtaskAI = async (subtask, text, file) => {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash-preview-05-20",
+    generation_config: {
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
+      temperature: 0.4,
+    },
+  });
+
+  let promptText = `As a career advisor, evaluate the following submission for the task "${task.name}" and subtask "${subtask.name}". `;
+  if (file) {
+    const fileContent = file.buffer.toString();
+    promptText += `The user has submitted a file with the following content:\n${fileContent}\n`;
+  }
+  if (text) {
+    promptText += `The user has provided the following explanation:\n${text}\n`;
+  }
+  promptText += `\nProvide a concise evaluation (phrases) of this submission. Assess:
+  1. Areas of strength
+  2. Areas for improvement.
+  3. Relevance.
+  keep your response as short as possible, and do not include any additional information or instructions. dont add markdown or text formatting.`;
+
+  const result = await model.generateContent(promptText);
+  analysis = result.response.text();
+  return analysis;
+};
+async function safeJsonParse(rawContent) {
+  try {
+    // Attempt normal parse first
+    return JSON.parse(rawContent);
+  } catch (err) {
+    console.warn("⚠️ Normal JSON parse failed. Trying to REPAIR broken JSON...");
+    try {
+      // Try to repair broken JSON
+      const repaired = repair(rawContent);
+      console.log("🛠️ Successfully repaired JSON.");
+      return JSON.parse(repaired);
+    } catch (repairErr) {
+      console.error("💀 JSON Repair also failed.");
+      throw new Error("Completely invalid JSON, bro. LLM needs chittar therapy.");
+    }
+  }
+}
+module.exports = { generateRoadmapAI, modifyRoadmapAI, getCareerPathsAI, evaluateSubtaskAI };
