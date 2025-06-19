@@ -1,5 +1,6 @@
 const Roadmap = require("../models/RoadmapModel");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { safeJsonParse } = require("./JsonParse");
 //helper function to update roadmap dynamically
 const updateRoadmap = async (userId) => {
   const roadmap = await Roadmap.findOne({ userId });

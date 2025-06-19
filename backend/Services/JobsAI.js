@@ -3,6 +3,7 @@ const { GoogleGenAI } = require("@google/genai");
 const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
+const { safeJsonParse } = require("./JsonParse");
 const CalculateRelevancyScoresAI = async (jobs, profile) => {
   const prompt = `
      You are a career coach AI. Based on the candidate's profile summary and each job description, provide a relevancy analysis.
@@ -265,24 +266,6 @@ Description: ${job.description}
 
   return promptBase.trim();
 };
-// json parse
-async function safeJsonParse(rawContent) {
-  try {
-    // Attempt normal parse first
-    return JSON.parse(rawContent);
-  } catch (err) {
-    console.warn("⚠️ Normal JSON parse failed. Trying to REPAIR broken JSON...");
-    try {
-      // Try to repair broken JSON
-      const repaired = repair(rawContent);
-      console.log("🛠️ Successfully repaired JSON.");
-      return JSON.parse(repaired);
-    } catch (repairErr) {
-      console.error("💀 JSON Repair also failed.");
-      throw new Error("Completely invalid JSON, bro. LLM needs chittar therapy.");
-    }
-  }
-}
 
 module.exports = {
   CalculateRelevancyScoresAI,

@@ -1,7 +1,5 @@
-const moment = require("moment");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-const mime = require("mime-types");
-const { parse, repair } = require("jsonrepair");
+const { safeJsonParse } = require("./JsonParse");
 const generateRoadmapAI = async (profile, selectedPath) => {
   try {
     const { preferences } = selectedPath;
@@ -329,21 +327,5 @@ const evaluateSubtaskAI = async (subtask, text, file) => {
   analysis = result.response.text();
   return analysis;
 };
-async function safeJsonParse(rawContent) {
-  try {
-    // Attempt normal parse first
-    return JSON.parse(rawContent);
-  } catch (err) {
-    console.warn("⚠️ Normal JSON parse failed. Trying to REPAIR broken JSON...");
-    try {
-      // Try to repair broken JSON
-      const repaired = repair(rawContent);
-      console.log("🛠️ Successfully repaired JSON.");
-      return JSON.parse(repaired);
-    } catch (repairErr) {
-      console.error("💀 JSON Repair also failed.");
-      throw new Error("Completely invalid JSON, bro. LLM needs chittar therapy.");
-    }
-  }
-}
+
 module.exports = { generateRoadmapAI, modifyRoadmapAI, getCareerPathsAI, evaluateSubtaskAI };
