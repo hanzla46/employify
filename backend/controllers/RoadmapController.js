@@ -184,9 +184,10 @@ const getAllCareerPaths = async (req, res) => {
     const CareerPaths = await safeJsonParse(extractedJson);
     const { paths } = CareerPaths;
     console.log(paths);
-    res.status(200).json({ data: { paths } });
+    res.status(200).json({ data: { paths }, success: true });
   } catch (error) {
     console.log(error);
+    res.status(500).json({ message: error, success: false });
   }
 };
 

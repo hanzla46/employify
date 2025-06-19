@@ -15,7 +15,7 @@ export function Login() {
   const redirectPath = new URLSearchParams(location.search).get("redirect") || "/";
   useEffect(() => {
     if (user) {
-      handleSuccess(`Already loggedin \n Redirecting to ${redirectPath}...`);
+      // handleSuccess(`Already loggedin \n Redirecting to ${redirectPath}...`);
       setTimeout(() => {
         navigate(redirectPath);
       }, 3500);

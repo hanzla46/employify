@@ -7,7 +7,7 @@ const add = async (req, res) => {
   try {
     const userId = req.user._id;
     console.log("checking existing profile");
-    const { hardSkills, softSkills, jobs, projects, careerGoal, location, education } = req.body;
+    const { hardSkills, softSkills, jobs, projects, careerGoal, location } = req.body;
     console.log("Creating new profile");
     const profile = new Profile({
       userId,
@@ -17,7 +17,6 @@ const add = async (req, res) => {
       projects,
       careerGoal,
       location,
-      education,
     });
     console.log("Profile data:", profile);
     await profile.save();

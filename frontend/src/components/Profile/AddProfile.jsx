@@ -55,14 +55,14 @@ const ProfileForm = () => {
       name: "",
     },
   ]);
-  const [education, setEducation] = useState([
-    {
-      id: Math.random(),
-      degree: "",
-      startYear: "",
-      endYear: "",
-    },
-  ]);
+  // const [education, setEducation] = useState([
+  //   {
+  //     id: Math.random(),
+  //     degree: "",
+  //     startYear: "",
+  //     endYear: "",
+  //   },
+  // ]);
   const [careerGoal, setCareerGoal] = useState("");
   const [selectedCountry, setSelectedCountry] = useState("");
   const [selectedCity, setSelectedCity] = useState("");
@@ -98,15 +98,16 @@ const ProfileForm = () => {
         name: "",
       };
       setProjects([...projects, newProject]);
-    } else if (type === "education") {
-      const newEducation = {
-        id: Math.random(),
-        degree: "",
-        startYear: "",
-        endYear: "",
-      };
-      setEducation([...education, newEducation]);
     }
+    // else if (type === "education") {
+    //   const newEducation = {
+    //     id: Math.random(),
+    //     degree: "",
+    //     startYear: "",
+    //     endYear: "",
+    //   };
+    //   setEducation([...education, newEducation]);
+    // }
   };
 
   const handleChange = (type, id, field, value) => {
@@ -118,9 +119,10 @@ const ProfileForm = () => {
       setJobs(jobs.map((job) => (job.id === id ? { ...job, [field]: value } : job)));
     } else if (type === "project") {
       setProjects(projects.map((project) => (project.id === id ? { ...project, [field]: value } : project)));
-    } else if (type === "education") {
-      setEducation(education.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu)));
     }
+    // else if (type === "education") {
+    //   setEducation(education.map((edu) => (edu.id === id ? { ...edu, [field]: value } : edu)));
+    // }
   };
 
   const removeItem = (type, id) => {
@@ -132,9 +134,10 @@ const ProfileForm = () => {
       setJobs(jobs.filter((job) => job.id !== id));
     } else if (type === "project" && projects.length > 1) {
       setProjects(projects.filter((project) => project.id !== id));
-    } else if (type === "education" && education.length > 1) {
-      setEducation(education.filter((edu) => edu.id !== id));
     }
+    //  else if (type === "education" && education.length > 1) {
+    //   setEducation(education.filter((edu) => edu.id !== id));
+    // }
   };
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -158,11 +161,11 @@ const ProfileForm = () => {
     const processedProjects = projects.map((project) => ({
       name: project.name,
     }));
-    const processedEducation = education.map((edu) => ({
-      degree: edu.degree,
-      startYear: edu.startYear.toString(),
-      endYear: edu.endYear.toString(),
-    }));
+    // const processedEducation = education.map((edu) => ({
+    //   degree: edu.degree,
+    //   startYear: edu.startYear.toString(),
+    //   endYear: edu.endYear.toString(),
+    // }));
 
     try {
       const result = await axios.post(
@@ -173,7 +176,7 @@ const ProfileForm = () => {
           jobs: processedJobs,
           projects: processedProjects,
           careerGoal,
-          education: processedEducation,
+          // education: processedEducation,
           location: {
             country: selectedCountry,
             city: selectedCity,
@@ -416,71 +419,71 @@ const ProfileForm = () => {
     ));
   };
 
-  const renderEducation = () => {
-    return education.map((edu, id) => (
-      <div key={`edu-${edu.id}`} className='mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800'>
-        <div className='flex justify-between items-center mb-3'>
-          <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Education #{id + 1}</h3>
-          {education.length > 1 && (
-            <button
-              type='button'
-              onClick={() => removeItem("education", edu.id)}
-              className='text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'>
-              Remove
-            </button>
-          )}
-        </div>
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-          <div>
-            <label htmlFor={`edu-degree-${edu.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-              Degree/Certificate
-            </label>
-            <input
-              type='text'
-              id={`edu-degree-${edu.id}`}
-              value={edu.degree}
-              onChange={(e) => handleChange("education", edu.id, "degree", e.target.value)}
-              placeholder='Bachelor of Science'
-              className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-              required
-            />
-          </div>
-          <div className='grid grid-cols-2 gap-4'>
-            <div>
-              <label htmlFor={`edu-start-${edu.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                Start Year
-              </label>
-              <input
-                type='number'
-                id={`edu-start-${edu.id}`}
-                value={edu.startYear}
-                onChange={(e) => handleChange("education", edu.id, "startYear", e.target.value)}
-                placeholder='2018'
-                min='1900'
-                max={new Date().getFullYear()}
-                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-              />
-            </div>
-            <div>
-              <label htmlFor={`edu-end-${edu.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
-                End Year
-              </label>
-              <input
-                type='number'
-                id={`edu-end-${edu.id}`}
-                value={edu.endYear}
-                onChange={(e) => handleChange("education", edu.id, "endYear", e.target.value)}
-                placeholder='2022'
-                min='1900'
-                max={new Date().getFullYear() + 5}
-                className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    ));
-  };
+  // const renderEducation = () => {
+  //   return education.map((edu, id) => (
+  //     <div key={`edu-${edu.id}`} className='mb-6 p-4 border border-gray-200 dark:border-gray-700 rounded-lg bg-gray-50 dark:bg-gray-800'>
+  //       <div className='flex justify-between items-center mb-3'>
+  //         <h3 className='text-lg font-medium text-gray-700 dark:text-gray-300'>Education #{id + 1}</h3>
+  //         {education.length > 1 && (
+  //           <button
+  //             type='button'
+  //             onClick={() => removeItem("education", edu.id)}
+  //             className='text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300'>
+  //             Remove
+  //           </button>
+  //         )}
+  //       </div>
+  //       <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+  //         <div>
+  //           <label htmlFor={`edu-degree-${edu.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+  //             Degree/Certificate
+  //           </label>
+  //           <input
+  //             type='text'
+  //             id={`edu-degree-${edu.id}`}
+  //             value={edu.degree}
+  //             onChange={(e) => handleChange("education", edu.id, "degree", e.target.value)}
+  //             placeholder='Bachelor of Science'
+  //             className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+  //             required
+  //           />
+  //         </div>
+  //         <div className='grid grid-cols-2 gap-4'>
+  //           <div>
+  //             <label htmlFor={`edu-start-${edu.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+  //               Start Year
+  //             </label>
+  //             <input
+  //               type='number'
+  //               id={`edu-start-${edu.id}`}
+  //               value={edu.startYear}
+  //               onChange={(e) => handleChange("education", edu.id, "startYear", e.target.value)}
+  //               placeholder='2018'
+  //               min='1900'
+  //               max={new Date().getFullYear()}
+  //               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+  //             />
+  //           </div>
+  //           <div>
+  //             <label htmlFor={`edu-end-${edu.id}`} className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>
+  //               End Year
+  //             </label>
+  //             <input
+  //               type='number'
+  //               id={`edu-end-${edu.id}`}
+  //               value={edu.endYear}
+  //               onChange={(e) => handleChange("education", edu.id, "endYear", e.target.value)}
+  //               placeholder='2022'
+  //               min='1900'
+  //               max={new Date().getFullYear() + 5}
+  //               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'
+  //             />
+  //           </div>
+  //         </div>
+  //       </div>
+  //     </div>
+  //   ));
+  // };
 
   const renderProjects = () => {
     return projects.map((project, id) => (
@@ -616,7 +619,7 @@ const ProfileForm = () => {
           onClick={() => setActiveTab("project")}>
           Projects
         </button>
-        <button
+        {/* <button
           className={`py-2 px-4 font-medium text-sm focus:outline-none ${
             activeTab === "education"
               ? "text-primary-600 dark:text-primary-400 border-b-2 border-primary-600 dark:border-primary-400"
@@ -624,7 +627,7 @@ const ProfileForm = () => {
           }`}
           onClick={() => setActiveTab("education")}>
           Education
-        </button>
+        </button> */}
         <button
           className={`py-2 px-4 font-medium text-sm focus:outline-none ${
             activeTab === "career"
@@ -734,7 +737,7 @@ const ProfileForm = () => {
           </button>
         </div>
         {/* education tab */}
-        <div className={activeTab === "education" ? "block" : "hidden"}>
+        {/* <div className={activeTab === "education" ? "block" : "hidden"}>
           <div className='mb-4'>
             <p className='text-sm text-gray-600 dark:text-gray-400'>Add your educational background.</p>
           </div>
@@ -752,7 +755,7 @@ const ProfileForm = () => {
             </svg>
             Add Another Education
           </button>
-        </div>
+        </div> */}
 
         {/* Career Goal Tab Content */}
         <div className={activeTab === "career" ? "block" : "hidden"}>{renderCareerTab()}</div>

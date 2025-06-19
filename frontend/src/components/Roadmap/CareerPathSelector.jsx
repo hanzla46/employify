@@ -38,7 +38,11 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
             Accept: "application/json",
           },
         });
-        setPathsData(result.data.data);
+        if (result.data.success) {
+          setPathsData(result.data.data);
+        } else {
+          handleError("something went wrong! try again by refreshing the page");
+        }
       } catch (error) {
         handleError("Failed to fetch career paths");
         console.error("Error fetching paths:", error);
@@ -48,7 +52,7 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
     };
     fetchPaths();
   }, [contextLoading, roadmap]);
-  if (!pathsData || !pathsData.paths || pathsData.paths.length === 0 || loading) {
+  if (loading) {
     return (
       <p className='text-center text-gray-500'>
         <Spinner />
@@ -172,11 +176,12 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
       </form>
       <div
         onClick={() => {
+          if (!selectedPathName) return;
           console.log("path selected!!");
           setIsPathSelected(true);
         }}
-        className='fixed right-4 bottom-4'>
-        <FancyButton text={"Choose"}></FancyButton>
+        className={`fixed right-4 bottom-4 ${!selectedPathName ? "opacity-50 pointer-events-none" : ""}`}>
+        <FancyButton text={"Choose"} disabled={!selectedPathName} />
       </div>
     </div>
   );

@@ -76,7 +76,15 @@ Why and What's Missing should be concise and specific to each job. dont give exp
 
 const getKeywordsAndSummary = async (profile) => {
   try {
-    const skillsList = profile.hardSkills.map((skill) => skill.name).join(", ");
+    const skillsList = profile.hardSkills
+      .map((skill) => {
+        let str = skill.name;
+        if (skill.subskills && skill.subskills.length > 0) {
+          str += ` (subskills: ${skill.subskills.join(", ")})`;
+        }
+        return str;
+      })
+      .join(", ");
 
     const prompt = `
 You are an intelligent job keyword expander and profile summarizer optimized for career platforms and recruitment engines.
