@@ -223,7 +223,7 @@ const fetchMarketAnalysis = async (skillName) => {
       return null;
     }
   } catch (error) {
-    handleError("Failed to fetch market analysis");
+    handleError("No data found for: "+skillName);
     console.error("Market analysis error:", error);
     return null;
   }

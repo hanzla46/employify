@@ -14,7 +14,7 @@ import { Account } from "./pages/Account.jsx";
 import { NotFound } from "./pages/NotFound.jsx";
 import { AuthProvider } from "./Context/AuthContext.jsx";
 import { SkillsProvider } from "./Context/SkillsContext.jsx";
-import { ToastContainer } from "./utils.js";
+import { ToastContainer } from "./utils.jsx";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { JobsProvider } from "./Context/JobsContext.jsx";
 import Profile from "./pages/Profile";
