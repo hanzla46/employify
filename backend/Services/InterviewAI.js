@@ -199,7 +199,8 @@ Use the following structured data to write a **1-paragraph, signal-rich summary*
  Return your answer as a JSON object with 'title' and 'infoSummary'.
 
 User Data:
-Profile Summary: ${profileSummary} \n
+Profile Summary: ${ProfileSummary} \n
+Career Path: ${careerPath} \n
 - Last 3 completed subtasks: ${
     completedSubtasks && completedSubtasks.length > 0 ? completedSubtasks.join(", ") : "None"
   }
@@ -213,9 +214,10 @@ Instructions:
 4. Output ONLY a valid JSON object with keys: title, infoSummary.
 
 Example Output:
-\`\`\` jsonn
-{"title": "Behavioral Interview: Teamwork", "infoSummary": "Based on your recent progress in communication and your career path in software engineering, focusing on teamwork will help address your recent feedback about collaboration."} \`\`\`
+\`\`\` json
+{"title": "Behavioral Interview: Teamwork", "infoSummary": "this is an interview for user with these skills and this experience. Based on his/her recent progress in interviews and career path, focusing on teamwork will help address your recent feedback about collaboration."} \`\`\`
 `;
+  console.log("prompt for auto interview: " + prompt);
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   const result = await model.generateContent(prompt);
@@ -226,6 +228,7 @@ Example Output:
     jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
   }
   const parsed = JSON.parse(jsonString);
+  console.log("parsed: " + parsed.title + parsed.infoSummary);
   return parsed;
 };
 

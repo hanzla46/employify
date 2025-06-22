@@ -17,8 +17,8 @@ export function Jobs() {
   const [searchParams, setSearchParams] = useSearchParams();
   const [filters, setFilters] = useState({
     search: "",
-    location: "",
-    jobType: "",
+    location: "All", // Default to "All" for consistent dropdown behavior
+    jobType: "All", // Default to "All" for consistent dropdown behavior
   });
   const [uniqueLocations, setUniqueLocations] = useState(["All locations"]);
   const [uniqueJobTypes, setUniqueJobTypes] = useState(["All types"]);
@@ -28,35 +28,41 @@ export function Jobs() {
   // State for Cover Letter and Resume generation
   const [jobActionStates, setJobActionStates] = useState({});
   const [activeResumeDropdown, setActiveResumeDropdown] = useState(null); // Stores jobId or null
-  const [isOpenedsavedJobs, setIsOpenedSavedJobs] = useState(false);
+  const [isOpenedsavedJobs, setIsOpenedSavedJobs] = useState(false); // Renamed to clearly indicate its purpose
   const [whyExpanded, setWhyExpanded] = useState({});
   const [missingExpanded, setMissingExpanded] = useState({});
 
+  // EFFECT 1: Initialize state from URL params on first render (mount)
   useEffect(() => {
-    if (isOpenedsavedJobs) {
-      return;
-    }
-    const urlFilters = {
-      search: searchParams.get("search") || "",
-      location: searchParams.get("location") || "All",
-      jobType: searchParams.get("jobType") || "All",
-    };
-    setFilters(urlFilters);
-  }, [isOpenedsavedJobs]);
+    const urlSearch = searchParams.get("search") || "";
+    const urlLocation = searchParams.get("location") || "All";
+    const urlJobType = searchParams.get("jobType") || "All";
+    const urlSavedJobs = searchParams.get("savedJobs") === "true"; // Check for "true" string
 
-  const shareJob = async (jobId) => {
-    await navigator.clipboard.writeText(window.location.origin + "/job" + "?jobId=" + jobId);
-    handleSuccess("Job link copied to clipboard!");
-  };
+    // Set filters based on URL or defaults
+    setFilters({
+      search: urlSearch,
+      location: urlLocation,
+      jobType: urlJobType,
+    });
 
+    // Set saved jobs state based on URL
+    setIsOpenedSavedJobs(urlSavedJobs);
+
+    // This effect runs only once on mount to set initial states.
+    // Subsequent changes to filters or isOpenedsavedJobs will be handled by Effect 2.
+  }, [searchParams]); // Depend on searchParams to react to external URL changes (e.g., direct navigation)
+
+  // EFFECT 2: Update URL params whenever filters or savedJobs view changes
   useEffect(() => {
-    const params = {
-      ...(filters.search && { search: filters.search }),
-      ...(filters.location !== "All" && { location: filters.location }),
-      ...(filters.jobType !== "All" && { jobType: filters.jobType }),
-    };
+    const params = {};
+    if (filters.search) params.search = filters.search;
+    if (filters.location !== "All") params.location = filters.location; // Only add if not "All"
+    if (filters.jobType !== "All") params.jobType = filters.jobType; // Only add if not "All"
+    if (isOpenedsavedJobs) params.savedJobs = "true"; // Add savedJobs param only when active
+
     setSearchParams(params);
-  }, [filters]);
+  }, [filters, isOpenedsavedJobs, setSearchParams]); // Added setSearchParams to deps for consistency
 
   useEffect(() => {
     document.title = "Jobs | Employify AI";
@@ -74,46 +80,78 @@ export function Jobs() {
 
   useEffect(() => {
     if (!Array.isArray(jobs)) return;
-    setUniqueLocations(["All", "Remote", ...new Set(jobs.map((item) => item.location).filter(Boolean))]);
-    setUniqueJobTypes(["All", ...new Set(jobs.map((item) => item.type).filter(Boolean))]);
+    // Ensure "All" and "Remote" are always options, and add others from jobs
+    setUniqueLocations(["All", "Remote", ...new Set(jobs.map((item) => item.location).filter(Boolean))].sort());
+    setUniqueJobTypes(["All", ...new Set(jobs.map((item) => item.type).filter(Boolean))].sort());
   }, [jobs]);
 
+  // EFFECT 3: Filter jobs based on current state (filters OR savedJobs view)
   useEffect(() => {
-    const filtered = jobs.filter((job) => {
-      return (
-        (filters.search === "" ||
-          job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
-          job.company.name.toLowerCase().includes(filters.search.toLowerCase())) &&
-        (filters.location === "" ||
-          filters.location === "All" ||
-          (filters.location === "Remote" && job.isRemote) ||
-          job.location === filters.location) &&
-        (filters.jobType === "" || filters.jobType === "All" || job.type === filters.jobType)
-      );
-    });
-    setFilteredJobs(filtered);
-  }, [filters, jobs]);
-
-  const toggleSaveJob = (jobId) => {
-    if (savedJobs.includes(jobId)) {
-      setSavedJobs(savedJobs.filter((id) => id !== jobId));
-    } else {
-      setSavedJobs([...savedJobs, jobId]);
-    }
-  };
-  const openCloseSavedJobs = () => {
-    if (isOpenedsavedJobs) {
-      setFilters({
-        search: "",
-        location: "",
-        jobType: "",
-      });
-      setIsOpenedSavedJobs(false);
+    let currentFilteredJobs = [];
+    if (!Array.isArray(jobs)) {
+      setFilteredJobs([]);
       return;
     }
-    let filteredJobs = jobs.filter((job) => savedJobs.includes(job.id));
-    setFilteredJobs(filteredJobs);
-    setIsOpenedSavedJobs(true);
+
+    if (isOpenedsavedJobs) {
+      // If "Saved Jobs" filter is active, only show saved jobs
+      currentFilteredJobs = jobs.filter((job) => savedJobs.includes(job.id));
+    } else {
+      // Otherwise, apply search, location, and job type filters
+      currentFilteredJobs = jobs.filter((job) => {
+        const matchesSearch =
+          filters.search === "" ||
+          job.title.toLowerCase().includes(filters.search.toLowerCase()) ||
+          job.company.name.toLowerCase().includes(filters.search.toLowerCase());
+
+        const matchesLocation =
+          filters.location === "All" || (filters.location === "Remote" && job.isRemote) || job.location === filters.location; // Direct match for location name
+
+        const matchesJobType = filters.jobType === "All" || job.type === filters.jobType;
+
+        return matchesSearch && matchesLocation && matchesJobType;
+      });
+    }
+    setFilteredJobs(currentFilteredJobs);
+  }, [filters, jobs, savedJobs, isOpenedsavedJobs]); // Added savedJobs and isOpenedsavedJobs as dependencies
+
+  const toggleSaveJob = (jobId) => {
+    const isSaved = savedJobs.includes(jobId);
+    let newSavedJobs;
+    if (isSaved) {
+      newSavedJobs = savedJobs.filter((id) => id !== jobId);
+    } else {
+      newSavedJobs = [...savedJobs, jobId];
+    }
+    setSavedJobs(newSavedJobs);
+
+    // If currently viewing saved jobs, update the filtered list immediately
+    // This is handled by the main filtering useEffect, but if we want *immediate* UI feedback
+    // without waiting for the next render cycle of the main filter, we can update here.
+    // However, the main useEffect (Effect 3) will handle it, so this manual update might be redundant.
+    // For simplicity and single source of truth for filteredJobs,
+    // let's rely on Effect 3 completely for filtering based on state changes.
+    // If performance becomes an issue on very large datasets, reconsider.
+  };
+
+  const openCloseSavedJobs = () => {
+    if (isOpenedsavedJobs) {
+      // If it was open, close it and reset filters to default "All" values
+      setFilters({
+        search: "",
+        location: "All",
+        jobType: "All",
+      });
+      setIsOpenedSavedJobs(false);
+    } else {
+      // If it was closed, open it and clear other filters
+      setIsOpenedSavedJobs(true);
+      setFilters({
+        search: "",
+        location: "All",
+        jobType: "All",
+      });
+    }
   };
 
   const navigate = useNavigate();
@@ -258,9 +296,7 @@ export function Jobs() {
             )}
             <div className='hidden md:flex space-x-4'>
               <button
-                onClick={() => {
-                  openCloseSavedJobs();
-                }}
+                onClick={openCloseSavedJobs} // Use the new handler
                 className={`p-1 text-gray-600 dark:text-gray-300 hover:text-primary-600 dark:hover:text-primary-400 ${
                   isOpenedsavedJobs ? "bg-green-500 dark:bg-green-300 border rounded-lg text-primary-600 dark:text-primary-400" : "bg-none"
                 }`}>
@@ -273,7 +309,7 @@ export function Jobs() {
       <ProtectedRoute>
         <div className='container mx-auto px-4 py-8'>
           <div className='max-w-6xl mx-auto'>
-            {!isOpenedsavedJobs && (
+            {!isOpenedsavedJobs && ( // Conditionally render filters when not in saved jobs view
               <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8'>
                 <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
                   <div className='md:col-span-2'>
@@ -607,9 +643,8 @@ export function Jobs() {
                   onClick={() =>
                     setFilters({
                       search: "",
-                      location: "",
-                      jobType: "",
-                      featured: false,
+                      location: "All", // Reset to "All" for dropdown
+                      jobType: "All", // Reset to "All" for dropdown
                     })
                   }>
                   Clear all filters
