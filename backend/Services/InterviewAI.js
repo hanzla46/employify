@@ -189,4 +189,44 @@ Format your output as a clear, concise, professional summary in **one paragraph*
   return content;
 };
 
-module.exports = { ContinueInterviewAI, GetInterviewInfoAI };
+const getSuggestedInterviewAI = async (completedSubtasks, careerPath, ProfileSummary, weaknesses) => {
+  const prompt = `
+You are an AI interview assistant responsible for generating a detailed, high-signal summary of an upcoming interview session.
+
+Your output will be passed to another AI system that generates interview questions, so the description must include clear context, focus areas, skill level, and goals of the session.
+
+Use the following structured data to write a **1-paragraph, signal-rich summary**.
+ Return your answer as a JSON object with 'title' and 'infoSummary'.
+
+User Data:
+Profile Summary: ${profileSummary} \n
+- Last 3 completed subtasks: ${
+    completedSubtasks && completedSubtasks.length > 0 ? completedSubtasks.join(", ") : "None"
+  }
+- Career Path: ${careerPath || "Not specified"}
+- Weaknesses from last 3 interviews: ${weaknesses && weaknesses.length > 0 ? weaknesses.join(", ") : "None"}
+
+Instructions:
+1. Analyze the user's recent learning/progress (subtasks), their career path, and their recent weaknesses.
+2. Suggest the most relevant interview topic (title) that would help the user improve and progress.
+3. Write a one paragraph info summary explaining why this topic is suggested, referencing the user's progress and weaknesses.
+4. Output ONLY a valid JSON object with keys: title, infoSummary.
+
+Example Output:
+\`\`\` jsonn
+{"title": "Behavioral Interview: Teamwork", "infoSummary": "Based on your recent progress in communication and your career path in software engineering, focusing on teamwork will help address your recent feedback about collaboration."} \`\`\`
+`;
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  // Extract JSON from response
+  let jsonString = content;
+  if (content.includes("```json")) {
+    jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
+  }
+  const parsed = JSON.parse(jsonString);
+  return parsed;
+};
+
+module.exports = { ContinueInterviewAI, GetInterviewInfoAI, getSuggestedInterviewAI };

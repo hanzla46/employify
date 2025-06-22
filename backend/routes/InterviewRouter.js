@@ -1,4 +1,9 @@
-const { startInterview, continueInterview } = require("../controllers/InterviewController");
+const {
+  startInterview,
+  continueInterview,
+  getAllInterviews,
+  getSuggestedInterview,
+} = require("../controllers/InterviewController");
 const ensureAuthenticated = require("../middlewares/Auth");
 const { upload } = require("../middlewares/uploadMulter");
 const router = require("express").Router();
@@ -12,4 +17,6 @@ router.post(
   ]),
   continueInterview
 );
+router.get("/get-all-interviews", ensureAuthenticated, getAllInterviews);
+router.get("/suggested-interview", ensureAuthenticated, getSuggestedInterview);
 module.exports = router;

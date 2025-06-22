@@ -1,7 +1,8 @@
 const Interview = require("../models/InterviewModel");
-const { ContinueInterviewAI, GetInterviewInfoAI } = require("../Services/InterviewAI");
+const { ContinueInterviewAI, GetInterviewInfoAI, getSuggestedInterviewAI } = require("../Services/InterviewAI");
 const { ProcessVideo } = require("../Services/ProcessMedia.Interview");
 const Profile = require("../models/ProfileModel");
+const Roadmap = require("../models/RoadmapModel");
 
 const startInterview = async (req, res) => {
   try {
@@ -129,5 +130,65 @@ const continueInterview = async (req, res) => {
     });
   }
 };
+const getAllInterviews = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const AllInterviews = await Interview.find({ userId });
+    console.log("all interviews: " + AllInterviews);
+    res.status(200).json({ interviews: AllInterviews });
+  } catch (err) {
+    res.status(500).json({ message: "server error" });
+  }
+};
 
-module.exports = { startInterview, continueInterview };
+const getSuggestedInterview = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const profile = await Profile.findOne({ userId });
+    if (!profile) return res.status(404).json({ message: "Profile not found", success: false });
+    const roadmap = await Roadmap.findOne({ userId }).tasks;
+    const interviews = await Interview.find({ userId, status: "completed" }).sort({ createdAt: -1 }).limit(3);
+    if (!roadmap || interviews.length < 1)
+      return res.status(201).json({ title: profile.careerGoal, interviewId: "", success: true });
+    // 1. Get last 3 completed subtasks
+    let completedSubtasks = [];
+    if (Array.isArray(profile.roadmap)) {
+      for (let i = profile.roadmap.length - 1; i >= 0 && completedSubtasks.length < 3; i--) {
+        const task = profile.roadmap[i];
+        if (Array.isArray(task.subtasks)) {
+          for (let j = task.subtasks.length - 1; j >= 0 && completedSubtasks.length < 3; j--) {
+            if (task.subtasks[j].completed) {
+              completedSubtasks.push(task.subtasks[j].title);
+            }
+          }
+        }
+      }
+    }
+
+    // 2. Get careerPath
+    const careerPath = profile.careerGoal || "";
+    const ProfileSummary = profile.profileSummary || "";
+
+    const weaknesses = interviews.map((i) => i.weaknesses).filter(Boolean);
+
+    const { title, infoSummary } = await getSuggestedInterviewAI(
+      completedSubtasks,
+      careerPath,
+      ProfileSummary,
+      weaknesses
+    );
+    const newInterview = new Interview({
+      userId,
+      status: "ongoing",
+      infoSummary,
+      questions: [],
+      overallScore: 0,
+      aiSummary: "",
+    });
+
+    res.status(200).json({ title, interviewId: newInterview._id, success: true });
+  } catch (err) {
+    res.status(500).json({ message: "Server error", error: err.message });
+  }
+};
+module.exports = { startInterview, continueInterview, getAllInterviews, getSuggestedInterview };

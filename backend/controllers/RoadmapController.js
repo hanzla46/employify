@@ -161,7 +161,7 @@ const evaluateSubtask = async (req, res) => {
       });
     }
 
-    let analysis = await evaluateSubtaskAI(subtask, text, req.file);
+    let analysis = await evaluateSubtaskAI(subtask, task, text, req.file);
 
     let retries = 3;
     while (retries > 0) {
