@@ -34,10 +34,6 @@ const ContinueInterviewAI = async (interview) => {
     - Allow natural pauses between topics rather than forced category switches
     - explore alot of categories while keeping in mind the interview data
 
-  **5. Realistic Hypothetical Response Generation:**
-  *   Based on the candidate's previous answers, the facial expression analysis, and your overall assessment, generate a plausible and realistic hypothetical response to the new question.
-  *   This response should be indicative of how the candidate *might* answer, considering their communication style, level of experience, and emotional cues.
-
   ---
 
   **Input Data:**
@@ -89,15 +85,14 @@ const ContinueInterviewAI = async (interview) => {
     "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression results. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point.].",
     "generated_question": "[Conversational question that naturally progresses the interview while implicitly addressing assessment needs, is concise (15-20 words max) while remaining meaningful.]",
     "question_category": "[Category of the question you generated.]",
-    "hypothetical_response": "[A realistic example of how the candidate might answer the new question, considering their communication style, level of experience, and emotional cues.]",
-    "score": "[scores of the latest question assessment. out of 10]",
-    "overallScore": "[The updated overall score of the candidate's whole interview. out of 100]",
-    "weknesses": "[user weaknesses. keep it short]",
+    "score": "[scores of the latest question assessment. out of 10. Apply the 'generous but fair' scoring philosophy.]",
+    "overallScore": "[[The updated overall score of the candidate's whole interview. out of 100. This should reflect the cumulative 'generous but fair' scoring.]",
+    "weaknesses": "[string. user weaknesses. keep it short and few phrases. could be related to hard skills or soft skills]",
     "completed": "['true'/'false'] when you have asked 11-12 questions, it should be true, otherwise false."
   }
   \`\`\`
 
-  Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "hypothetical_response", "score", "completed") must be strings. Avoid including any introductory or concluding text outside of the JSON object.
+  Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "score",'overallScore', "completed") MUST be strings. Avoid including any introductory or concluding text outside of the JSON object.
   `;
   console.log("interview prompt: " + prompt);
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);

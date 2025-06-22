@@ -101,7 +101,6 @@ const continueInterview = async (req, res) => {
       currentAnalysis,
       generated_question,
       question_category,
-      hypothetical_response,
       score,
       overallScore,
       completed,
@@ -115,6 +114,7 @@ const continueInterview = async (req, res) => {
     }
     interview.weaknesses = weaknesses;
     interview.aiSummary = overallAnalysis;
+    interview.overallScore = overallScore;
     interview.questions.push({
       question: generated_question,
       answer: "N/A",
@@ -129,7 +129,6 @@ const continueInterview = async (req, res) => {
       overallAnalysis,
       question: generated_question,
       category: question_category,
-      hypotheticalResponse: hypothetical_response,
       success: true,
       completed,
       score,
