@@ -2,10 +2,11 @@ const mongoose = require("mongoose");
 
 const questionSchema = new mongoose.Schema({
   question: { type: String, required: true },
-  answer: { type: String, required: true },
-  category: { type: String, required: true },
+  answer: { type: String },
+  category: { type: String },
   score: { type: String, default: "0" },
-  analysis: { type: String, default: "" },  facialAnalysis: {
+  analysis: { type: String, default: "" },
+  facialAnalysis: {
     timestamp: { type: Date, default: Date.now },
     emotions: [
       {
@@ -21,7 +22,7 @@ const questionSchema = new mongoose.Schema({
     clarity: { type: String, default: "" },
     confidence: { type: String, default: "" },
     paceAndTone: { type: String, default: "" },
-    fillerWords: [{ type: String }]
+    fillerWords: [{ type: String }],
   },
 });
 

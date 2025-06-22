@@ -1,6 +1,7 @@
 const {
   startInterview,
   continueInterview,
+  checkInterviewSession,
   getAllInterviews,
   getSuggestedInterview,
 } = require("../controllers/InterviewController");
@@ -19,4 +20,5 @@ router.post(
 );
 router.get("/get-all-interviews", ensureAuthenticated, getAllInterviews);
 router.get("/suggested-interview", ensureAuthenticated, getSuggestedInterview);
+router.get("/check-session", ensureAuthenticated, checkInterviewSession);
 module.exports = router;

@@ -28,8 +28,6 @@ const startInterview = async (req, res) => {
       overallScore: 0,
       aiSummary: "",
     });
-
-    await newInterview.save();
     const introInterviewQuestions = [
       "Can you briefly introduce yourself?",
       "Walk me through your background. ",
@@ -38,6 +36,15 @@ const startInterview = async (req, res) => {
       "What excites you the most about this opportunity? ",
     ];
     const randomIntroQ = introInterviewQuestions[Math.floor(Math.random() * introInterviewQuestions.length)];
+    newInterview.questions.push({
+      question: randomIntroQ,
+      answer: "N/A",
+      category: "N/A",
+      score: null,
+      facialAnalysis: { emotions: [], expressionAnalysis: "" },
+    });
+
+    await newInterview.save();
     res.status(201).json({
       message: "Interview started successfully!",
       interviewId: newInterview._id,
@@ -58,25 +65,25 @@ const continueInterview = async (req, res) => {
   try {
     console.log("Continue Interview Request:", req.body);
     const video = req.files?.video?.[0];
-    const audio = req.files?.audio?.[0];
 
     const userId = req.user._id;
-    const { question, written, answer, category } = req.body;
+    const { question, written, answer, category, sessionId } = req.body;
 
     const interview = await Interview.findOne({
+      _id: sessionId,
       userId,
       status: "ongoing",
     }).sort({ createdAt: -1 });
     if (!interview) {
       return res.status(404).json({ message: "No ongoing interview found.", success: false });
     }
-    interview.questions.push({
+    interview.questions[interview.questions.length - 1] = {
       question,
       answer: answer + written,
       category,
       score: null,
       facialAnalysis: { emotions: [], expressionAnalysis: "" },
-    });
+    };
     await interview.save();
 
     const QId = interview.questions.length;
@@ -108,6 +115,13 @@ const continueInterview = async (req, res) => {
     }
     interview.weaknesses = weaknesses;
     interview.aiSummary = overallAnalysis;
+    interview.questions.push({
+      question: generated_question,
+      answer: "N/A",
+      category: question_category,
+      score: null,
+      facialAnalysis: { emotions: [], expressionAnalysis: "" },
+    });
     await interview.save();
 
     res.status(200).json({
@@ -184,6 +198,21 @@ const getSuggestedInterview = async (req, res) => {
       overallScore: 0,
       aiSummary: "",
     });
+    const introInterviewQuestions = [
+      "Can you briefly introduce yourself?",
+      "Walk me through your background. ",
+      "How do you describe yourself in one sentence? ",
+      "What’s your story?",
+      "What excites you the most about this opportunity? ",
+    ];
+    const randomIntroQ = introInterviewQuestions[Math.floor(Math.random() * introInterviewQuestions.length)];
+    newInterview.questions.push({
+      question: randomIntroQ,
+      answer: "N/A",
+      category: "General",
+      score: null,
+      facialAnalysis: { emotions: [], expressionAnalysis: "" },
+    });
     await newInterview.save();
     res.status(200).json({ title, interviewId: newInterview._id, success: true });
   } catch (err) {
@@ -191,4 +220,33 @@ const getSuggestedInterview = async (req, res) => {
     res.status(500).json({ message: "Server error", error: err.message });
   }
 };
-module.exports = { startInterview, continueInterview, getAllInterviews, getSuggestedInterview };
+const checkInterviewSession = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { sessionId } = req.query;
+    if (!sessionId) {
+      return res.status(400).json({ success: false, message: "Session ID required" });
+    }
+    const interview = await Interview.findOne({ _id: sessionId, userId });
+    if (!interview) {
+      return res.status(404).json({ success: false, message: "Session not found" });
+    }
+    const questions = interview.questions || [];
+    const questionsLength = questions.length;
+    const currentQuestion = questionsLength > 0 ? questions[questionsLength - 1].question : null;
+    const currentCategory = questionsLength > 0 ? questions[questionsLength - 1].category : null;
+    const secondLastScore = questionsLength > 1 ? questions[questionsLength - 2].score : null;
+    return res.status(200).json({
+      success: true,
+      question: currentQuestion,
+      category: currentCategory,
+      questionsLength,
+      secondLastScore,
+      interviewId: interview._id,
+      status: interview.status,
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+};
+module.exports = { startInterview, continueInterview, checkInterviewSession, getAllInterviews, getSuggestedInterview };
