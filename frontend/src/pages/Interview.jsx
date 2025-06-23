@@ -9,9 +9,10 @@ import { JobsContext } from "../Context/JobsContext";
 import { handleSuccess, handleError } from "../utils";
 import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";
-import { useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import FancyButton from "../components/Button";
 import { AuthContext } from "../Context/AuthContext";
+import { SkillsContext } from "../Context/SkillsContext";
 const url = import.meta.env.VITE_API_URL;
 
 export function Interview() {
@@ -21,6 +22,7 @@ export function Interview() {
   const [jobOrMock, setJobOrMock] = useState("mock");
   const { jobs } = useContext(JobsContext);
   const { user } = useContext(AuthContext);
+  const { hasProfile } = useContext(SkillsContext);
   const [jobId, setJobId] = useState("");
   const [sessionId, setSessionId] = useState("");
   const [job, setJob] = useState(null);
@@ -353,16 +355,24 @@ export function Interview() {
                         <h3 className='text-xl font-semibold text-white text-center'>Interview Setup</h3>
                       </div>
                       <div className='p-6'>
-                        <DialogForm
-                          start={start}
-                          setInterviewData={setInterviewData}
-                          interviewData={interviewData}
-                          job={job}
-                          jobOrMock={jobOrMock}
-                          setJobOrMock={setJobOrMock}
-                          loading={loading}
-                          setLoading={setLoading}
-                        />
+                        {hasProfile ? (
+                          <DialogForm
+                            start={start}
+                            setInterviewData={setInterviewData}
+                            interviewData={interviewData}
+                            job={job}
+                            jobOrMock={jobOrMock}
+                            setJobOrMock={setJobOrMock}
+                            loading={loading}
+                            setLoading={setLoading}
+                          />
+                        ) : (
+                          <Link to='/profile'>
+                            <h1 className='text-lg font-semibold text-center text-indigo-700 dark:text-indigo-200 bg-indigo-50 dark:bg-indigo-900/30 rounded-xl py-4 px-2 shadow-md border border-indigo-200 dark:border-indigo-800 transition-all duration-200 hover:bg-indigo-100 dark:hover:bg-indigo-800 cursor-pointer'>
+                              Add Profile to make interview customized
+                            </h1>
+                          </Link>
+                        )}
                       </div>
                     </div>
 
