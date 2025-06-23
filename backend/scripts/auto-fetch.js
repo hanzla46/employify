@@ -256,7 +256,7 @@ const autoFetchJobs = async () => {
   const workModes = ["true", "false"];
 
   let keyIndex = 0;
-  const apiKeys = ["ff82a3cb34msh70d1e319df0556bp1011c1jsnf3a797ae2c39"];
+  const apiKeys = ["a31cbcebd0mshb2b54d3a6bfdb51p1bb25ajsnb56e2f713da4'"];
 
   function getNextApiKey() {
     const key = apiKeys[keyIndex];
