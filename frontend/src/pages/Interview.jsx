@@ -193,9 +193,27 @@ export function Interview() {
     setIsAudioRecording(false);
     setIsVideoRecording(false);
     await stopVideoRecording();
+
+    // WAIT for mediaBlobUrl to show up
+    let mediaUrl = null;
+    let attempts = 0;
+    while (!mediaUrl && attempts < 10) {
+      console.log("⏳ Waiting for mediaBlobUrl...");
+      await new Promise((res) => setTimeout(res, 300));
+      mediaUrl = mediaBlobUrl;
+      attempts++;
+    }
+
+    let blob = null;
+    if (mediaUrl) {
+      blob = await fetch(mediaUrl).then((res) => res.blob());
+      if (!blob || !blob.type.startsWith("video/")) {
+        handleError("Invalid blob type: " + blob?.type);
+      }
+    }
     const formData = new FormData();
-    if (recordedBlob) {
-      formData.append("video", recordedBlob, "recording.webm");
+    if (blob) {
+      formData.append("video", blob, "recording.webm");
     }
     formData.append("question", question);
     formData.append("category", category);
@@ -225,7 +243,7 @@ export function Interview() {
         setRecordedBlob(null);
         setIsAudioRecording(true);
         SpeechRecognition.startListening({ continuous: true });
-        // Removed auto-start of video recording after response
+        // // Removed auto-start of video recording after response
         // startVideoRecording();
         // setIsVideoRecording(true);
         if (response.data.completed == true || response.data.completed == "true") {
@@ -383,12 +401,20 @@ export function Interview() {
                   <div className='md:col-span-3 md:float-left flex flex-col justify-normal'>
                     <VideoComponent stream={previewStream} isVideoRecording={isVideoRecording} />
                     <div
-                      className='mt-5'
+                      className='mt-5 relative group'
                       onClick={() => {
+                        if (questionCount < 4) return;
                         setIsCompleted(true);
                         setIsStarted(false);
                       }}>
-                      <FancyButton text={"End Interview"} />{" "}
+                      <FancyButton disabled={questionCount < 4} text={"End Interview"} />
+                      {questionCount < 4 && (
+                        <div
+                          className='absolute left-1/2 -translate-x-1/2 top-full mt-1 z-10 px-3 py-2 rounded-lg bg-gray-800 text-white text-xs shadow-lg pointer-events-none select-none whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200'
+                          style={{ minWidth: "180px", textAlign: "center" }}>
+                          You need to answer at least 4 questions
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
