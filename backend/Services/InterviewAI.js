@@ -34,10 +34,6 @@ const ContinueInterviewAI = async (interview) => {
     - Allow natural pauses between topics rather than forced category switches
     - explore alot of categories while keeping in mind the interview data
 
-  **5. Realistic Hypothetical Response Generation:**
-  *   Based on the candidate's previous answers, the facial expression analysis, and your overall assessment, generate a plausible and realistic hypothetical response to the new question.
-  *   This response should be indicative of how the candidate *might* answer, considering their communication style, level of experience, and emotional cues.
-
   ---
 
   **Input Data:**
@@ -89,15 +85,14 @@ const ContinueInterviewAI = async (interview) => {
     "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression results. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point.].",
     "generated_question": "[Conversational question that naturally progresses the interview while implicitly addressing assessment needs, is concise (15-20 words max) while remaining meaningful.]",
     "question_category": "[Category of the question you generated.]",
-    "hypothetical_response": "[A realistic example of how the candidate might answer the new question, considering their communication style, level of experience, and emotional cues.]",
-    "score": "[scores of the latest question assessment. out of 10]",
-    "overallScore": "[The updated overall score of the candidate's whole interview. out of 100]",
-    "weknesses": "[user weaknesses. keep it short]",
+    "score": "[scores of the latest question assessment. out of 10. Apply the 'generous but fair' scoring philosophy.]",
+    "overallScore": "[[The updated overall score of the candidate's whole interview. out of 100. This should reflect the cumulative 'generous but fair' scoring.]",
+    "weaknesses": "[string. user weaknesses. keep it short and few phrases. could be related to hard skills or soft skills]",
     "completed": "['true'/'false'] when you have asked 11-12 questions, it should be true, otherwise false."
   }
   \`\`\`
 
-  Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "hypothetical_response", "score", "completed") must be strings. Avoid including any introductory or concluding text outside of the JSON object.
+  Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "score",'overallScore', "completed") MUST be strings. Avoid including any introductory or concluding text outside of the JSON object.
   `;
   console.log("interview prompt: " + prompt);
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
@@ -189,4 +184,47 @@ Format your output as a clear, concise, professional summary in **one paragraph*
   return content;
 };
 
-module.exports = { ContinueInterviewAI, GetInterviewInfoAI };
+const getSuggestedInterviewAI = async (completedSubtasks, careerPath, ProfileSummary, weaknesses) => {
+  const prompt = `
+You are an AI interview assistant responsible for generating a detailed, high-signal summary of an upcoming interview session.
+
+Your output will be passed to another AI system that generates interview questions, so the description must include clear context, focus areas, skill level, and goals of the session.
+
+Use the following structured data to write a **1-paragraph, signal-rich summary**.
+ Return your answer as a JSON object with 'title' and 'infoSummary'.
+
+User Data:
+Profile Summary: ${ProfileSummary} \n
+Career Path: ${careerPath} \n
+- Last 3 completed subtasks: ${
+    completedSubtasks && completedSubtasks.length > 0 ? completedSubtasks.join(", ") : "None"
+  }
+- Career Path: ${careerPath || "Not specified"}
+- Weaknesses from last 3 interviews: ${weaknesses && weaknesses.length > 0 ? weaknesses.join(", ") : "None"}
+
+Instructions:
+1. Analyze the user's recent learning/progress (subtasks), their career path, and their recent weaknesses.
+2. Suggest the most relevant interview topic (title) that would help the user improve and progress.
+3. Write a one paragraph info summary explaining why this topic is suggested, referencing the user's progress and weaknesses.
+4. Output ONLY a valid JSON object with keys: title, infoSummary.
+
+Example Output:
+\`\`\` json
+{"title": "Behavioral Interview: Teamwork", "infoSummary": "this is an interview for user with these skills and this experience. Based on his/her recent progress in interviews and career path, focusing on teamwork will help address your recent feedback about collaboration."} \`\`\`
+`;
+  console.log("prompt for auto interview: " + prompt);
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  // Extract JSON from response
+  let jsonString = content;
+  if (content.includes("```json")) {
+    jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
+  }
+  const parsed = JSON.parse(jsonString);
+  console.log("parsed: " + parsed.title + parsed.infoSummary);
+  return parsed;
+};
+
+module.exports = { ContinueInterviewAI, GetInterviewInfoAI, getSuggestedInterviewAI };

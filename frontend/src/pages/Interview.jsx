@@ -11,6 +11,7 @@ import DialogForm from "../components/Interview/DialogForm";
 import { Spinner } from "../lib/Spinner";
 import { useSearchParams } from "react-router-dom";
 import FancyButton from "../components/Button";
+import { AuthContext } from "../Context/AuthContext";
 const url = import.meta.env.VITE_API_URL;
 
 export function Interview() {
@@ -19,12 +20,33 @@ export function Interview() {
   }, []);
   const [jobOrMock, setJobOrMock] = useState("mock");
   const { jobs } = useContext(JobsContext);
+  const { user } = useContext(AuthContext);
   const [jobId, setJobId] = useState("");
+  const [sessionId, setSessionId] = useState("");
   const [job, setJob] = useState(null);
-  const [searchParams] = useSearchParams();
+  const [searchParams, setSearchParams] = useSearchParams();
   useEffect(() => {
     setJobId(searchParams.get("jobId") || "");
   }, [searchParams]);
+  useEffect(() => {
+    setSessionId(searchParams.get("sessionId") || "");
+  }, []);
+  useEffect(() => {
+    if (!user || !sessionId) return;
+    const checkInterviewSession = async () => {
+      const res = await axios.get(url + `/interview/check-session?sessionId=${sessionId}`);
+      if (res.data.success) {
+        setQuestion(res.data.question);
+        setCategory(res.data.category);
+        setQuestionCount(res.data.questionsLength);
+        setScore(res.data.score);
+        setIsStarted(true);
+        setIsCompleted(false);
+        setInfoBox(false);
+      }
+    };
+    checkInterviewSession();
+  }, [user, sessionId]);
   useEffect(() => {
     if (jobId) {
       const matchingJob = jobs.find((item) => item["id"] === jobId);
@@ -41,6 +63,7 @@ export function Interview() {
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const [isAudioRecording, setIsAudioRecording] = useState(false);
   const [question, setQuestion] = useState("");
+  const [questionCount, setQuestionCount] = useState(0);
   const [category, setCategory] = useState("");
   const [written, setWritten] = useState("");
   const [score, setScore] = useState();
@@ -127,6 +150,9 @@ export function Interview() {
         }
       );
       if (response.data.success) {
+        setSessionId(response.data.interviewId);
+        setSearchParams({ sessionId: response.data.interviewId });
+        setQuestionCount(1);
         setQuestion(response.data.question);
         setCategory(response.data.category);
         handleSuccess("Interview started successfully!");
@@ -175,6 +201,7 @@ export function Interview() {
     formData.append("category", category);
     formData.append("answer", transcript);
     formData.append("written", written);
+    formData.append("sessionId", sessionId);
     for (let [key, value] of formData.entries()) {
       console.log(key, value);
     }
@@ -186,6 +213,7 @@ export function Interview() {
         },
       });
       if (response.data.success) {
+        setQuestionCount(questionCount + 1);
         setQuestion(response.data.question);
         setCategory(response.data.category);
         setScore(response.data.score);
@@ -341,7 +369,7 @@ export function Interview() {
               {isStarted && (
                 <div className='grid grid-cols-1 md:grid-cols-12 gap-4 p-6'>
                   <div className='md:col-span-5'>
-                    <QuestionAndScore question={question} score={score} summary={summary} />
+                    <QuestionAndScore question={question} questionCount={questionCount} score={score} summary={summary} />
                   </div>
                   <div className='md:col-span-4'>
                     <ResponsesComponent
@@ -481,7 +509,7 @@ function InstructionsCard({ title, items, icon }) {
   );
 }
 
-function QuestionAndScore({ question, score, summary }) {
+function QuestionAndScore({ question, questionCount, score, summary }) {
   const scoreValue = score ? parseInt(score) : 0;
 
   const getScoreColor = (score) => {
@@ -501,7 +529,7 @@ function QuestionAndScore({ question, score, summary }) {
       <div className='bg-gradient-to-r from-indigo-600 to-purple-600 p-4'>
         <h3 className='text-lg font-medium text-white flex items-center'>
           <Sparkles className='h-5 w-5 mr-2' />
-          Current Question
+          Current Question {questionCount}
         </h3>
       </div>
 

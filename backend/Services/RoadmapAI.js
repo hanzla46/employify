@@ -297,7 +297,7 @@ tasks: [all tasks array with schema of existing tasks],
   const roadmapData = await safeJsonParse(extractedJson);
   return roadmapData;
 };
-const evaluateSubtaskAI = async (subtask, text, file) => {
+const evaluateSubtaskAI = async (subtask, task, text, file) => {
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
   const model = genAI.getGenerativeModel({
     model: "gemini-2.5-flash-preview-05-20",

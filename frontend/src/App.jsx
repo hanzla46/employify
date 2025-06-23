@@ -11,6 +11,7 @@ import { About } from "./pages/About";
 import { Login } from "./pages/Login.jsx";
 import { Signup } from "./pages/Signup";
 import { Account } from "./pages/Account.jsx";
+import Dashboard from "./pages/Dashboard";
 import { NotFound } from "./pages/NotFound.jsx";
 import { AuthProvider } from "./Context/AuthContext.jsx";
 import { SkillsProvider } from "./Context/SkillsContext.jsx";
@@ -48,6 +49,7 @@ function App() {
                 <ScrollToTop />
                 <Routes>
                   <Route path='/' element={<Home />} />
+                  <Route path='/dashboard' element={<Dashboard />} />
                   <Route path='/account' element={<Account />} />
                   <Route path='/home' element={<Home />} />
                   <Route path='/login' element={<Login />} />

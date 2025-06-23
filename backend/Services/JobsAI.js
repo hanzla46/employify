@@ -5,7 +5,8 @@ const path = require("path");
 const fs = require("fs");
 const { safeJsonParse } = require("./JsonParse");
 const CalculateRelevancyScoresAI = async (jobs, profile) => {
-  const prompt = `
+  try {
+    const prompt = `
      You are a career coach AI. Based on the candidate's profile summary and each job description, provide a relevancy analysis.
 
      Career Goal: ${profile.careerGoal} \n
@@ -36,43 +37,53 @@ Why and What's Missing should be concise and specific to each job. dont give exp
      ]
      \`\`\`
      `;
-  // console.log("prompt: " + prompt);
+    // console.log("prompt: " + prompt);
 
-  const ai = new GoogleGenAI({
-    apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
-  });
-  const contents = [
-    {
-      role: "user",
-      parts: [
-        {
-          text: prompt,
-        },
-      ],
-    },
-  ];
-  const modelName = "gemini-2.5-flash-preview-05-20";
-  const config = {
-    thinkingConfig: {
-      thinkingBudget: 0,
-    },
-    generationConfig: {
-      temperature: 0.0,
-      topP: 1.0,
-      topK: 1,
-    },
-  };
-  const result = await ai.models.generateContent({
-    model: modelName,
-    contents: contents,
-    config: config,
-  });
-  let content = result.candidates[0].content.parts[0].text;
-  // console.log("job ai content: " + content);
-  const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
-  const parsedResult = await safeJsonParse(jsonString);
+    const ai = new GoogleGenAI({
+      apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
+    });
+    const contents = [
+      {
+        role: "user",
+        parts: [
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ];
+    const modelName = "gemini-2.5-flash-preview-05-20";
+    const config = {
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
+      generationConfig: {
+        temperature: 0.0,
+        topP: 1.0,
+        topK: 1,
+      },
+    };
+    const result = await ai.models.generateContent({
+      model: modelName,
+      contents: contents,
+      config: config,
+    });
+    let content = result.candidates[0].content.parts[0].text;
+    // console.log("job ai content: " + content);
+    const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
+    const parsedResult = await safeJsonParse(jsonString);
 
-  return parsedResult;
+    return parsedResult;
+  } catch (error) {
+    console.error("AI relevancy scoring failed:", error);
+    // Return default analysis for all jobs in this chunk
+    return jobs.map((job) => ({
+      id: job._id.toString(),
+      score: 0,
+      why: ["AI analysis failed"],
+      missing: [],
+    }));
+  }
 };
 
 const getCoverLetterDataAI = async (summary, job) => {

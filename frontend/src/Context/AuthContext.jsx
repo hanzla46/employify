@@ -45,9 +45,9 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (name, email, password) => {
+  const signup = async (name, email, password, otp) => {
     try {
-      const res = await axios.post(url + "/auth/signup", { name, email, password }, { withCredentials: true });
+      const res = await axios.post(url + "/auth/signup", { name, email, password, otp }, { withCredentials: true });
       console.log(res);
       setUser(res.data);
       return { success: true };

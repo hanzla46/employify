@@ -3,7 +3,8 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
-
+const url = import.meta.env.VITE_API_URL;
+import axios from "axios";
 export function Signup() {
   useEffect(() => {
     document.title = "Signup | Employify AI";
@@ -12,6 +13,7 @@ export function Signup() {
 
   const redirectPath = new URLSearchParams(location.search).get("redirect") || "/";
   const { user, loading, setUser } = useContext(AuthContext);
+  const [otp, setOtp] = useState(0);
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
   useEffect(() => {
@@ -145,6 +147,16 @@ export function Signup() {
 
     return nameValid && emailValid && passwordValid && confirmPasswordValid;
   };
+  const getOtp = async (e) => {
+    e.preventDefault();
+    if (!signupInfo) return;
+    const res = await axios.get(url + "/auth/send-otp?email=" + signupInfo.email);
+    if (res.data.success) {
+      handleSuccess(res.data.message);
+    } else {
+      handleError("something went wrong");
+    }
+  };
 
   const handleSignup = async (e) => {
     e.preventDefault();
@@ -157,7 +169,7 @@ export function Signup() {
     const { name, email, password } = signupInfo;
 
     try {
-      const res = await signup(name, email, password);
+      const res = await signup(name, email, password, otp);
       if (res.success) {
         handleSuccess("Signed up successfully");
         setTimeout(() => {
@@ -225,7 +237,24 @@ export function Signup() {
             />
             {errors.email && touched.email && <p className='mt-1 text-sm text-red-500'>{errors.email}</p>}
           </div>
-
+          <div className='flex flex-col space-y-2'>
+            <div className='flex items-center space-x-2'>
+              <input
+                type='number'
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder='Enter OTP'
+                className={`w-full p-3 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-primary-500 focus:outline-none transition bg-white dark:bg-gray-700 dark:text-white`}
+              />
+              <button
+                onClick={getOtp}
+                disabled={!signupInfo.email || errors.email}
+                className='whitespace-nowrap px-4 py-3 bg-primary-500 text-white rounded-lg hover:bg-primary-600 transition focus:ring-4 focus:ring-primary-300 focus:outline-none font-medium disabled:opacity-50 disabled:cursor-not-allowed'>
+                Get OTP
+              </button>
+            </div>
+            <p className='text-xs text-gray-500 dark:text-gray-400'>We'll send a verification code to your email</p>
+          </div>
           <div>
             <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1' htmlFor='password'>
               Password
