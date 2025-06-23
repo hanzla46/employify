@@ -71,19 +71,28 @@ const getJobs = async (req, res) => {
     console.log(`Split jobs into ${jobChunks.length} chunks of 50 jobs each`); // Process each chunk in parallel and ensure we get analysis for each job
     const analysisResults = await Promise.all(
       jobChunks.map(async (chunk) => {
-        const chunkAnalysis = await CalculateRelevancyScoresAI(chunk, profile);
-        // Make sure we have analysis for each job in the chunk
-        return chunk.map((job) => {
-          const analysis = chunkAnalysis.find((a) => a.id === job._id.toString());
-          return (
-            analysis || {
-              id: job._id.toString(),
-              score: 0,
-              why: [],
-              missing: [],
-            }
-          );
-        });
+        try {
+          const chunkAnalysis = await CalculateRelevancyScoresAI(chunk, profile);
+          return chunk.map((job) => {
+            const analysis = chunkAnalysis.find((a) => a.id === job._id.toString());
+            return (
+              analysis || {
+                id: job._id.toString(),
+                score: 0,
+                why: [],
+                missing: [],
+              }
+            );
+          });
+        } catch (err) {
+          console.error(`AI analysis failed for a chunk:`, err);
+          return chunk.map((job) => ({
+            id: job._id.toString(),
+            score: 0,
+            why: ["AI analysis failed"],
+            missing: [],
+          }));
+        }
       })
     );
 

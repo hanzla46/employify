@@ -390,11 +390,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   }, [graphData]); // Rerun layout when graphData changes
 
   if (loading) {
-    return (
-      <div className='flex justify-center align-bottom'>
-        <Atom color='#32cd32' size='large' text='Loading Roadmap Graph' textColor='#17d83f' />
-      </div>
-    );
+    return <DynamicLoader />;
   }
 
   if (error) {
@@ -712,5 +708,31 @@ function Indicators({ progress }) {
     </div>
   );
 }
+const DynamicLoader = () => {
+  const loadingMessages = [
+    "Summoning Roadmap Demons 👹",
+    "Assembling AI Braincells 🧠",
+    "Manifesting Career Vibes ✨",
+    "Injecting Purpose Into Pixels 💉💻",
+    "Calling ChatGPT’s 87 cousins 🤯",
+    "Almost There... or are we? 😵‍💫",
+  ];
+
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % loadingMessages.length);
+    }, 2500); // change text every 2.5s
+
+    return () => clearInterval(interval); // cleanup when unmounting
+  }, []);
+
+  return (
+    <div className='flex justify-center items-center h-full'>
+      <Atom color='#32cd32' size='large' text={loadingMessages[currentIndex]} textColor='#17d83f' />
+    </div>
+  );
+};
 
 export default SkillsGraph;

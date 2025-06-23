@@ -310,25 +310,35 @@ export function Jobs() {
         <div className='container mx-auto px-4 py-8'>
           <div className='max-w-6xl mx-auto'>
             {!isOpenedsavedJobs && ( // Conditionally render filters when not in saved jobs view
-              <div className='bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-8'>
-                <div className='grid grid-cols-2 md:grid-cols-4 gap-3'>
+              <div className='bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8 mb-10 border border-gray-100 dark:border-gray-700'>
+                <form className='grid grid-cols-1 md:grid-cols-4 gap-6 items-end'>
                   <div className='md:col-span-2'>
+                    <label htmlFor='job-search' className='block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1'>
+                      Search
+                    </label>
                     <div className='relative'>
                       <input
+                        id='job-search'
                         type='text'
                         placeholder='Search job title, company, skill...'
-                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                        className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500'
                         value={filters.search}
                         onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+                        aria-label='Search jobs'
                       />
                       <Search className='absolute right-3 top-2.5 h-5 w-5 text-gray-500 dark:text-gray-400' />
                     </div>
                   </div>
                   <div>
+                    <label htmlFor='job-location' className='block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1'>
+                      Location
+                    </label>
                     <select
-                      className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                      id='job-location'
+                      className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500'
                       value={filters.location}
-                      onChange={(e) => setFilters({ ...filters, location: e.target.value })}>
+                      onChange={(e) => setFilters({ ...filters, location: e.target.value })}
+                      aria-label='Filter by location'>
                       {uniqueLocations.map((location) => (
                         <option key={location} value={location}>
                           {location}
@@ -337,10 +347,15 @@ export function Jobs() {
                     </select>
                   </div>
                   <div>
+                    <label htmlFor='job-type' className='block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1'>
+                      Job Type
+                    </label>
                     <select
-                      className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white'
+                      id='job-type'
+                      className='w-full px-4 py-2 rounded-lg border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-primary-500'
                       value={filters.jobType}
-                      onChange={(e) => setFilters({ ...filters, jobType: e.target.value })}>
+                      onChange={(e) => setFilters({ ...filters, jobType: e.target.value })}
+                      aria-label='Filter by job type'>
                       {uniqueJobTypes.map((type) => (
                         <option key={type} value={type}>
                           {type}
@@ -348,10 +363,17 @@ export function Jobs() {
                       ))}
                     </select>
                   </div>
-                </div>
-
-                <div className='mt-4 flex justify-end items-center'>
-                  <div className='text-sm text-gray-600 dark:text-gray-300'>Found {filteredJobs.length} jobs</div>
+                  <div className='flex items-end'>
+                    <button
+                      type='button'
+                      className='w-full px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white font-semibold shadow transition'
+                      onClick={() => setFilters({ search: "", location: "All", jobType: "All" })}>
+                      Clear Filters
+                    </button>
+                  </div>
+                </form>
+                <div className='mt-6 flex justify-end items-center'>
+                  <div className='text-sm text-gray-600 dark:text-gray-300 font-medium'>Found {filteredJobs.length} jobs</div>
                 </div>
               </div>
             )}
