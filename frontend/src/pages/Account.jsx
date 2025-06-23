@@ -63,11 +63,7 @@ export function Account() {
                   {userData.avatar === "404" ? (
                     <CircleUserRound className='w-32 h-32 rounded-full mb-4 p-2 border-4 border-primary-500' />
                   ) : (
-                    <img
-                      src={userData.avatar}
-                      alt='Profile'
-                      className='w-32 h-32 rounded-full mb-4 border-4 border-primary-500'
-                    />
+                    <img src={userData.avatar} alt='Profile' className='w-32 h-32 rounded-full mb-4 border-4 border-primary-500' />
                   )}
                   <h2 className='text-2xl font-bold text-primary-600 dark:text-primary-400'>{userData.name}</h2>
                   <p className='text-gray-600 dark:text-gray-400'>{userData.email}</p>
@@ -75,10 +71,13 @@ export function Account() {
                 </div>
 
                 <div className='space-y-2 pt-4 border-t border-gray-200 dark:border-gray-700'>
-                  <button className='w-full flex items-center p-3 text-left rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 font-medium'>
-                    <User size={18} className='mr-3 text-primary-500' />
-                    Profile
-                  </button>
+                  <Link to='/profile'>
+                    {" "}
+                    <button className='w-full flex items-center p-3 text-left rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 font-medium'>
+                      <User size={18} className='mr-3 text-primary-500' />
+                      Profile
+                    </button>
+                  </Link>
                   <button className='w-full flex items-center p-3 text-left rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 font-medium'>
                     <Settings size={18} className='mr-3 text-primary-500' />
                     Settings
@@ -98,11 +97,7 @@ export function Account() {
                   <button
                     onClick={toggleDarkMode}
                     className='w-full flex items-center p-3 text-left rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 font-medium'>
-                    {darkMode ? (
-                      <Sun size={18} className='mr-3 text-primary-500' />
-                    ) : (
-                      <Moon size={18} className='mr-3 text-primary-500' />
-                    )}
+                    {darkMode ? <Sun size={18} className='mr-3 text-primary-500' /> : <Moon size={18} className='mr-3 text-primary-500' />}
                     {darkMode ? "Light Mode" : "Dark Mode"}
                   </button>
                   <button
@@ -172,9 +167,7 @@ export function Account() {
                       icon: CreditCard,
                     },
                   ].map((item, index) => (
-                    <div
-                      key={index}
-                      className='flex items-start p-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700'>
+                    <div key={index} className='flex items-start p-3 rounded-md hover:bg-gray-50 dark:hover:bg-gray-700'>
                       <div className='p-2 bg-primary-50 dark:bg-primary-900/20 rounded-full mr-4'>
                         <item.icon size={20} className='text-primary-600 dark:text-primary-400' />
                       </div>

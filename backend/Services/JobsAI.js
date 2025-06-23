@@ -258,10 +258,11 @@ You are a **modern frontend engineer and UX-centric resume stylist**. Your task 
 💡 This resume must follow the **modern resume example** attached. Style, spacing, and layout should be visibly aligned.
 
 👤 USER PROFILE:
-Name: ${profile.name || "Muhammad Shoaib"}
-Email: ${profile.email || "mshoaibarid@gmail.com"}
+Name: ${profile.name || "John Doe"}
+Email: ${profile.email || "example@gmail.com"}
 phone:  ${profile.phone || "+923445450151"}
-languages: english, punjabi, urdu
+linkedin: ${profile.linkedin || "Dont include it"}
+languages: English & (dynamically add according to user's location)
 Hard Skills: ${profile.hardSkills}  
 Soft Skills: ${profile.softSkills}  
 Work Experience: ${profile.jobs}  

@@ -284,10 +284,23 @@ export function Jobs() {
             {!hasProfile && user ? (
               <div>
                 {" "}
-                <Link to={"/roadmap"}>
+                <Link to={"/profile"}>
                   {" "}
                   <h2 className='text-red-600 dark:text-red-400 underline'>
                     ❗ Add Profile to unlock more features <span className='text-xl'>↗</span>
+                  </h2>
+                </Link>
+              </div>
+            ) : (
+              ""
+            )}
+            {hasProfile ? (
+              <div>
+                {" "}
+                <Link to={"/profile/edit"}>
+                  {" "}
+                  <h2 className='text-green-600 dark:text-green-400 underline'>
+                    ❗ You can update profile for better experience <span className='text-xl'>↗</span>
                   </h2>
                 </Link>
               </div>
@@ -372,7 +385,7 @@ export function Jobs() {
                     </button>
                   </div>
                 </form>
-                <div className='mt-6 flex justify-end items-center'>
+                <div className='flex justify-self-end mt-0 pt-0'>
                   <div className='text-sm text-gray-600 dark:text-gray-300 font-medium'>Found {filteredJobs.length} jobs</div>
                 </div>
               </div>

@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from "react-router-dom";
 import ProfileLayout from "./ProfileLayout";
 import ProfileForm from "../components/Profile/ProfileForm";
-import EditProfile from "../components/Profile/EditProfile";
 import ProtectedRoute from "../Context/ProtectedRoute";
 
 export default function Profile() {
