@@ -12,6 +12,7 @@ export const SkillsProvider = ({ children }) => {
   const [roadmap, setRoadmap] = useState([]);
   const [suggestedChanges, setSuggestedChanges] = useState(["change1", "change2", "change3"]);
   const [hasProfile, setHasProfile] = useState(false);
+  const [profile, setProfile] = useState({});
   const [evaluated, setEvaluated] = useState(false);
   const [isPathSelected, setIsPathSelected] = useState(false);
   const [careerPath, setCareerPath] = useState("");
@@ -31,6 +32,7 @@ export const SkillsProvider = ({ children }) => {
         const profileResponse = await axios.get(url + "/profile/check");
         if (profileResponse.data.profile) {
           setHasProfile(true);
+          setProfile(profileResponse.data.profileData);
           console.log("profile found");
           setEvaluated(profileResponse.data.isEvaluated);
           setCareerPath(profileResponse.data.careerPath);
@@ -65,9 +67,10 @@ export const SkillsProvider = ({ children }) => {
 
   useEffect(() => {
     let interval;
+    if (!user) return;
     if (roadmapHasSubtasksWithoutSources(roadmap)) {
       interval = setInterval(() => {
-        fetchUpdatedRoadmap();
+        // fetchUpdatedRoadmap();
       }, 30000); // 30 seconds
     }
     return () => clearInterval(interval);
@@ -95,6 +98,8 @@ export const SkillsProvider = ({ children }) => {
         setEvaluated,
         hasProfile,
         setHasProfile,
+        profile,
+        setProfile,
         setIsPathSelected,
         isPathSelected,
         careerPath,
