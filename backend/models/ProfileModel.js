@@ -26,11 +26,13 @@ const ProfileSchema = new mongoose.Schema({
   projects: [
     {
       name: { type: String, required: true },
+      description: { type: String, default: "" },
     },
   ],
   education: [
     {
       degree: { type: String, required: true },
+      institute: String,
       startYear: { type: String, required: true },
       endYear: { type: String, required: true },
     },
