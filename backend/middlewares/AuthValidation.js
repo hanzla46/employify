@@ -5,6 +5,7 @@ const signupValidation = (req, res, next) => {
     name: joi.string().min(3).max(20).required(),
     email: joi.string().email().required(),
     password: joi.string().min(8).max(30).required(),
+    otp: joi.number(),
   });
   const { error } = schema.validate(req.body);
   if (error) {
@@ -14,18 +15,29 @@ const signupValidation = (req, res, next) => {
 };
 
 const loginValidation = (req, res, next) => {
-    const schema = joi.object({
-      email: joi.string().email().required(),
-      password: joi.string().min(4).max(50).required(),
-    });
-    const { error } = schema.validate(req.body);
-    if (error) {
-      return res.status(400).json({ message: "Bad Request", error });
-    }
-    next();
-  };
-  
+  const schema = joi.object({
+    email: joi.string().email().required(),
+    password: joi.string().min(4).max(50).required(),
+  });
+  const { error } = schema.validate(req.body);
+  if (error) {
+    return res.status(400).json({ message: "Bad Request", error });
+  }
+  next();
+};
+const OtpEmailValidation = (req, res, next) => {
+  const schema = joi.object({
+    email: joi.string().email().required(),
+  });
+  const { error } = schema.validate(req.query);
+  if (error) {
+    return res.status(400).json({ message: "Bad Request", error });
+  }
+  next();
+};
+
 module.exports = {
-    signupValidation,
-    loginValidation
-}
+  signupValidation,
+  loginValidation,
+  OtpEmailValidation,
+};
