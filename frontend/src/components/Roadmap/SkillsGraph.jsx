@@ -710,12 +710,12 @@ function Indicators({ progress }) {
 }
 const DynamicLoader = () => {
   const loadingMessages = [
-    "Summoning Roadmap Demons 👹",
-    "Assembling AI Braincells 🧠",
-    "Manifesting Career Vibes ✨",
-    "Injecting Purpose Into Pixels 💉💻",
-    "Calling ChatGPT’s 87 cousins 🤯",
-    "Almost There... or are we? 😵‍💫",
+    "Loading Roadmap Graph...",
+    "Analyzing Skill Gaps...",
+    "Generating Personalized Career Path...",
+    "Optimizing Learning Recommendations...",
+    "Finalizing Task Breakdown...",
+    "Preparing Visual Graph Structure...",
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);

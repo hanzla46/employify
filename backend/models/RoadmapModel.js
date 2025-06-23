@@ -5,7 +5,7 @@ const SubtaskSchema = new mongoose.Schema(
     id: Number,
     name: String,
     buttonText: String,
-    sources: String,
+    sources: { type: String, default: "" },
     completed: { type: Boolean, default: false },
     evaluation: {
       text: String,

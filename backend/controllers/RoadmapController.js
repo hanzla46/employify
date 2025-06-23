@@ -1,7 +1,13 @@
 const Profile = require("../models/ProfileModel");
 const Roadmap = require("../models/RoadmapModel");
 const MarketAnalysis = require("../models/MarketAnalysisModel");
-const { generateRoadmapAI, modifyRoadmapAI, getCareerPathsAI, evaluateSubtaskAI } = require("../Services/RoadmapAI.js");
+const {
+  generateRoadmapAI,
+  generateSubtaskSourcesAI,
+  modifyRoadmapAI,
+  getCareerPathsAI,
+  evaluateSubtaskAI,
+} = require("../Services/RoadmapAI.js");
 const { updateRoadmap, updateUserProfile } = require("../Services/DynamicUpdates.js");
 
 const generateRoadmap = async (req, res) => {
@@ -32,14 +38,36 @@ const generateRoadmap = async (req, res) => {
     console.log(roadmapData);
     const roadmap = new Roadmap({ userId: user._id, tasks: tasks, changes: [] });
     await roadmap.save();
-    return res.status(200).json({
+    res.status(200).json({
       success: true,
       data: {
         tasks: tasks,
       },
       changes: [],
-      prompt,
-      result,
+    });
+    setImmediate(async () => {
+      const allSubtasks = [];
+      for (const task of tasks) {
+        for (const subtask of task.subtasks) {
+          allSubtasks.push({ taskId: task.id, subtaskId: subtask.id, task, subtask });
+        }
+      }
+      const profileForSources = { ...profile._doc };
+      await Promise.all(
+        allSubtasks.map(async ({ taskId, subtaskId, task, subtask }) => {
+          try {
+            const sources = await generateSubtaskSourcesAI(profileForSources, task, subtask);
+            await Roadmap.updateOne(
+              { userId: user._id, "tasks.id": taskId },
+              { $set: { "tasks.$[task].subtasks.$[subtask].sources": sources } },
+              { arrayFilters: [{ "task.id": taskId }, { "subtask.id": subtaskId }] }
+            );
+            console.log("sources updated: ", taskId, subtaskId);
+          } catch (err) {
+            console.log("something went wrong for " + subtaskId, err);
+          }
+        })
+      );
     });
   } catch (error) {
     console.error("Failed to generate roadmap:", error.message);

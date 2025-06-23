@@ -1,5 +1,7 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { safeJsonParse } = require("./JsonParse");
+const Roadmap = require("../models/RoadmapModel");
+const Profile = require("../models/ProfileModel");
 const generateRoadmapAI = async (profile, selectedPath) => {
   try {
     const { preferences } = selectedPath;
@@ -82,7 +84,6 @@ Accelerators: ${selectedPath.Accelerators} \n
         *   'id': Unique identifier within the task (e.g., 101, 102).
         *   'name': A concrete action (e.g., "Implement feature X using library Y," "Draft outreach message using template Z," "Analyze top 5 competitor strategies"). Include specific tools/techniques where relevant (e.g., "Use [AI Tool Name] for initial draft").
         *   'buttonText': Action-oriented text reflecting the subtask (e.g., "Start Course Module", "Build Prototype", "Find Mentors", "Analyze Competitors", "Practice Pitch").
-        *  'sources': You MUST generate an HTML string listing AT LEAST 3 *unique, practical, actionable* resources or hidden strategies the user would NOT easily find by Googling. DO NOT suggest official documentation, basic tutorials, or general advice. Focus on rare tools, emerging platforms, underrated blogs, real-world case studies, or powerful niche techniques that give the user a real unfair advantage. EACH resource must be wrapped in a styled <div> using inline CSS (margin, font-size, color). Example structure: <div style='margin-bottom:8px;'><a href='https://example.com' target='_blank' style='color:#3b82f6;font-weight:bold;'>Hidden Gem Title</a><p style='font-size:12px;color:gray;'>1-line why this resource is critical for the user's goal</p></div>. Avoid any generic suggestions. Sources should feel like insider secrets, not school assignments.
     *   'dependencies': Array of task IDs that are prerequisites.
     *   'category': **[Strategic Planning, Foundational Skills, Advanced Specialization, Portfolio Building, Networking & Visibility, Application & Interview Prep, Freelance Client Acquisition, Startup Validation & Launch, Soft Skill Enhancement, AI Integration & Augmentation]**. (Choose the MOST relevant).
     *   'difficulty': **Beginner / Intermediate / Advanced / Expert** (relative to the user's likely starting point for *this task*).
@@ -117,10 +118,10 @@ Accelerators: ${selectedPath.Accelerators} \n
           "description": "Deepen expertise in [Skill X] by applying it to solve problems where AI tools are prevalent. This demonstrates adaptability and higher-order thinking beyond basic automation.",
           "position": { "x": 50, "y": 100 },
           "subtasks": [
-            { "id": 101, "name": "Identify 3 industry problems solvable by Skill X + AI Tool Y", "buttonText": "Research Problems", "sources": "<div><h2> a tip</h2></div>" },
-            { "id": 102, "name": "Build a small proof-of-concept integrating Skill X & AI Tool Y", "buttonText": "Build PoC", "sources": "<div><a>link to a tool</a></div>" },
-            { "id": 103, "name": "Document process & results for portfolio", "buttonText": "Document Project", "sources": "<div><p>Document your project</p></div>" },
-            { "id": 104, "name": "Use AI writing assistant [e.g., Grammarly Pro, ChatGPT] to refine documentation", "buttonText": "Refine Docs w/ AI", "sources":"<div> <a> link to a learning resource</a></div>" },
+            { "id": 101, "name": "Identify 3 industry problems solvable by Skill X + AI Tool Y", "buttonText": "Research Problems"},
+            { "id": 102, "name": "Build a small proof-of-concept integrating Skill X & AI Tool Y", "buttonText": "Build PoC"},
+            { "id": 103, "name": "Document process & results for portfolio", "buttonText": "Document Project"},
+            { "id": 104, "name": "Use AI writing assistant [e.g., Grammarly Pro, ChatGPT] to refine documentation", "buttonText": "Refine Docs w/ AI" },
           ],
           "dependencies": [], // Example: might depend on foundational Skill X task if not already proficient
           "category": "AI Integration & Augmentation",
@@ -141,7 +142,7 @@ Generate the JSON roadmap and summary now based *specifically* on the user profi
     console.log(prompt);
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-preview-05-20",
+      model: "gemini-2.5-flash",
       generation_config: {
         thinkingConfig: {
           thinkingBudget: 0,
@@ -166,6 +167,50 @@ Generate the JSON roadmap and summary now based *specifically* on the user profi
     throw error;
   }
 };
+const generateSubtaskSourcesAI = async (profile, task, subtask) => {
+  const maxRetries = GEMINI_API_KEYS.length;
+  let lastError = null;
+  let usedKeys = new Set();
+  for (let attempt = 0; attempt < maxRetries; attempt++) {
+    // Pick a key not used in previous attempts
+    const available = GEMINI_API_KEYS.filter((k) => !usedKeys.has(k));
+    const apiKey =
+      available.length > 0
+        ? available[Math.floor(Math.random() * available.length)]
+        : GEMINI_API_KEYS[Math.floor(Math.random() * GEMINI_API_KEYS.length)];
+    usedKeys.add(apiKey);
+    try {
+      const prompt = `You are an expert career strategist. For the following subtask, generate an HTML string containing at least 3 unique, practical, actionable resources (each with a clickable link and a 1-line reason why it's valuable for this subtask). Do NOT suggest official documentation, basic tutorials, or general advice. Focus on rare tools, emerging platforms, underrated blogs, real-world case studies, or powerful niche techniques that give the user a real unfair advantage. Each resource must be wrapped in a styled <div> using inline CSS (margin, font-size, color). Each resource MUST include a working <a href='...'> link.
+
+Subtask: ${subtask.name}
+Task: ${task.name}
+User Profile: ${profile.careerGoal}, Skills: ${profile.hardSkills.map((s) => s.name).join(", ")}
+
+Return ONLY the HTML string. No markdown, no comments, no pre/post text.`;
+      const genAI = new GoogleGenerativeAI(apiKey);
+      const model = genAI.getGenerativeModel({
+        model: "gemini-2.5-flash",
+        generation_config: {
+          thinkingConfig: {
+            thinkingBudget: 0,
+          },
+          temperature: 1.5,
+        },
+      });
+      const result = await model.generateContent(prompt);
+      const content = result.response.candidates[0].content.parts[0].text;
+      if (content && content.trim().length > 0) {
+        return content.trim();
+      }
+    } catch (error) {
+      lastError = error;
+      console.error(`Error (attempt ${attempt + 1}) generating sources for subtask:`, error);
+    }
+  }
+  // If all retries fail
+  return "";
+};
+
 const getCareerPathsAI = async (profile) => {
   const prompt = `You are an expert career strategist and global job market analyst.
 
@@ -226,14 +271,14 @@ Output format:
 {
 "paths": [
 {
-"Path_name": "Example - AI Engineer → AI Product Manager",
-"Stages": ["AI Intern", "Junior AI Developer", "Senior AI Developer", "AI Product Manager"],
-"Timeline": "1 → 3 → 5 → 8 years",
-"Salary_range": "$10k (PKR, Entry) → $22k → $40k → $60k (remote USD)",
+"Path_name": "STRING. Example - AI Engineer → AI Product Manager",
+"Stages": [ARRAY. "AI Intern", "Junior AI Developer", "Senior AI Developer", "AI Product Manager"],
+"Timeline": "STRING. 1 → 3 → 5 → 8 years",
+"Salary_range": "STRING. $10k (PKR, Entry) → $22k → $40k → $60k (remote USD)",
 "Industries": ["Tech", "Healthcare", "Fintech"],
-"Risk_level": "Medium",
+"Risk_level": "STRING. Medium",
 "AI_impact": "Low (building AI > replaced by AI)",
-"Required_skills": ["Deep Learning", "Prompt Engineering", "Product Management"],
+"Required_skills": [ARRAY. "Deep Learning", "Prompt Engineering", "Product Management"],
 "Accelerators": ["Tensorflow Certification", "Build AI SaaS MVP"],
 },
 // more career paths
@@ -243,8 +288,11 @@ Output format:
 `;
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
   const model = genAI.getGenerativeModel({
-    model: "gemini-2.5-flash-preview-04-17",
+    model: "gemini-2.5-flash",
     generation_config: {
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
       temperature: 2,
       response_mime_type: "application/json",
     },
@@ -327,5 +375,15 @@ const evaluateSubtaskAI = async (subtask, task, text, file) => {
   analysis = result.response.text();
   return analysis;
 };
-
-module.exports = { generateRoadmapAI, modifyRoadmapAI, getCareerPathsAI, evaluateSubtaskAI };
+const GEMINI_API_KEYS = [
+  "AIzaSyA3-kU0Oo4A_kZRp1ceogRhoUhWHawXPvI",
+  "AIzaSyCWeJAjae2FE25b1AcKHBm4-vRFiC-g5pc",
+  "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
+  "AIzaSyDe6QFfQ19BVsYCXWbZwVMYyq1ysK_BNUc",
+  "AIzaSyB_YoYW79NMhSsbS9dGLkjq5hrkUJmd2jw",
+];
+function getRandomGeminiKey() {
+  const validKeys = GEMINI_API_KEYS.filter(Boolean);
+  return validKeys[Math.floor(Math.random() * validKeys.length)];
+}
+module.exports = { generateRoadmapAI, generateSubtaskSourcesAI, modifyRoadmapAI, getCareerPathsAI, evaluateSubtaskAI };

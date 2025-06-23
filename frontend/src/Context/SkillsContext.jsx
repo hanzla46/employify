@@ -63,6 +63,28 @@ export const SkillsProvider = ({ children }) => {
     localStorage.setItem("roadmap", JSON.stringify(roadmap));
   }, [roadmap]);
 
+  useEffect(() => {
+    let interval;
+    if (roadmapHasSubtasksWithoutSources(roadmap)) {
+      interval = setInterval(() => {
+        fetchUpdatedRoadmap();
+      }, 30000); // 30 seconds
+    }
+    return () => clearInterval(interval);
+  }, [roadmap]);
+
+  function roadmapHasSubtasksWithoutSources(roadmap) {
+    return roadmap.some((task) => task.subtasks.some((subtask) => !subtask.sources || subtask.sources.length === 0));
+  }
+
+  async function fetchUpdatedRoadmap() {
+    const getRoadmap = await axios.get(url + "/roadmap/get");
+    if (getRoadmap.data.success) {
+      console.log("Roadmap found while updating");
+      setEvaluated(true);
+      await setRoadmap(getRoadmap.data.data.tasks);
+    } // or whatever your state setter is
+  }
   return (
     <SkillsContext.Provider
       value={{
