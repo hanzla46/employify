@@ -1,7 +1,7 @@
 require("dotenv").config();
 const axios = require("axios");
 const mongoose = require("mongoose");
-const cron = require('node-cron');
+const cron = require("node-cron");
 const Job = require("../models/JobModel");
 const MarketAnalysis = require("../models/MarketAnalysisModel");
 
@@ -31,6 +31,25 @@ const SKILL_PATTERNS = {
     /\b(Data Entry|Calendar Management|Travel Arrangements|Document Management|Office Management|Customer Support|Record Keeping|Reception Duties)\b/gi,
 };
 
+// API Configurations
+const GLASSDOOR_API_CONFIG = {
+  method: "GET",
+  url: "https://real-time-glassdoor-data.p.rapidapi.com/company-search",
+  headers: {
+    "x-rapidapi-key": "ff82a3cb34msh70d1e319df0556bp1011c1jsnf3a797ae2c39",
+    "x-rapidapi-host": "real-time-glassdoor-data.p.rapidapi.com",
+  },
+};
+
+const JSEARCH_API_CONFIG = {
+  method: "GET",
+  url: "https://jsearch.p.rapidapi.com/search",
+  headers: {
+    "X-RapidAPI-Key": process.env.JSEARCH_API_KEY,
+    "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
+  },
+};
+
 // Extract skills from job description
 function extractSkills(description = "") {
   let skills = new Set();
@@ -53,15 +72,15 @@ async function logCleanupStats() {
     tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
     const oldJobs = await Job.countDocuments({ postedAt: { $lt: tenDaysAgo } });
     const recentJobs = await Job.countDocuments({ postedAt: { $gte: tenDaysAgo } });
-    
-    console.log('Job Database Statistics:');
-    console.log('------------------------');
+
+    console.log("Job Database Statistics:");
+    console.log("------------------------");
     console.log(`Total jobs: ${totalJobs}`);
     console.log(`Jobs older than 10 days: ${oldJobs}`);
     console.log(`Recent jobs (≤10 days): ${recentJobs}`);
-    console.log('------------------------');
+    console.log("------------------------");
   } catch (error) {
-    console.error('Error logging cleanup stats:', error);
+    console.error("Error logging cleanup stats:", error);
   }
 }
 
@@ -71,47 +90,37 @@ async function cleanupOldJobs() {
     console.log("Starting job cleanup process...");
     await logCleanupStats();
 
-    // Calculate date threshold (10 days ago)
     const tenDaysAgo = new Date();
     tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
 
-    // Find jobs to be deleted
     const oldJobs = await Job.find({ postedAt: { $lt: tenDaysAgo } });
     console.log(`Found ${oldJobs.length} jobs older than 10 days`);
 
-    // Before deleting, update market analysis
     if (oldJobs.length > 0) {
-      // Get all skills from jobs to be deleted
       const skillsToUpdate = new Set();
       oldJobs.forEach((job) => {
         const jobSkills = extractSkills(job.description);
         jobSkills.forEach((skill) => skillsToUpdate.add(skill));
       });
 
-      // Update market analysis for affected skills
       for (const skill of skillsToUpdate) {
         const analysis = await MarketAnalysis.findOne({ skill: skill.toLowerCase() });
         if (analysis) {
-          // Get fresh job count excluding old jobs
           const currentJobs = await Job.find({
             description: new RegExp(skill, "i"),
             postedAt: { $gte: tenDaysAgo },
           });
-
-          // Update market analysis with current data
           analysis.marketDemand.totalJobs = currentJobs.length;
           analysis.marketDemand.lastUpdated = new Date();
           await analysis.save();
         }
       }
 
-      // Delete old jobs
       const deleteResult = await Job.deleteMany({ postedAt: { $lt: tenDaysAgo } });
       console.log(`Deleted ${deleteResult.deletedCount} old jobs`);
     }
 
     console.log("Job cleanup process completed successfully");
-    // Log stats after cleanup
     console.log("\nAfter cleanup:");
     await logCleanupStats();
   } catch (error) {
@@ -134,20 +143,92 @@ function extractRequirementsForSkill(description = "", skill = "") {
   }
 }
 
-async function updateMarketAnalysis(jobs = []) {
-  if (!jobs || jobs.length === 0) {
-    console.log("No jobs provided for market analysis update");
-    return;
+// Fetch and normalize Glassdoor company data
+async function getCompanyData(companyName) {
+  try {
+    const response = await axios.request({
+      ...GLASSDOOR_API_CONFIG,
+      params: {
+        query: companyName,
+        limit: "1",
+        domain: "www.glassdoor.com",
+      },
+    });
+
+    const rawData = response.data?.data?.[0];
+    if (!rawData) return null;
+
+    return {
+      glassdoorId: rawData.company_id,
+      name: rawData.name,
+      rating: rawData.rating,
+      reviewCount: rawData.review_count,
+      salaryCount: rawData.salary_count,
+      size: rawData.company_size,
+      industry: rawData.industry,
+      workLifeBalance: rawData.work_life_balance_rating,
+      careerGrowth: rawData.career_opportunities_rating,
+      ceo: {
+        name: rawData.ceo,
+        approval: rawData.ceo_rating,
+      },
+      competitors: rawData.competitors?.map((c) => c.name) || [],
+      locations: rawData.office_locations,
+      lastUpdated: new Date(),
+    };
+  } catch (error) {
+    console.error(`[Glassdoor] Failed for ${companyName}:`, error.message);
+    return null;
   }
+}
+
+// Process jobs with company data enrichment
+async function processJobs(jobs) {
+  const processedJobs = [];
+  const companyCache = new Map();
+
+  for (const job of jobs) {
+    try {
+      const jobCopy = { ...job };
+
+      if (!jobCopy.companyData) {
+        const companyName =
+          jobCopy.employer_name ||
+          (jobCopy.employer_website ? new URL(jobCopy.employer_website).hostname.replace("www.", "") : null);
+
+        if (companyName) {
+          if (companyCache.has(companyName)) {
+            jobCopy.companyData = companyCache.get(companyName);
+          } else {
+            const companyData = await getCompanyData(companyName);
+            if (companyData) {
+              companyCache.set(companyName, companyData);
+              jobCopy.companyData = companyData;
+              jobCopy.companyId = companyData.glassdoorId;
+            }
+          }
+        }
+      }
+
+      processedJobs.push(jobCopy);
+    } catch (error) {
+      console.error(`Error processing job ${job.job_id}:`, error.message);
+      processedJobs.push(job);
+    }
+  }
+  return processedJobs;
+}
+
+// Update market analysis with processed jobs
+async function updateMarketAnalysis(jobs = []) {
+  if (!jobs || jobs.length === 0) return;
 
   console.log(`Processing ${jobs.length} jobs for market analysis...`);
   const skillData = new Map();
 
-  // Process each job
-  jobs.forEach((job) => {
+  for (const job of jobs) {
     try {
       const skills = extractSkills(job.job_description);
-      console.log(`Found skills in job ${job._id}:`, skills);
       const salary = job.salary_max || job.salary_min || 0;
 
       skills.forEach((skill) => {
@@ -164,13 +245,10 @@ async function updateMarketAnalysis(jobs = []) {
         data.jobCount++;
         data.salarySum += salary;
 
-        // Extract requirements specific to this skill
-        const requirements = extractRequirementsForSkill(job.job_description, skill);
-        requirements.forEach((req) => {
+        extractRequirementsForSkill(job.job_description, skill).forEach((req) => {
           data.requirements.set(req, (data.requirements.get(req) || 0) + 1);
         });
 
-        // Count co-occurring technologies
         skills.forEach((otherSkill) => {
           if (otherSkill !== skill) {
             data.relatedTech.set(otherSkill, (data.relatedTech.get(otherSkill) || 0) + 1);
@@ -180,9 +258,8 @@ async function updateMarketAnalysis(jobs = []) {
     } catch (error) {
       console.error("Error processing job:", error);
     }
-  });
+  }
 
-  // Update database
   for (const [skill, data] of skillData.entries()) {
     try {
       const requirements = Array.from(data.requirements.entries())
@@ -254,9 +331,8 @@ const autoFetchJobs = async () => {
   ];
 
   const workModes = ["true", "false"];
-
   let keyIndex = 0;
-  const apiKeys = ["a31cbcebd0mshb2b54d3a6bfdb51p1bb25ajsnb56e2f713da4'"];
+  const apiKeys = ["a31cbcebd0mshb2b54d3a6bfdb51p1bb25ajsnb56e2f713da4"];
 
   function getNextApiKey() {
     const key = apiKeys[keyIndex];
@@ -270,9 +346,8 @@ const autoFetchJobs = async () => {
         let page = 1;
         while (page <= 100) {
           try {
-            const options = {
-              method: "GET",
-              url: "https://jsearch.p.rapidapi.com/search",
+            const response = await axios.request({
+              ...JSEARCH_API_CONFIG,
               params: {
                 query: `${query} jobs`,
                 page: page,
@@ -281,21 +356,19 @@ const autoFetchJobs = async () => {
                 country: country,
               },
               headers: {
+                ...JSEARCH_API_CONFIG.headers,
                 "X-RapidAPI-Key": getNextApiKey(),
-                "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
               },
-            };
+            });
 
-            const response = await axios.request(options);
-            const jobs = response.data.data;
-
+            let jobs = response.data.data;
             if (jobs && jobs.length > 0) {
+              jobs = await processJobs(jobs);
               await Job.insertMany(jobs, { ordered: false });
               await updateMarketAnalysis(jobs);
               console.log(`Processed ${jobs.length} jobs from ${country} for query "${query}"`);
             }
-
-            page = page + 20;
+            page += 20;
           } catch (error) {
             console.error(`Error fetching jobs for ${country}, ${query}, page ${page}:`, error.message);
             break;
@@ -311,32 +384,25 @@ const autoFetchJobs = async () => {
 async function scheduleJobs() {
   try {
     const MONGODB_URL = process.env.MONGODB_URL;
-    if (!MONGODB_URL) {
-      throw new Error("MONGODB_URL not found in environment variables");
-    }
+    if (!MONGODB_URL) throw new Error("MONGODB_URL not found in environment variables");
 
-    // Connect to MongoDB
     await mongoose.connect(MONGODB_URL);
     console.log("Connected to MongoDB successfully");
 
-    // Schedule job cleanup to run daily at midnight
-    cron.schedule('0 0 * * *', async () => {
-      console.log('Running scheduled job cleanup...');
+    cron.schedule("0 0 * * *", async () => {
+      console.log("Running scheduled job cleanup...");
       await cleanupOldJobs();
     });
 
-    // Schedule job fetching to run every 6 hours
-    cron.schedule('0 */6 * * *', async () => {
-      console.log('Running scheduled job fetch...');
+    cron.schedule("0 */6 * * *", async () => {
+      console.log("Running scheduled job fetch...");
       await autoFetchJobs();
     });
 
-    // Run initial cleanup and fetch
     await cleanupOldJobs();
     await autoFetchJobs();
-
   } catch (error) {
-    console.error('Error in job scheduling:', error);
+    console.error("Error in job scheduling:", error);
     process.exit(1);
   }
 }
@@ -353,12 +419,11 @@ if (require.main === module) {
     process.exit();
   };
 
-  // Handle process termination
-  process.on('SIGTERM', cleanup);
-  process.on('SIGINT', cleanup);
+  process.on("SIGTERM", cleanup);
+  process.on("SIGINT", cleanup);
 
-  scheduleJobs().catch(error => {
-    console.error('Failed to start job scheduler:', error);
+  scheduleJobs().catch((error) => {
+    console.error("Failed to start job scheduler:", error);
     cleanup();
   });
 }

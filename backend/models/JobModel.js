@@ -31,6 +31,12 @@ const JobSchema = new mongoose.Schema({
   ],
   qualifications: [String],
   responsibilities: [String],
+  companyId: String, // Glassdoor company ID
+  companyData: {
+    // Full company data object
+    type: Map,
+    of: mongoose.Mixed,
+  },
 });
 
 module.exports = mongoose.model("Job", JobSchema);
