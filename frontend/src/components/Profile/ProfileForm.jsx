@@ -19,7 +19,7 @@ const ProfileForm = ({ isEdit }) => {
   }, []);
   useEffect(() => {
     if (isEdit) document.title = "Edit Profile | Employify";
-    else document.title = "Add Profile | Employify";
+    else if (!isEdit) document.title = "Add Profile | Employify";
   }, []);
   // State declarations
   const [loading, setLoading] = useState(false);
@@ -570,7 +570,7 @@ const ProfileForm = ({ isEdit }) => {
               onChange={(e) => handleChange("education", edu.id, "degree", e.target.value)}
               placeholder='e.g. Bachelor of Science in Computer Science'
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors'
-              required
+              required={isEdit}
             />
           </div>
 
@@ -585,7 +585,7 @@ const ProfileForm = ({ isEdit }) => {
               onChange={(e) => handleChange("education", edu.id, "institute", e.target.value)}
               placeholder='e.g. Massachusetts Institute of Technology'
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors'
-              required
+              required={isEdit}
             />
           </div>
         </div>
@@ -604,7 +604,7 @@ const ProfileForm = ({ isEdit }) => {
               min='1900'
               max={new Date().getFullYear()}
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors'
-              required
+              required={isEdit}
             />
           </div>
           <div>
@@ -620,7 +620,7 @@ const ProfileForm = ({ isEdit }) => {
               min='1900'
               max={new Date().getFullYear() + 5}
               className='w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 transition-colors'
-              required
+              required={isEdit}
             />
           </div>
         </div>
@@ -925,29 +925,30 @@ const ProfileForm = ({ isEdit }) => {
           </button>
         </div>
 
-        <div className={activeTab === "education" && isEdit ? "block" : "hidden"}>
-          <div className='mb-6'>
-            <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2'>Education</h3>
-            <p className='text-sm text-gray-600 dark:text-gray-400'>
-              Add your academic background including degrees, certifications, and training programs.
-            </p>
+        {isEdit && (
+          <div className={activeTab === "education" && isEdit ? "block" : "hidden"}>
+            <div className='mb-6'>
+              <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2'>Education</h3>
+              <p className='text-sm text-gray-600 dark:text-gray-400'>
+                Add your academic background including degrees, certifications, and training programs.
+              </p>
+            </div>
+            {renderEducation()}
+            <button
+              type='button'
+              onClick={() => addSkill("education")}
+              className='flex items-center justify-center px-4 py-2 bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-300 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors mt-4 w-full sm:w-auto'>
+              <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2' viewBox='0 0 20 20' fill='currentColor'>
+                <path
+                  fillRule='evenodd'
+                  d='M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z'
+                  clipRule='evenodd'
+                />
+              </svg>
+              Add Another Education
+            </button>
           </div>
-          {renderEducation()}
-          <button
-            type='button'
-            onClick={() => addSkill("education")}
-            className='flex items-center justify-center px-4 py-2 bg-primary-50 dark:bg-primary-900 text-primary-600 dark:text-primary-300 rounded-md hover:bg-primary-100 dark:hover:bg-primary-800 transition-colors mt-4 w-full sm:w-auto'>
-            <svg xmlns='http://www.w3.org/2000/svg' className='h-5 w-5 mr-2' viewBox='0 0 20 20' fill='currentColor'>
-              <path
-                fillRule='evenodd'
-                d='M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z'
-                clipRule='evenodd'
-              />
-            </svg>
-            Add Another Education
-          </button>
-        </div>
-
+        )}
         <div className={activeTab === "career" ? "block" : "hidden"}>
           <div className='mb-6'>
             <h3 className='text-lg font-semibold text-gray-800 dark:text-gray-200 mb-2'>Career Goals & Location</h3>
