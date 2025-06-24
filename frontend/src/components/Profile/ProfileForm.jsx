@@ -8,11 +8,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { SkillsContext } from "../../Context/SkillsContext";
 import { useNavigate } from "react-router-dom";
 
-const ProfileForm = (isEdit) => {
+const ProfileForm = ({ isEdit }) => {
   const url = import.meta.env.VITE_API_URL;
   const { hasProfile, setHasProfile, profile, setProfile } = useContext(SkillsContext);
   const navigate = useNavigate();
-
+  useEffect(() => {
+    if (isEdit && !hasProfile) {
+      navigate("/profile/add");
+    }
+  }, []);
+  useEffect(() => {
+    if (isEdit) document.title = "Edit Profile | Employify";
+    else document.title = "Add Profile | Employify";
+  }, []);
   // State declarations
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("hard");

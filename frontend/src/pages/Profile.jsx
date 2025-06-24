@@ -12,7 +12,7 @@ export default function Profile() {
           path='add'
           element={
             <ProtectedRoute>
-              <ProfileForm isedit={false} />
+              <ProfileForm isEdit={false} />
             </ProtectedRoute>
           }
         />
@@ -20,7 +20,7 @@ export default function Profile() {
           path='edit'
           element={
             <ProtectedRoute>
-              <ProfileForm isedit={true} />
+              <ProfileForm isEdit={true} />
             </ProtectedRoute>
           }
         />
