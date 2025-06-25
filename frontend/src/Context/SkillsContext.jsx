@@ -70,7 +70,7 @@ export const SkillsProvider = ({ children }) => {
     if (!user) return;
     if (roadmapHasSubtasksWithoutSources(roadmap)) {
       interval = setInterval(() => {
-        // fetchUpdatedRoadmap();
+        fetchUpdatedRoadmap();
       }, 30000); // 30 seconds
     }
     return () => clearInterval(interval);
@@ -84,9 +84,8 @@ export const SkillsProvider = ({ children }) => {
     const getRoadmap = await axios.get(url + "/roadmap/get");
     if (getRoadmap.data.success) {
       console.log("Roadmap found while updating");
-      setEvaluated(true);
       await setRoadmap(getRoadmap.data.data.tasks);
-    } // or whatever your state setter is
+    }
   }
   return (
     <SkillsContext.Provider

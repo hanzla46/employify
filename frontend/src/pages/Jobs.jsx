@@ -579,14 +579,6 @@ export function Jobs() {
                             <div className='mt-3 pt-4 border-t border-gray-200 dark:border-gray-700'>
                               <h3 className='font-bold text-gray-900 dark:text-white mb-3'>Job Description</h3>
                               <p className='text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line'>{job.description}</p>
-
-                              <div className='w-1/3 flex flex-col sm:flex-row gap-3'>
-                                <button
-                                  onClick={() => openCompanyModal(job)}
-                                  className='flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-center transition-all duration-200 shadow-lg hover:shadow-xl'>
-                                  View Company
-                                </button>
-                              </div>
                             </div>
                           )}
 
@@ -613,8 +605,12 @@ export function Jobs() {
                       <Link to={"/interview?jobId=" + job.id} className='w-full sm:w-auto'>
                         <FancyButton text={"Practice Interview"} />
                       </Link>
+                      <button
+                        onClick={() => openCompanyModal(job)}
+                        className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-center transition-all duration-200 shadow-lg hover:shadow-xl'>
+                        View Company
+                      </button>
                       {/* resume and CL */}
-
                       <div className='flex flex-row gap-2'>
                         {" "}
                         <button

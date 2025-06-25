@@ -5,6 +5,14 @@ const cron = require("node-cron");
 const Job = require("../models/JobModel");
 const MarketAnalysis = require("../models/MarketAnalysisModel");
 
+const apiKeys = process.env.RAPIDAPI_KEYS ? process.env.RAPIDAPI_KEYS.split(",").map((key) => key.trim()) : [];
+let keyIndex = 0;
+
+function getNextApiKey() {
+  const key = apiKeys[keyIndex];
+  keyIndex = (keyIndex + 1) % apiKeys.length;
+  return key;
+}
 // Skill extraction regex patterns
 const SKILL_PATTERNS = {
   programming: /\b(JavaScript|Python|Java|C\+\+|Ruby|PHP|Go|Rust|Swift|Kotlin|TypeScript|C#|Scala|Dart|R)\b/gi,
@@ -148,6 +156,10 @@ async function getCompanyData(companyName) {
   try {
     const response = await axios.request({
       ...GLASSDOOR_API_CONFIG,
+      headers: {
+        ...GLASSDOOR_API_CONFIG.headers,
+        "x-rapidapi-key": getNextApiKey(),
+      },
       params: {
         query: companyName,
         limit: "1",
@@ -345,13 +357,6 @@ const autoFetchJobs = async () => {
 
   const workModes = ["true", "false"];
   let keyIndex = 0;
-  const apiKeys = ["73dfebafaamsh693cbbe6778ea66p17cf03jsn44cb2f06bfe0"];
-
-  function getNextApiKey() {
-    const key = apiKeys[keyIndex];
-    keyIndex = (keyIndex + 1) % apiKeys.length;
-    return key;
-  }
 
   for (const country of countries) {
     for (const query of queries) {
