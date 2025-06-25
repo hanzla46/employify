@@ -7,6 +7,7 @@ import { useSearchParams, useLocation, Navigate, useNavigate, Link } from "react
 import { handleError, handleSuccess } from "../utils";
 import FancyButton from "../components/Button";
 import { SkillsContext } from "../Context/SkillsContext";
+import CompanyDetailsModal from "../components/CompanyDetails";
 const url = import.meta.env.VITE_API_URL;
 import axios from "axios";
 
@@ -270,12 +271,45 @@ export function Jobs() {
   const disabledBtnClass = "opacity-70 cursor-not-allowed";
   const clBtnColors = "bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800";
   const resumeBtnColors = "bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-800 hover:to-purple-800";
-  const dropdownItemClass =
-    "w-full text-left px-3 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center rounded-md";
-  const dropdownItemDisabledClass = "opacity-60 cursor-not-allowed";
 
+  const [company, setCompany] = useState(null);
+  const [companyData, setCompanyData] = useState(null);
+  const [emailData, setEmailData] = useState(null);
+  const [isCompanyModalOpen, setIsCompanyModalOpen] = useState(false);
+  const [emails, setEmails] = useState([]);
+  const [emailsLoading, setEmailsLoading] = useState(false);
+  useEffect(() => {
+    if (company) {
+      const getEmails = async () => {
+        setEmailsLoading(true);
+        const res = await axios.get(url + "/jobs/get-company-emails?url=" + company.website);
+        if (res.data.success) setEmails(res.data.emails || []);
+        else handleError(res.data.message || "Failed to fetch emails");
+        setEmailsLoading(false);
+      };
+      getEmails();
+    }
+  }, [company]);
+  const openCompanyModal = (job) => {
+    setCompany(job.company);
+    setCompanyData(job.companyData || null);
+    setEmailData(job.matchAnalysis ? job.matchAnalysis.email : null);
+    setIsCompanyModalOpen(true);
+  };
   return (
     <div className='min-h-screen bg-gradient-to-b pt-16 from-gray-50 to-white dark:from-gray-800 dark:to-gray-700'>
+      <CompanyDetailsModal
+        isOpen={isCompanyModalOpen}
+        onClose={() => {
+          setEmails([]);
+          setIsCompanyModalOpen(false);
+        }}
+        companyData={companyData}
+        company={company}
+        emailData={emailData}
+        emails={emails}
+        emailsLoading={emailsLoading}
+      />
       {/* Header */}
       <header className='sticky top-11 z-10 bg-white dark:bg-gray-800 shadow-md'>
         <div className='container mx-auto px-2 py-2'>
@@ -547,12 +581,11 @@ export function Jobs() {
                               <p className='text-gray-600 dark:text-gray-300 mb-6 whitespace-pre-line'>{job.description}</p>
 
                               <div className='w-1/3 flex flex-col sm:flex-row gap-3'>
-                                <a
-                                  href={job.company.website || `https://www.google.com/search?q=${job.company.name}`}
-                                  target='_blank'
-                                  className='flex-1 inline-flex items-center justify-center px-4 py-3 border border-gray-300 dark:border-gray-600 rounded-xl text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors'>
+                                <button
+                                  onClick={() => openCompanyModal(job)}
+                                  className='flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg font-medium text-center transition-all duration-200 shadow-lg hover:shadow-xl'>
                                   View Company
-                                </a>
+                                </button>
                               </div>
                             </div>
                           )}

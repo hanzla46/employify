@@ -21,8 +21,9 @@ const CalculateRelevancyScoresAI = async (jobs, profile) => {
      1. Match Score (0-100): How well the candidate's profile matches the job requirements (skills, experience, qualifications etc.).
      2. Why: List 3 key reasons why this job is a good match (matching skills, experience, etc.)
      3. What's Missing: List up to 3 important requirements or skills that the candidate lacks. (not experience, but skills or qualifications).
+     4. Email: Generate a personalized email object for the candidate to send to the employer about this job. The email object should have a 'subject' and a 'body' field. The subject should be a concise, relevant subject line for the job application. The body should be a short, friendly, and professional message referencing the job and the candidate's fit, ready to send as an initial contact or application email. Do not include placeholders or require further editing.
 
-Why and What's Missing should be concise and specific to each job. dont give explanations or additional text. prefer phrases over sentences.
+Why and What's Missing should be concise and specific to each job. Don't give explanations or additional text. Prefer phrases over sentences.
 
      Respond in JSON format:
      \`\`\`json
@@ -31,7 +32,11 @@ Why and What's Missing should be concise and specific to each job. dont give exp
          "id": "job_id",
          "score": 85,
          "why": ["reason1", "reason2", "reason3"],
-         "missing": ["missing1", "missing2", "missing3"]
+         "missing": ["missing1", "missing2", "missing3"],
+         "email": {
+           "subject": "Your subject here",
+           "body": "Your body text here"
+         }
        },
        // other jobs
      ]
@@ -82,6 +87,10 @@ Why and What's Missing should be concise and specific to each job. dont give exp
       score: 0,
       why: ["AI analysis failed"],
       missing: [],
+      email: {
+        subject: "Job Application",
+        body: "Dear Hiring Team, I am interested in this position and believe my skills are a strong match. Looking forward to connecting!",
+      },
     }));
   }
 };
