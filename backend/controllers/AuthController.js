@@ -17,28 +17,26 @@ const sendOtp = async (req, res) => {
     const otp = new Otp({ email: req.query.email, code: random });
     otp.save();
   }
-  const form = new FormData();
-  form.append("from", "employify@1995576b62339155.maileroo.org");
-  form.append("to", req.query.email);
-  form.append("subject", "Email Verification");
-  form.append("template_id", "1752");
-  form.append("template_data", JSON.stringify({ otp: random }));
-
-  axios
-    .post("https://smtp.maileroo.com/send-template", form, {
-      headers: {
-        ...form.getHeaders(),
-        "X-API-Key": "76ea6da9c64e138dd360a09ca062bfbf251ca0cf4c51d03ad678e58c0be7e4fb",
-      },
-    })
-    .then((response) => {
-      console.log(response.data);
-      res.status(200).json({ success: true, message: "Otp Sent Successfuly" });
-    })
-    .catch((error) => {
-      console.error(error);
-      res.status(500).json({ success: false, message: error });
+  const data = {
+    service_id: "service_mzj71bg",
+    template_id: "template_nvfoxdm",
+    user_id: "Y4K8B2V9KyBRz_jiN",
+    template_params: {
+      email: req.query.email,
+      code: random,
+    },
+    accessToken: process.env.EMAILJS_PRIVATE_KEY,
+  };
+  try {
+    const emailjsResponse = await axios.post("https://api.emailjs.com/api/v1.0/email/send", data, {
+      headers: { "Content-Type": "application/json" },
     });
+    res.status(200).json({ message: "Otp sent successfully", success: true });
+    console.log("SUCCESS!", emailjsResponse.status, emailjsResponse.statusText);
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send otp", success: false });
+    console.error("FAILED...", err.response?.data || err.message);
+  }
 };
 const signup = async (req, res) => {
   try {
