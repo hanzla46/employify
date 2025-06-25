@@ -4,7 +4,6 @@ import axios from "axios";
 axios.defaults.withCredentials = true;
 axios.defaults.headers.common["Accept"] = "application/json";
 import { countryCityMap } from "./CountryCityData";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SkillsContext } from "../../Context/SkillsContext";
 import { useNavigate } from "react-router-dom";
 
@@ -14,13 +13,14 @@ const ProfileForm = ({ isEdit }) => {
   const navigate = useNavigate();
   useEffect(() => {
     if (isEdit && !hasProfile) {
+      handleError("No profile found for editing");
       navigate("/profile/add");
     }
-  }, []);
+  }, [navigate, isEdit, hasProfile]);
   useEffect(() => {
     if (isEdit) document.title = "Edit Profile | Employify";
     else if (!isEdit) document.title = "Add Profile | Employify";
-  }, []);
+  }, [isEdit]);
   // State declarations
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("hard");
@@ -646,42 +646,47 @@ const ProfileForm = ({ isEdit }) => {
 
         <div>
           <h3 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-3'>Location Information</h3>
+
           <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+            {/* Country Select */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>Country *</label>
-              <Select
-                onValueChange={(val) => {
-                  setSelectedCountry(val);
+              <select
+                value={selectedCountry}
+                onChange={(e) => {
+                  setSelectedCountry(e.target.value);
                   setSelectedCity("");
-                }}>
-                <SelectTrigger className='w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-primary-500 focus:ring-primary-500'>
-                  <SelectValue placeholder='Select Country' />
-                </SelectTrigger>
-                <SelectContent className='bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'>
-                  {Object.keys(countryCityMap).map((c) => (
-                    <SelectItem key={c} value={c} className='hover:bg-gray-100 dark:hover:bg-gray-700'>
-                      {c}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                }}
+                className='w-full px-3 py-2 rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200'>
+                <option value=''>Select Country</option>
+                {Object.keys(countryCityMap).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </select>
             </div>
 
+            {/* City Select */}
             <div>
               <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1'>City *</label>
-              <Select onValueChange={(val) => setSelectedCity(val)} disabled={!selectedCountry} value={selectedCity || undefined}>
-                <SelectTrigger className='w-full border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 hover:border-primary-500 focus:ring-primary-500'>
-                  <SelectValue placeholder={selectedCountry ? "Select City" : "Select country first"} />
-                </SelectTrigger>
-                <SelectContent className='bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'>
-                  {selectedCountry &&
-                    countryCityMap[selectedCountry].map((city) => (
-                      <SelectItem key={city} value={city} className='hover:bg-gray-100 dark:hover:bg-gray-700'>
-                        {city}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={selectedCity}
+                onChange={(e) => setSelectedCity(e.target.value)}
+                disabled={!selectedCountry}
+                className={`w-full px-3 py-2 rounded-md border ${
+                  selectedCountry
+                    ? "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                } focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors duration-200`}>
+                <option value=''>{selectedCountry ? "Select City" : "Select country first"}</option>
+                {selectedCountry &&
+                  countryCityMap[selectedCountry].map((city) => (
+                    <option key={city} value={city}>
+                      {city}
+                    </option>
+                  ))}
+              </select>
             </div>
           </div>
         </div>

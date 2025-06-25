@@ -39,7 +39,7 @@ function App() {
 
   return (
     <>
-      <ToastContainer />
+      <ToastContainer darkMode={darkMode} />
       <AuthProvider>
         <SkillsProvider>
           <JobsProvider>
