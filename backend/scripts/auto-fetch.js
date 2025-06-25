@@ -36,7 +36,7 @@ const GLASSDOOR_API_CONFIG = {
   method: "GET",
   url: "https://real-time-glassdoor-data.p.rapidapi.com/company-search",
   headers: {
-    "x-rapidapi-key": "ff82a3cb34msh70d1e319df0556bp1011c1jsnf3a797ae2c39",
+    "x-rapidapi-key": "be6e459e24msha7b59aacb49a197p18a90fjsndc025d66ac28",
     "x-rapidapi-host": "real-time-glassdoor-data.p.rapidapi.com",
   },
 };
@@ -45,7 +45,7 @@ const JSEARCH_API_CONFIG = {
   method: "GET",
   url: "https://jsearch.p.rapidapi.com/search",
   headers: {
-    "X-RapidAPI-Key": process.env.JSEARCH_API_KEY,
+    "X-RapidAPI-Key": "73dfebafaamsh693cbbe6778ea66p17cf03jsn44cb2f06bfe0",
     "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
   },
 };
@@ -183,29 +183,42 @@ async function getCompanyData(companyName) {
 }
 
 // Process jobs with company data enrichment
-async function processJobs(jobs) {
+async function processJobs(jobs, work_from_home) {
   const processedJobs = [];
   const companyCache = new Map();
 
   for (const job of jobs) {
     try {
-      const jobCopy = { ...job };
+      const jobCopy = {
+        title: job.job_title,
+        id: job.job_id,
+        company: {
+          name: job.employer_name,
+          logo: job.employer_logo,
+          website: job.employer_website,
+        },
+        type: job.job_employment_type,
+        salary: job.salary_min ? `${job.job_min_salary} - ${job.job_max_salary}` : 0,
+        description: job.job_description,
+        location: job.job_city,
+        postedAt: new Date(job.job_posted_at_datetime_utc),
+        source: "jsearch",
+        externalLink: job.job_apply_link,
+        applyOptions: job.apply_options,
+        isRemote: work_from_home == "true" ? true : false,
+        qualifications: job.job_highlights?.Qualifications || [],
+        responsibilities: job.job_highlights?.Responsibilities || [],
+      };
 
-      if (!jobCopy.companyData) {
-        const companyName =
-          jobCopy.employer_name ||
-          (jobCopy.employer_website ? new URL(jobCopy.employer_website).hostname.replace("www.", "") : null);
-
-        if (companyName) {
-          if (companyCache.has(companyName)) {
-            jobCopy.companyData = companyCache.get(companyName);
-          } else {
-            const companyData = await getCompanyData(companyName);
-            if (companyData) {
-              companyCache.set(companyName, companyData);
-              jobCopy.companyData = companyData;
-              jobCopy.companyId = companyData.glassdoorId;
-            }
+      if (job.employer_name || job.employer_website) {
+        if (companyCache.has(job.employer_name)) {
+          jobCopy.companyData = companyCache.get(job.employer_name);
+        } else {
+          const companyData = await getCompanyData(job.employer_name);
+          if (companyData) {
+            companyCache.set(job.employer_name, companyData);
+            jobCopy.companyData = companyData;
+            jobCopy.companyId = companyData.glassdoorId;
           }
         }
       }
@@ -295,10 +308,10 @@ async function updateMarketAnalysis(jobs = []) {
 const autoFetchJobs = async () => {
   const countries = ["PK", "US", "IN", "GB", "CA", "DE", "SG", "AU", "NL", "KE"];
   const queries = [
+    "Backend Developer",
     "Software Engineer",
     "Full Stack Developer",
     "Frontend Developer",
-    "Backend Developer",
     "DevOps Engineer",
     "AI Engineer",
     "Machine Learning Engineer",
@@ -332,7 +345,7 @@ const autoFetchJobs = async () => {
 
   const workModes = ["true", "false"];
   let keyIndex = 0;
-  const apiKeys = ["a31cbcebd0mshb2b54d3a6bfdb51p1bb25ajsnb56e2f713da4"];
+  const apiKeys = ["73dfebafaamsh693cbbe6778ea66p17cf03jsn44cb2f06bfe0"];
 
   function getNextApiKey() {
     const key = apiKeys[keyIndex];
@@ -351,7 +364,7 @@ const autoFetchJobs = async () => {
               params: {
                 query: `${query} jobs`,
                 page: page,
-                num_pages: "20",
+                num_pages: "10",
                 work_from_home: work_from_home,
                 country: country,
               },
@@ -363,12 +376,12 @@ const autoFetchJobs = async () => {
 
             let jobs = response.data.data;
             if (jobs && jobs.length > 0) {
-              jobs = await processJobs(jobs);
+              jobs = await processJobs(jobs, work_from_home);
               await Job.insertMany(jobs, { ordered: false });
               await updateMarketAnalysis(jobs);
               console.log(`Processed ${jobs.length} jobs from ${country} for query "${query}"`);
             }
-            page += 20;
+            page += 10;
           } catch (error) {
             console.error(`Error fetching jobs for ${country}, ${query}, page ${page}:`, error.message);
             break;
