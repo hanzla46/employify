@@ -51,11 +51,11 @@ const CompanyDetailsModal = ({ isOpen, onClose, company, companyData, emailData,
         <div className='relative bg-gradient-to-r from-blue-600 via-purple-600 to-blue-800 p-6 text-white'>
           <button
             onClick={onClose}
-            className='absolute top-4 right-4 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors duration-200 backdrop-blur-sm'>
+            className='absolute z-10 top-2 right-2 p-2 rounded-full bg-red-600 hover:bg-red-500 transition-colors duration-200 backdrop-blur-sm'>
             <X className='w-5 h-5' />
           </button>
 
-          <div className='flex items-start space-x-4'>
+          <div className='flex items-end space-x-4'>
             <div className='w-16 h-16 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center overflow-hidden'>
               {company.logo ? (
                 <img src={company.logo} alt={company.name} className='w-full h-full object-cover' />
@@ -95,10 +95,10 @@ const CompanyDetailsModal = ({ isOpen, onClose, company, companyData, emailData,
                 <Star className='w-4 h-4 text-blue-600' />
               </div>
               <div className='flex items-center space-x-2'>
-                <span className='text-2xl font-bold text-blue-900'>{companyData ? companyData.rating : "4.1"}</span>
-                <div className='flex space-x-1'>{renderStars(companyData ? companyData.rating : 4)}</div>
+                <span className='text-2xl font-bold text-blue-900'>{companyData ? companyData.rating : "N/A"}</span>
+                <div className='flex space-x-1'>{renderStars(companyData ? companyData.rating : "N/A")}</div>
               </div>
-              <p className='text-xs text-blue-600 mt-1'>{companyData ? companyData.reviewCount.toLocaleString() : "209"} reviews</p>
+              <p className='text-xs text-blue-600 mt-1'>{companyData ? companyData.reviewCount.toLocaleString() : "0"} reviews</p>
             </div>
 
             <div className='bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-xl border border-green-200'>
@@ -107,8 +107,8 @@ const CompanyDetailsModal = ({ isOpen, onClose, company, companyData, emailData,
                 <Heart className='w-4 h-4 text-green-600' />
               </div>
               <div className='flex items-center space-x-2'>
-                <span className='text-2xl font-bold text-green-900'>{companyData ? companyData.workLifeBalance : "7.8"}</span>
-                <div className='flex space-x-1'>{renderStars(companyData ? companyData.workLifeBalance : 4.3)}</div>
+                <span className='text-2xl font-bold text-green-900'>{companyData ? companyData.workLifeBalance : "N/A"}</span>
+                <div className='flex space-x-1'>{renderStars(companyData ? companyData.workLifeBalance : 0)}</div>
               </div>
             </div>
 
@@ -118,8 +118,8 @@ const CompanyDetailsModal = ({ isOpen, onClose, company, companyData, emailData,
                 <TrendingUp className='w-4 h-4 text-purple-600' />
               </div>
               <div className='flex items-center space-x-2'>
-                <span className='text-2xl font-bold text-purple-900'>{companyData ? companyData.careerGrowth : "5"}</span>
-                <div className='flex space-x-1'>{renderStars(companyData ? companyData.careerGrowth : 5)}</div>
+                <span className='text-2xl font-bold text-purple-900'>{companyData ? companyData.careerGrowth : "Not Found"}</span>
+                <div className='flex space-x-1'>{renderStars(companyData ? companyData.careerGrowth : 0)}</div>
               </div>
             </div>
           </div>

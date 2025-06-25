@@ -21,7 +21,7 @@ const CalculateRelevancyScoresAI = async (jobs, profile) => {
      1. Match Score (0-100): How well the candidate's profile matches the job requirements (skills, experience, qualifications etc.).
      2. Why: List 3 key reasons why this job is a good match (matching skills, experience, etc.)
      3. What's Missing: List up to 3 important requirements or skills that the candidate lacks. (not experience, but skills or qualifications).
-     4. Email: Generate a personalized email object for the candidate to send to the employer about this job. The email object should have a 'subject' and a 'body' field. The subject should be a concise, relevant subject line for the job application. The body should be a short, friendly, and professional message referencing the job and the candidate's fit, ready to send as an initial contact or application email. Do not include placeholders or require further editing.
+     4. Email: Generate a personalized email object for the candidate to send to the employer (a single person) about this job. The email object should have a 'subject' and a 'body' field. The subject should be a concise, relevant subject line for the job application. The body should be a short, friendly, and professional message referencing the job and the candidate's fit, ready to send as an initial contact or application email. Do not include placeholders or require further editing.
 
 Why and What's Missing should be concise and specific to each job. Don't give explanations or additional text. Prefer phrases over sentences.
 
