@@ -18,6 +18,7 @@ import { SkillsProvider } from "./Context/SkillsContext.jsx";
 import { ToastContainer } from "./utils.jsx";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { JobsProvider } from "./Context/JobsContext.jsx";
+import { DashboardProvider } from "./Context/DashboardContext.jsx";
 import Profile from "./pages/Profile";
 import FeedbackPage from "./pages/Feedbacks.jsx";
 function App() {
@@ -43,29 +44,31 @@ function App() {
       <AuthProvider>
         <SkillsProvider>
           <JobsProvider>
-            <Router>
-              <div className='min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200'>
-                <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
-                <ScrollToTop />
-                <Routes>
-                  <Route path='/' element={<Home />} />
-                  <Route path='/dashboard' element={<Dashboard />} />
-                  <Route path='/account' element={<Account />} />
-                  <Route path='/home' element={<Home />} />
-                  <Route path='/login' element={<Login />} />
-                  <Route path='/signup' element={<Signup />} />
-                  <Route path='/interview' element={<Interview />} />
-                  <Route path='/roadmap' element={<Roadmap />} />
-                  <Route path='/profile/*' element={<Profile />} />
-                  <Route path='/jobs' element={<Jobs />} />
-                  <Route path='/pricing' element={<Pricing />} />
-                  <Route path='/about' element={<About />} />
-                  <Route path='/feedbacks' element={<FeedbackPage />} />
-                  <Route path='*' element={<NotFound />} />
-                </Routes>
-                <Footer />
-              </div>
-            </Router>
+            <DashboardProvider>
+              <Router>
+                <div className='min-h-screen w-full bg-gradient-to-b from-gray-50 to-white dark:from-gray-900 dark:to-gray-800 transition-colors duration-200'>
+                  <Navbar darkMode={darkMode} setDarkMode={setDarkMode} />
+                  <ScrollToTop />
+                  <Routes>
+                    <Route path='/' element={<Home />} />
+                    <Route path='/dashboard' element={<Dashboard />} />
+                    <Route path='/account' element={<Account />} />
+                    <Route path='/home' element={<Home />} />
+                    <Route path='/login' element={<Login />} />
+                    <Route path='/signup' element={<Signup />} />
+                    <Route path='/interview' element={<Interview />} />
+                    <Route path='/roadmap' element={<Roadmap />} />
+                    <Route path='/profile/*' element={<Profile />} />
+                    <Route path='/jobs' element={<Jobs />} />
+                    <Route path='/pricing' element={<Pricing />} />
+                    <Route path='/about' element={<About />} />
+                    <Route path='/feedbacks' element={<FeedbackPage />} />
+                    <Route path='*' element={<NotFound />} />
+                  </Routes>
+                  <Footer />
+                </div>
+              </Router>
+            </DashboardProvider>
           </JobsProvider>
         </SkillsProvider>
       </AuthProvider>

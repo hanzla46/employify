@@ -34,6 +34,9 @@ export function Interview() {
     setSessionId(searchParams.get("sessionId") || "");
   }, []);
   useEffect(() => {
+    setInterviewData((prev) => ({ ...prev, position: searchParams.get("position") || "" }));
+  }, [searchParams]);
+  useEffect(() => {
     if (!user || !sessionId) return;
     const checkInterviewSession = async () => {
       const res = await axios.get(url + `/interview/check-session?sessionId=${sessionId}`);

@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 import { SkillsContext } from "../Context/SkillsContext";
 import { JobsContext } from "../Context/JobsContext";
+import { DashboardContext } from "../Context/DashboardContext";
 import { Spinner } from "../lib/Spinner";
 import InterviewScoreChart from "../components/InterviewScoreChart";
 import axios from "axios";
@@ -43,44 +44,7 @@ const Dashboard = () => {
   const { user } = useContext(AuthContext);
   const { roadmap } = useContext(SkillsContext);
   const { savedJobs } = useContext(JobsContext);
-  const [interviewScores, setInterviewScores] = useState([]);
-  const [missingSkills, setMissingSkills] = useState([]);
-  const [weaknesses, setWeaknesses] = useState([]);
-  const [suggestedInterview, setSuggestedInterview] = useState(null);
-  const [loading, setLoading] = useState(true);
-  useEffect(() => {
-    const fetchData = async () => {
-      if (!user) return;
-
-      try {
-        // Fetch interviews
-        const interviewsRes = await axios.get(`${url}/interview/get-all-interviews`);
-        const scores = interviewsRes.data.interviews?.map((i) => Number(i.overallScore)).filter((score) => !isNaN(score)) || [];
-        setInterviewScores(scores);
-        setWeaknesses(
-          interviewsRes.data.interviews?.map((i) => {
-            if (!i?.weaknesses) return "";
-            return i.weaknesses;
-          })
-        );
-
-        // Fetch suggested interview
-        const suggestionRes = await axios.get(`${url}/interview/suggested-interview`);
-        if (suggestionRes.data.success) {
-          setSuggestedInterview({
-            id: suggestionRes.data.interviewId,
-            title: suggestionRes.data.title,
-          });
-        }
-      } catch (err) {
-        handleError("Dashboard data error:", err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchData();
-  }, [user]);
+  const { interviewScores, suggestedInterview, weaknesses, loading } = useContext(DashboardContext);
   const averageScore = interviewScores.length > 0 ? Math.round(interviewScores.reduce((a, b) => a + b, 0) / interviewScores.length) : 0;
   // Calculate roadmap completion
   const roadmapCompletion = React.useMemo(() => {
