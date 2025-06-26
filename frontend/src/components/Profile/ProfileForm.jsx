@@ -24,6 +24,7 @@ const ProfileForm = ({ isEdit }) => {
   // State declarations
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState("hard");
+  const [resume, setResume] = useState(null);
   const [hardSkills, setHardSkills] = useState([{ id: Math.random(), name: "", experience: "", subskills: [], selectedSubskills: [] }]);
   const [softSkills, setSoftSkills] = useState([{ id: Math.random(), name: "", proficiency: "" }]);
   const [jobs, setJobs] = useState([
@@ -116,6 +117,7 @@ const ProfileForm = ({ isEdit }) => {
           setLinkedin(p.linkedin || "");
           setGithub(p.github || "");
           setPhone(p.phone || "");
+          setResume(p.resume || null);
         } catch (error) {
           console.error("Failed to fetch profile data:", error);
           handleError("Failed to load profile data. Please refresh the page.");
@@ -250,13 +252,40 @@ const ProfileForm = ({ isEdit }) => {
       payload.github = github;
       payload.phone = phone;
     }
+    if (resume) {
+      payload.resume = resume;
+    }
     setLoading(true);
     try {
-      const result = await axios.post(url + "/profile/add", payload, {
+      // Use FormData for file upload
+      const formData = new FormData();
+      formData.append("hardSkills", JSON.stringify(processedHardSkills));
+      formData.append("softSkills", JSON.stringify(processedSoftSkills));
+      formData.append("jobs", JSON.stringify(processedJobs));
+      formData.append("projects", JSON.stringify(processedProjects));
+      formData.append("careerGoal", careerGoal);
+      formData.append("location", JSON.stringify({ country: selectedCountry, city: selectedCity }));
+      if (isEdit && education.length > 0) {
+        formData.append("education", JSON.stringify(education.map((edu) => ({
+          degree: edu.degree,
+          institute: edu.institute,
+          startYear: edu.startYear.toString(),
+          endYear: edu.endYear.toString(),
+        }))));
+      }
+      if (isEdit) {
+        formData.append("linkedin", linkedin);
+        formData.append("github", github);
+        formData.append("phone", phone);
+      }
+      if (resume) {
+        formData.append("resume", resume);
+      }
+      const result = await axios.post(url + "/profile/add", formData, {
         withCredentials: true,
         headers: {
           Accept: "application/json",
-          "Content-Type": "application/json",
+          // Let axios set Content-Type to multipart/form-data
         },
       });
 
@@ -643,7 +672,20 @@ const ProfileForm = ({ isEdit }) => {
             required
           />
         </div>
-
+        <div>
+          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Upload Resume (PDF, Max 2MB)</label>
+          <input
+            type='file'
+            accept='.pdf'
+            onChange={(e) => {
+              if (e.target.files && e.target.files[0]) {
+                setResume(e.target.files[0]);
+              }
+            }}
+            className='block w-full text-sm text-gray-700 dark:text-gray-200 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100 dark:file:bg-primary-900 dark:file:text-primary-300 dark:hover:file:bg-primary-800 mt-1'
+          />
+          {resume && <div className='mt-2 text-xs text-green-600 dark:text-green-400'>Selected: {resume.name}</div>}
+        </div>
         <div>
           <h3 className='text-sm font-medium text-gray-700 dark:text-gray-300 mb-3'>Location Information</h3>
 

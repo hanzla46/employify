@@ -11,6 +11,7 @@ export default function FeedbackPage() {
   const [activeTab, setActiveTab] = useState("form"); // 'form' or 'feedbacks'
 
   useEffect(() => {
+    document.title = "Feedbacks | Employify";
     fetchFeedbacks();
   }, []);
 

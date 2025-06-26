@@ -1,25 +1,29 @@
 const Profile = require("../models/ProfileModel.js");
 const { getKeywordsAndSummaryAI, getSubskillsAI } = require("../Services/ProfileAI.js");
 const mime = require("mime-types");
+const fs = require("fs");
+const path = require("path");
 const add = async (req, res) => {
   try {
     const userId = req.user._id;
-    // Accept all possible fields
-    const { hardSkills, softSkills, jobs, projects, careerGoal, location, education, linkedin, github, phone } =
-      req.body;
-    console.log(
-      "payload: ",
-      hardSkills,
-      softSkills,
-      jobs,
-      projects,
-      careerGoal,
-      location,
-      education,
-      linkedin,
-      github,
-      phone
-    );
+    // Parse JSON fields from multipart/form-data
+    const hardSkills = JSON.parse(req.body.hardSkills || "[]");
+    const softSkills = JSON.parse(req.body.softSkills || "[]");
+    const jobs = JSON.parse(req.body.jobs || "[]");
+    const projects = JSON.parse(req.body.projects || "[]");
+    const careerGoal = req.body.careerGoal || "";
+    const location = JSON.parse(req.body.location || "{}");
+    const education = req.body.education ? JSON.parse(req.body.education) : undefined;
+    const linkedin = req.body.linkedin;
+    const github = req.body.github;
+    const phone = req.body.phone;
+    // Handle resume file
+    let resumePath = undefined;
+    if (req.file) {
+      // Save file path or buffer as needed
+      resumePath = req.file;
+      console.log("resume: " + resumePath.buffer);
+    }
     let profile = await Profile.findOne({ userId });
     if (profile) {
       // Edit mode: update existing profile
