@@ -19,7 +19,7 @@ import { ToastContainer } from "./utils.jsx";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { JobsProvider } from "./Context/JobsContext.jsx";
 import Profile from "./pages/Profile";
-
+import FeedbackPage from "./pages/Feedbacks.jsx";
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -60,6 +60,7 @@ function App() {
                   <Route path='/jobs' element={<Jobs />} />
                   <Route path='/pricing' element={<Pricing />} />
                   <Route path='/about' element={<About />} />
+                  <Route path='/feedbacks' element={<FeedbackPage />} />
                   <Route path='*' element={<NotFound />} />
                 </Routes>
                 <Footer />
