@@ -53,9 +53,9 @@ export default function FeedbackPage() {
     <div className='min-h-screen p-4 md:p-8 md:pt-12 bg-gradient-to-b from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-950 text-gray-800 dark:text-gray-100 font-sans'>
       <div className='max-w-4xl mx-auto'>
         <div className='text-center mb-10'>
-          <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2'>Share Your Feedback</h1>
+          <h1 className='text-3xl md:text-4xl font-bold text-gray-900 dark:text-gray-100 mb-2'>Drop Your Vibe ✨</h1>
           <p className='text-gray-600 dark:text-gray-300 max-w-lg mx-auto'>
-            We value your opinion! Let us know what you think about our service.
+            We wanna hear from you! Tell us what slaps, what flops, or just vibe with us. Your feedback = our glow up. 💬
           </p>
         </div>
 
@@ -68,7 +68,7 @@ export default function FeedbackPage() {
                 ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             }`}>
-            Submit Feedback
+            ✍️ Drop Feedback
           </button>
           <button
             onClick={() => setActiveTab("feedbacks")}
@@ -77,7 +77,7 @@ export default function FeedbackPage() {
                 ? "text-indigo-600 dark:text-indigo-400 border-b-2 border-indigo-600 dark:border-indigo-400"
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             }`}>
-            View Feedback ({feedbacks.length})
+            👀 Peep Feedback ({feedbacks.length})
           </button>
         </div>
 
@@ -92,7 +92,7 @@ export default function FeedbackPage() {
                 <input
                   id='name'
                   type='text'
-                  placeholder='Your name'
+                  placeholder='What do your friends call you?'
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className='w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all'
@@ -106,7 +106,7 @@ export default function FeedbackPage() {
                 <input
                   id='email'
                   type='email'
-                  placeholder='your.email@example.com'
+                  placeholder='your@email.cool'
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                   className='w-full px-4 py-2.5 rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all'
@@ -115,11 +115,11 @@ export default function FeedbackPage() {
 
               <div>
                 <label htmlFor='comment' className='block text-sm font-medium text-gray-700 dark:text-gray-200 mb-1'>
-                  Feedback <span className='text-red-500'>*</span>
+                  Spill the Tea <span className='text-red-500'>*</span>
                 </label>
                 <textarea
                   id='comment'
-                  placeholder='Share your thoughts with us...'
+                  placeholder='Tell us what’s fire, what’s sus, or just say hey!'
                   value={form.comment}
                   onChange={(e) => setForm({ ...form, comment: e.target.value })}
                   rows={4}
@@ -128,7 +128,7 @@ export default function FeedbackPage() {
               </div>
 
               <div>
-                <label className='block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2'>Rating</label>
+                <label className='block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2'>Vibe Check (Rating)</label>
                 <div className='flex items-center space-x-2'>
                   {[1, 2, 3, 4, 5].map((star) => (
                     <button
@@ -136,6 +136,7 @@ export default function FeedbackPage() {
                       type='button'
                       onClick={() => setForm({ ...form, rating: star })}
                       className={`p-1 rounded-full ${form.rating >= star ? "text-yellow-400" : "text-gray-300 dark:text-gray-700"}`}>
+                      <span className='sr-only'>{star} star</span>
                       <svg xmlns='http://www.w3.org/2000/svg' className='h-8 w-8' viewBox='0 0 20 20' fill='currentColor'>
                         <path d='M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z' />
                       </svg>
@@ -163,10 +164,10 @@ export default function FeedbackPage() {
                         fill='currentColor'
                         d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'></path>
                     </svg>
-                    Submitting...
+                    Sending vibes...
                   </span>
                 ) : (
-                  "Submit Feedback"
+                  "Send It 🚀"
                 )}
               </button>
             </div>
@@ -177,35 +178,23 @@ export default function FeedbackPage() {
         {activeTab === "feedbacks" && (
           <div className='space-y-6'>
             <div className='flex justify-between items-center mb-4'>
-              <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Community Feedback</h2>
+              <h2 className='text-xl font-semibold text-gray-900 dark:text-gray-100'>Squad Feedback 💬</h2>
               <button
                 onClick={() => setActiveTab("form")}
                 className='text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300'>
-                Add your feedback
+                Drop yours ➕
               </button>
             </div>
 
             {feedbacks.length === 0 ? (
               <div className='bg-white dark:bg-gray-900 rounded-xl shadow-sm p-8 text-center'>
-                <svg
-                  xmlns='http://www.w3.org/2000/svg'
-                  className='h-12 w-12 mx-auto text-gray-400 dark:text-gray-600'
-                  fill='none'
-                  viewBox='0 0 24 24'
-                  stroke='currentColor'>
-                  <path
-                    strokeLinecap='round'
-                    strokeLinejoin='round'
-                    strokeWidth={1}
-                    d='M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z'
-                  />
-                </svg>
-                <h3 className='mt-4 text-lg font-medium text-gray-900 dark:text-gray-100'>No feedback yet</h3>
-                <p className='mt-1 text-gray-500 dark:text-gray-400'>Be the first to share your thoughts!</p>
+                <span className='text-4xl block mb-2'>😶‍🌫️</span>
+                <h3 className='mt-4 text-lg font-medium text-gray-900 dark:text-gray-100'>No vibes yet</h3>
+                <p className='mt-1 text-gray-500 dark:text-gray-400'>Be the first to drop your thoughts and set the mood! 🔥</p>
                 <button
                   onClick={() => setActiveTab("form")}
                   className='mt-4 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500'>
-                  Share Feedback
+                  Drop Feedback
                 </button>
               </div>
             ) : (
@@ -219,7 +208,9 @@ export default function FeedbackPage() {
                     </div>
                     <div className='ml-4 flex-1'>
                       <div className='flex items-center justify-between'>
-                        <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>{fb.name}</h3>
+                        <h3 className='text-lg font-medium text-gray-900 dark:text-gray-100'>
+                          {fb.name} <span className='ml-1'>🗣️</span>
+                        </h3>
                         <div className='flex items-center'>
                           {[...Array(5)].map((_, i) => (
                             <svg
