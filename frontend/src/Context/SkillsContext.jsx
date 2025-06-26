@@ -66,26 +66,47 @@ export const SkillsProvider = ({ children }) => {
   }, [roadmap]);
 
   useEffect(() => {
-    let interval;
     if (!user) return;
-    if (roadmapHasSubtasksWithoutSources(roadmap)) {
-      interval = setInterval(() => {
-        fetchUpdatedRoadmap();
-      }, 30000); // 30 seconds
-    }
-    return () => clearInterval(interval);
-  }, [roadmap]);
+
+    let isMounted = true;
+    let attempts = 0;
+    const maxAttempts = 20; // ~10 minutes max
+
+    const interval = setInterval(async () => {
+      if (!isMounted || attempts >= maxAttempts) {
+        clearInterval(interval);
+        return;
+      }
+
+      // ❗ check the current roadmap only once per poll
+      if (!roadmapHasSubtasksWithoutSources(roadmap)) {
+        clearInterval(interval);
+        return;
+      }
+
+      try {
+        const response = await axios.get(`${url}/roadmap/get`);
+        if (!isMounted) return;
+
+        if (response.data.success) {
+          const updatedRoadmap = response.data.data.tasks;
+          setRoadmap(updatedRoadmap);
+          attempts++;
+        }
+      } catch (err) {
+        console.error("Roadmap update failed:", err);
+        attempts++;
+      }
+    }, 60000); // every 60 seconds
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, [user]); // 👈 no roadmap here!!!
 
   function roadmapHasSubtasksWithoutSources(roadmap) {
     return roadmap.some((task) => task.subtasks.some((subtask) => !subtask.sources || subtask.sources.length === 0));
-  }
-
-  async function fetchUpdatedRoadmap() {
-    const getRoadmap = await axios.get(url + "/roadmap/get");
-    if (getRoadmap.data.success) {
-      console.log("Roadmap found while updating");
-      await setRoadmap(getRoadmap.data.data.tasks);
-    }
   }
   return (
     <SkillsContext.Provider

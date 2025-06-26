@@ -45,6 +45,7 @@ const ProfileSchema = new mongoose.Schema({
   linkedin: { type: String },
   github: { type: String },
   phone: { type: String },
+  resumeAnalysis: { type: String, default: "" },
   jobKeywords: [String],
   evaluationResult: { type: String, default: "" },
   profileSummary: String,

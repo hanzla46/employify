@@ -1,4 +1,9 @@
 const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { GoogleGenAI } = require("@google/genai");
+const path = require("path");
+const fs = require("fs").promises;
+const { setTimeout } = require("timers/promises");
+
 const getKeywordsAndSummaryAI = async (profile) => {
   try {
     const skillsList = profile.hardSkills
@@ -54,6 +59,70 @@ ${profile}
     return "LLM_ERROR";
   }
 };
+
+const processResumeAI = async (file) => {
+  try {
+    const filePath = path.join(__dirname, "uploads", `${Date.now()}-${file.originalname}`);
+    await fs.writeFile(filePath, file.buffer);
+    const ai = new GoogleGenAI({
+      apiKey: process.env.GEMINI_API,
+    });
+    const modelName = "gemini-2.5-flash";
+    let files;
+    let config;
+    try {
+      console.log("Starting resume file upload...");
+      files = [await ai.files.upload({ file: filePath })];
+      await waitForFileActive(ai, files[0].name);
+      await fs.unlink(filePath);
+      config = {
+        responseMimeType: "text/plain",
+      };
+      console.log(`resume uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`);
+    } catch (error) {
+      console.error("Error uploading resume file:", error);
+      throw new Error("Failed to upload resume for processing.");
+    }
+    const prompt = `Analyze this resume and provide insights on positive and negatives of this resume. keep it short and one paragraph`;
+    const contents = [
+      {
+        role: "user",
+        parts: [
+          {
+            fileData: {
+              fileUri: files[0].uri,
+              mimeType: files[0].mimeType,
+            },
+          },
+          {
+            text: prompt,
+          },
+        ],
+      },
+    ];
+    try {
+      console.log("Generating content for resume...");
+      const result = await ai.models.generateContentStream({
+        model: modelName,
+        contents: contents,
+        config: config,
+      });
+      let content = "";
+      for await (const chunk of result) {
+        content += chunk.text;
+      }
+      console.log("Raw resume response text:", content);
+      return content;
+    } catch (error) {
+      console.error("Error generating content from resume:", error);
+      throw new Error("Failed to process resume content.");
+    }
+  } catch (error) {
+    console.error("Error processing resume AI:", error);
+    return "LLM_ERROR";
+  }
+};
+
 const getSubskillsAI = async (skillName) => {
   try {
     const normalizedSkillName = skillName.trim();
@@ -91,4 +160,24 @@ const getSubskillsAI = async (skillName) => {
     return [];
   }
 };
-module.exports = { getKeywordsAndSummaryAI, getSubskillsAI };
+async function waitForFileActive(ai, fileName) {
+  let file = await ai.files.get({ name: fileName });
+  let retries = 0;
+  const maxRetries = 20; // Safety break to prevent infinite loops
+  const delay = 5000; // 5 seconds
+
+  while (file.state === "PROCESSING" && retries < maxRetries) {
+    console.log(`Polling file status: ${file.state}... (Attempt ${retries + 1})`);
+    await setTimeout(delay); // Wait for 5 seconds
+    file = await ai.files.get({ name: fileName });
+    retries++;
+  }
+
+  if (file.state !== "ACTIVE") {
+    console.error("File processing failed or timed out. Final state:", file.state);
+    throw new Error(`File ${fileName} is not in ACTIVE state. Current state: ${file.state}`);
+  }
+
+  return file;
+}
+module.exports = { getKeywordsAndSummaryAI, processResumeAI, getSubskillsAI };

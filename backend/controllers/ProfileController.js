@@ -1,5 +1,5 @@
 const Profile = require("../models/ProfileModel.js");
-const { getKeywordsAndSummaryAI, getSubskillsAI } = require("../Services/ProfileAI.js");
+const { getKeywordsAndSummaryAI, processResumeAI, getSubskillsAI } = require("../Services/ProfileAI.js");
 const mime = require("mime-types");
 const fs = require("fs");
 const path = require("path");
@@ -17,13 +17,6 @@ const add = async (req, res) => {
     const linkedin = req.body.linkedin;
     const github = req.body.github;
     const phone = req.body.phone;
-    // Handle resume file
-    let resumePath = undefined;
-    if (req.file) {
-      // Save file path or buffer as needed
-      resumePath = req.file;
-      console.log("resume: " + resumePath.buffer);
-    }
     let profile = await Profile.findOne({ userId });
     if (profile) {
       // Edit mode: update existing profile
@@ -77,6 +70,10 @@ const add = async (req, res) => {
       success: true,
       profileData: updatedProfile,
     });
+    if (req.file) {
+      const resumeAnalysis = await processResumeAI(req.file);
+      await Profile.findOneAndUpdate({ userId: userId }, { $set: { resumeAnalysis: resumeAnalysis } }, { new: true });
+    }
   } catch (error) {
     console.error("Error adding/updating profile:", error);
     res.status(500).json({ message: "Internal server error", success: false });
