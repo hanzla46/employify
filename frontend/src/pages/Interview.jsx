@@ -41,31 +41,41 @@ export function Interview() {
   const [sessionId, setSessionId] = useState("");
   const [job, setJob] = useState(null);
   const [searchParams, setSearchParams] = useSearchParams();
+
   useEffect(() => {
     setJobId(searchParams.get("jobId") || "");
   }, [searchParams]);
+
   useEffect(() => {
     setSessionId(searchParams.get("sessionId") || "");
   }, []);
+
   useEffect(() => {
     setInterviewData((prev) => ({ ...prev, position: searchParams.get("position") || "" }));
   }, [searchParams]);
+
   useEffect(() => {
     if (!user || !sessionId) return;
     const checkInterviewSession = async () => {
-      const res = await axios.get(url + `/interview/check-session?sessionId=${sessionId}`);
-      if (res.data.success) {
-        setQuestion(res.data.question);
-        setCategory(res.data.category);
-        setQuestionCount(res.data.questionsLength);
-        setScore(res.data.score);
-        setIsStarted(true);
-        setIsCompleted(false);
-        setInfoBox(false);
+      try {
+        const res = await axios.get(url + `/interview/check-session?sessionId=${sessionId}`);
+        if (res.data.success) {
+          setQuestion(res.data.question);
+          setCategory(res.data.category);
+          setQuestionCount(res.data.questionsLength);
+          setScore(res.data.score);
+          setIsStarted(true);
+          setIsCompleted(false);
+          setInfoBox(false);
+        }
+      } catch (error) {
+        console.error("Failed to check interview session:", error);
+        handleError("Failed to load previous interview session.");
       }
     };
     checkInterviewSession();
   }, [user, sessionId]);
+
   useEffect(() => {
     if (jobId) {
       const matchingJob = jobs.find((item) => item["id"] === jobId);
@@ -79,8 +89,9 @@ export function Interview() {
       setJob(null);
     }
   }, [jobId, jobs]);
+
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
-  const [isAudioRecording, setIsAudioRecording] = useState(false);
+  const [isRecording, setIsRecording] = useState(false); // Unified recording state
   const [question, setQuestion] = useState("");
   const [questionCount, setQuestionCount] = useState(0);
   const [category, setCategory] = useState("");
@@ -88,8 +99,7 @@ export function Interview() {
   const [score, setScore] = useState();
   const [isStarted, setIsStarted] = useState(false);
   const [isCompleted, setIsCompleted] = useState(false);
-  const [isVideoRecording, setIsVideoRecording] = useState(false);
-  const [recordedBlob, setRecordedBlob] = useState(null);
+  // const [recordedBlob, setRecordedBlob] = useState(null); // No longer directly used
   const [summary, setSummary] = useState("");
   const [overallAnalysis, setOverallAnalysis] = useState("");
   const [interviewData, setInterviewData] = useState({
@@ -106,13 +116,14 @@ export function Interview() {
   const [recordingUrl, setRecordingUrl] = useState(null);
 
   const {
-    status,
+    status, // Keep status if needed for debugging or more complex UI
     startRecording: startVideoRecording,
     stopRecording: stopVideoRecording,
     mediaBlobUrl,
     previewStream,
     clearBlobUrl,
   } = useReactMediaRecorder({ video: true, audio: true });
+
   // question audio
   useEffect(() => {
     if (!question) return;
@@ -125,21 +136,8 @@ export function Interview() {
     synth.cancel();
     synth.speak(utterance);
   }, [question]);
-  //video blob
-  useEffect(() => {
-    const handleBlob = async () => {
-      if (mediaBlobUrl) {
-        const blob = await fetch(mediaBlobUrl).then((res) => res.blob());
-        if (blob && blob.type.startsWith("video/")) {
-          setRecordedBlob(blob);
-        } else {
-          handleError("Invalid video blob: " + blob.type);
-        }
-      }
-    };
-    handleBlob();
-  }, [mediaBlobUrl]);
-  //key event
+
+  // key event
   const textareaRef = useRef(null);
   useEffect(() => {
     if (!isStarted) return;
@@ -156,10 +154,11 @@ export function Interview() {
     return () => {
       window.removeEventListener("keydown", handleKeyPress);
     };
-  }, [isStarted]);
+  }, [isStarted, loading, transcript, written, question, category, sessionId]); // Added relevant dependencies for sendResponse
 
   const startInterview = async () => {
     try {
+      setLoading(true); // Start loading when interview setup is confirmed
       const response = await axios.post(
         url + "/interview/start",
         { interviewData, jobOrMock, job },
@@ -167,7 +166,7 @@ export function Interview() {
           withCredentials: true,
           headers: {
             Accept: "application/json",
-            "Content-Type": "application/json", // Correct for startInterview
+            "Content-Type": "application/json",
           },
         }
       );
@@ -179,11 +178,10 @@ export function Interview() {
         setCategory(response.data.category);
         handleSuccess("Interview started successfully!");
         setIsStarted(true);
-        // Removed auto-start of video recording
-        // startVideoRecording();
-        // setIsVideoRecording(true);
+        // Start both audio and video recording
         SpeechRecognition.startListening({ continuous: true });
-        setIsAudioRecording(true);
+        startVideoRecording();
+        setIsRecording(true); // Unified state
         setInfoBox(false);
         const section = document.getElementById("top");
         if (section) {
@@ -201,8 +199,9 @@ export function Interview() {
       } else {
         handleError("Error setting up request: " + error.message);
       }
+    } finally {
+      setLoading(false); // End loading regardless of success/failure
     }
-    setLoading(false);
   };
 
   const sendResponse = async (isConfirmed) => {
@@ -210,34 +209,60 @@ export function Interview() {
       handleError("Response can't be empty");
       return;
     }
-    SpeechRecognition.stopListening();
-    setIsAudioRecording(false);
-    setIsVideoRecording(false);
-    await stopVideoRecording();
 
-    // WAIT for mediaBlobUrl to show up
-    let mediaUrl = null;
+    setLoading(true); // Start loading immediately
+
+    // Step 1: Stop all current recordings
+    SpeechRecognition.stopListening();
+    setIsRecording(false); // Update unified state
+    await stopVideoRecording(); // Await ensures the recording process is initiated to finalize the blob
+
+    // Step 2: Wait for mediaBlobUrl to be generated by react-media-recorder
+    let currentMediaBlobUrl = null;
     let attempts = 0;
-    while (!mediaUrl && attempts < 10) {
-      console.log("⏳ Waiting for mediaBlobUrl...");
-      await new Promise((res) => setTimeout(res, 300));
-      mediaUrl = mediaBlobUrl;
-      attempts++;
+    const maxAttempts = 30; // 30 attempts * 100ms delay = 3 seconds max wait
+    const delay = 100; // ms
+
+    // Use a loop to poll `mediaBlobUrl` which gets updated asynchronously by useReactMediaRecorder
+    while (!currentMediaBlobUrl && attempts < maxAttempts) {
+      currentMediaBlobUrl = mediaBlobUrl; // Attempt to capture the latest value
+      if (!currentMediaBlobUrl) {
+        await new Promise((res) => setTimeout(res, delay)); // Wait a bit
+        attempts++;
+      }
     }
 
     let blob = null;
-    if (mediaUrl) {
-      blob = await fetch(mediaUrl).then((res) => res.blob());
-      if (!blob || !blob.type.startsWith("video/")) {
-        handleError("Invalid blob type: " + blob?.type);
+    if (currentMediaBlobUrl) {
+      try {
+        blob = await fetch(currentMediaBlobUrl).then((res) => res.blob());
+        if (!blob || !blob.type.startsWith("video/")) {
+          console.warn("Invalid video blob type received: " + (blob ? blob.type : "null"));
+          // handleError("Invalid video blob format captured."); // Optionally show error to user
+          blob = null; // Ensure blob is null if invalid
+        }
+      } catch (error) {
+        console.error("Error fetching or validating blob from URL:", error);
+        // handleError("Failed to process video recording."); // Optionally show error to user
+        blob = null; // Ensure blob is null on error
       }
+    } else {
+      console.warn("MediaBlobUrl was not available after stopping recording and waiting. Proceeding without video.");
+      // If video is strictly required, uncomment the handleError and return below:
+      // handleError("Video recording failed. Please ensure camera/mic permissions.");
+      // setLoading(false);
+      // return;
     }
-    if (mediaUrl && isConfirmed !== true) {
-      setRecordingUrl(mediaUrl);
+
+    // Step 3: If a blob was captured and confirmation is needed, show modal
+    if (blob && isConfirmed !== true) {
+      setRecordingUrl(currentMediaBlobUrl);
       setShowReviewModal(true);
+      setLoading(false); // Release loading state while review modal is open
       return; // Stop here until user confirms
     }
-    setLoading(true);
+
+    // Step 4: Prepare FormData
     const formData = new FormData();
     if (blob) {
       formData.append("video", blob, "recording.webm");
@@ -247,16 +272,16 @@ export function Interview() {
     formData.append("answer", transcript);
     formData.append("written", written);
     formData.append("sessionId", sessionId);
-    for (let [key, value] of formData.entries()) {
-      console.log(key, value);
-    }
+
     try {
       const response = await axios.post(url + "/interview/continue", formData, {
         withCredentials: true,
         headers: {
           Accept: "application/json",
+          // Content-Type: 'multipart/form-data' is automatically set by the browser when using FormData
         },
       });
+
       if (response.data.success) {
         setQuestionCount(questionCount + 1);
         setQuestion(response.data.question);
@@ -266,26 +291,28 @@ export function Interview() {
         setOverallAnalysis(response.data.overallAnalysis);
         resetTranscript();
         setWritten("");
-        clearBlobUrl();
-        setRecordedBlob(null);
-        setIsAudioRecording(true);
-        SpeechRecognition.startListening({ continuous: true });
-        // // Removed auto-start of video recording after response
-        // startVideoRecording();
-        // setIsVideoRecording(true);
-        if (response.data.completed == true || response.data.completed == "true") {
+        clearBlobUrl(); // Clear the blob URL ONLY after successful submission
+
+        if (response.data.completed === true || response.data.completed === "true") {
           setIsCompleted(true);
           setIsStarted(false);
+          // Recordings are already stopped from the beginning of sendResponse
+          // Explicitly ensure they are off for completed state if not already
+          setIsRecording(false);
+          SpeechRecognition.stopListening();
           return;
         }
+
+        // Step 5: Start recordings for the next question
+        SpeechRecognition.startListening({ continuous: true });
+        startVideoRecording();
+        setIsRecording(true); // Unified state
       } else {
         console.error("Failed to continue interview:", response.data.message);
         handleError("Failed to continue interview: " + response.data.message);
-        setLoading(false);
       }
     } catch (error) {
       console.error("Error sending response:", error);
-      setLoading(false);
       if (error.response) {
         handleError(`Server Error (${error.response.status}): ${error.response.data.message}`);
       } else if (error.request) {
@@ -298,33 +325,24 @@ export function Interview() {
     }
   };
 
-  //audio
-  const RecordAudio = async () => {
-    if (isAudioRecording) {
-      await SpeechRecognition.stopListening();
-      setIsAudioRecording(false);
-      return;
-    }
-    if (!isAudioRecording) {
-      SpeechRecognition.startListening({ continuous: true });
-      setIsAudioRecording(true);
-    }
-  };
-  if (!browserSupportsSpeechRecognition) {
-    return <p>no access</p>;
-  }
-
-  //video recording
-  const handleVideoRecord = () => {
-    if (isVideoRecording) {
+  // Unified toggle function for recording
+  const toggleRecording = () => {
+    if (isRecording) {
+      // If currently recording, stop both
+      SpeechRecognition.stopListening();
       stopVideoRecording();
-      setIsVideoRecording(false);
-    }
-    if (!isVideoRecording) {
+      setIsRecording(false);
+    } else {
+      // If not recording, start both
+      SpeechRecognition.startListening({ continuous: true });
       startVideoRecording();
-      setIsVideoRecording(true);
+      setIsRecording(true);
     }
   };
+
+  if (!browserSupportsSpeechRecognition) {
+    return <p>Your browser does not support Speech Recognition. Please try Chrome for full functionality.</p>;
+  }
 
   //everything starts from here
   const start = () => {
@@ -339,17 +357,18 @@ export function Interview() {
         transcript={transcript}
         written={written}
         onReRecord={() => {
-          setRecordedBlob(null);
-          clearBlobUrl();
+          clearBlobUrl(); // Ensure old blob URL is cleared for a fresh recording
           resetTranscript();
           setWritten("");
           setShowReviewModal(false);
+          // Restart both audio and video recording
           SpeechRecognition.startListening({ continuous: true });
-          setIsAudioRecording(true);
+          startVideoRecording();
+          setIsRecording(true);
         }}
         onConfirm={async () => {
           setShowReviewModal(false);
-          sendResponse(true);
+          sendResponse(true); // Pass true to confirm and skip review modal next time
         }}
       />
 
@@ -358,8 +377,8 @@ export function Interview() {
           <div className='flex items-center justify-between mb-2'>
             {isStarted && (
               <div className='px-4 py-2 bg-white dark:bg-gray-800 rounded-full shadow-md border border-indigo-100 dark:border-indigo-900 text-indigo-700 dark:text-indigo-300 font-medium flex items-center'>
-                <div className={`w-3 h-3 rounded-full mr-2 ${isAudioRecording ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
-                {isAudioRecording || isVideoRecording ? "Recording" : "Paused"}
+                <div className={`w-3 h-3 rounded-full mr-2 ${isRecording ? "bg-green-500 animate-pulse" : "bg-red-500"}`}></div>
+                {isRecording ? "Recording" : "Paused"}
               </div>
             )}
           </div>
@@ -371,10 +390,8 @@ export function Interview() {
               <InterviewHeader
                 isStarted={isStarted}
                 isCompleted={isCompleted}
-                RecordAudio={RecordAudio}
-                videoRecording={isVideoRecording}
-                isAudioRecording={isAudioRecording}
-                handleVideoRecord={handleVideoRecord}
+                isRecording={isRecording} // Pass unified state
+                toggleRecording={toggleRecording} // Pass unified toggle function
                 sendResponse={sendResponse}
                 loading={loading}
               />
@@ -455,7 +472,7 @@ export function Interview() {
                     />
                   </div>
                   <div className='md:col-span-3 md:float-left flex flex-col justify-normal'>
-                    <VideoComponent stream={previewStream} isVideoRecording={isVideoRecording} />
+                    <VideoComponent stream={previewStream} isRecording={isRecording} />
                     <div
                       className='mt-5 relative group'
                       onClick={() => {
@@ -509,25 +526,11 @@ export function Interview() {
 function InterviewHeader({
   isStarted,
   isCompleted,
-  handleVideoRecord,
-  RecordAudio,
+  isRecording, // Unified state
+  toggleRecording, // Unified toggle function
   sendResponse,
-  isAudioRecording,
-  videoRecording,
   loading,
 }) {
-  const handleCombinedRecording = () => {
-    if (isAudioRecording || videoRecording) {
-      if (isAudioRecording) RecordAudio();
-      if (videoRecording) handleVideoRecord();
-    } else {
-      RecordAudio();
-      handleVideoRecord();
-    }
-  };
-
-  const isRecording = isAudioRecording && videoRecording;
-
   return (
     <div className='bg-gradient-to-r from-indigo-600 to-[var(--color-primary-400)] p-3'>
       <div className='flex flex-col md:flex-row justify-between items-center'>
@@ -549,7 +552,7 @@ function InterviewHeader({
               className={`p-2.5 rounded-full transition-all duration-200 shadow-md disabled:opacity-50 ${
                 isRecording ? "bg-red-500 text-white hover:bg-red-600" : "bg-white text-indigo-600 hover:bg-indigo-50"
               }`}
-              onClick={handleCombinedRecording}>
+              onClick={toggleRecording}>
               {isRecording ? (
                 <div className='h-5 w-5 bg-white rounded-sm flex items-center justify-center'>
                   <div className='h-3 w-3 bg-red-500 rounded-sm'></div>
@@ -656,7 +659,7 @@ function QuestionAndScore({ question, questionCount, score, summary }) {
   );
 }
 
-function VideoComponent({ stream, isVideoRecording }) {
+function VideoComponent({ stream, isRecording }) {
   const videoRef = useRef(null);
   useEffect(() => {
     if (videoRef.current && stream) {
@@ -670,7 +673,7 @@ function VideoComponent({ stream, isVideoRecording }) {
           <Video className='h-5 w-5 mr-2' />
           Your Camera
         </h3>
-        {isVideoRecording && (
+        {isRecording && (
           <div className='flex items-center px-3 py-1 bg-black/30 rounded-full'>
             <div className='h-3 w-3 rounded-full bg-red-500 animate-pulse mr-2'></div>
             <span className='text-xs text-white'>Recording</span>
@@ -680,7 +683,7 @@ function VideoComponent({ stream, isVideoRecording }) {
 
       <div className='relative flex-grow bg-gray-900 flex items-center justify-center'>
         {stream ? <video ref={videoRef} autoPlay muted playsInline className='w-full h-64 object-cover transform -scale-x-100' /> : ""}
-        {!isVideoRecording && (
+        {!isRecording && (
           <div className='absolute inset-0 flex items-center justify-center bg-black/50 backdrop-blur-sm'>
             <div className='p-6 bg-black/60 rounded-full'>
               <PauseCircle className='h-16 w-16 text-white/90' />

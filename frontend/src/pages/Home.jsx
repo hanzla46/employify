@@ -25,18 +25,6 @@ import {
 import { Link } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 
-function FeatureCard({ icon: Icon, title, description, color = "indigo" }) {
-  return (
-    <div className='bg-white dark:bg-gray-800/40 p-8 rounded-3xl shadow-lg hover:shadow-xl transition-all duration-300 hover:translate-y-[-4px] border border-gray-100 dark:border-gray-700 backdrop-blur-sm h-auto'>
-      <div className={`h-14 w-14 bg-${color}-100 dark:bg-${color}-900/30 rounded-xl flex items-center justify-center mb-6`}>
-        <Icon className={`h-7 w-7 text-${color}-600 dark:text-${color}-400`} />
-      </div>
-      <h3 className='text-xl font-bold mb-3 dark:text-white'>{title}</h3>
-      <p className='text-gray-600 dark:text-gray-300 leading-relaxed mt-auto'>{description}</p>
-    </div>
-  );
-}
-
 function EnhancedFeatureHighlight({ icon: Icon, title, description }) {
   return (
     <div className='flex items-center p-4 bg-white/80 dark:bg-gray-800/50 rounded-xl backdrop-blur-sm border border-gray-200 dark:border-gray-700'>
@@ -97,7 +85,7 @@ export function Home() {
   }, []);
 
   return (
-    <div className='pt-8 bg-gradient-to-b from-gray-50 to-white dark:from-gray-800 dark:to-gray-700'>
+    <div className='pt-8 bg-gradient-to-br from-gray-100 to-white dark:from-gray-900 dark:to-gray-700'>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full'>
         {/* Hero Section */}
         <header className='py-20 lg:py-28 relative'>

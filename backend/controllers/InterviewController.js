@@ -7,7 +7,7 @@ const Roadmap = require("../models/RoadmapModel");
 const startInterview = async (req, res) => {
   try {
     const userId = req.user._id;
-    await Interview.updateMany({ userId, status: "ongoing" }, { $set: { status: "completed" } });
+    // await Interview.updateMany({ userId, status: "ongoing" }, { $set: { status: "completed" } });
     const interviewData = req.body.interviewData;
     const job = req.body.job;
     const jobOrMock = req.body.jobOrMock;
@@ -106,7 +106,9 @@ const continueInterview = async (req, res) => {
       completed,
       weaknesses,
     } = result;
-
+    if (completed === true || completed === "true") {
+      interview.status = "completed";
+    }
     if (interview.questions.length > 1) {
       let lastQuestion = interview.questions[interview.questions.length - 2];
       lastQuestion.score = score;
