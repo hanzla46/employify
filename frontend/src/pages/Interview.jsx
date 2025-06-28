@@ -2,7 +2,21 @@ import "regenerator-runtime/runtime";
 import { useRef, useState, useEffect, useContext } from "react";
 import { useReactMediaRecorder } from "react-media-recorder";
 import axios from "axios";
-import { Bot, Video, Mic, Send, CheckCircle, PauseCircle, Info, Sparkles, AlertCircle, BarChart } from "lucide-react";
+import {
+  X,
+  Trash2,
+  CheckCircle2,
+  Bot,
+  Video,
+  Mic,
+  Send,
+  CheckCircle,
+  PauseCircle,
+  Info,
+  Sparkles,
+  AlertCircle,
+  BarChart,
+} from "lucide-react";
 import SpeechRecognition, { useSpeechRecognition } from "react-speech-recognition";
 import ProtectedRoute from "../Context/ProtectedRoute";
 import { JobsContext } from "../Context/JobsContext";
@@ -88,6 +102,9 @@ export function Interview() {
   });
   const [infoBox, setInfoBox] = useState(true);
   const [loading, setLoading] = useState(false);
+  const [showReviewModal, setShowReviewModal] = useState(false);
+  const [recordingUrl, setRecordingUrl] = useState(null);
+
   const {
     status,
     startRecording: startVideoRecording,
@@ -188,12 +205,11 @@ export function Interview() {
     setLoading(false);
   };
 
-  const sendResponse = async () => {
+  const sendResponse = async (isConfirmed) => {
     if (!transcript && !written) {
       handleError("Response can't be empty");
       return;
     }
-    setLoading(true);
     SpeechRecognition.stopListening();
     setIsAudioRecording(false);
     setIsVideoRecording(false);
@@ -216,6 +232,12 @@ export function Interview() {
         handleError("Invalid blob type: " + blob?.type);
       }
     }
+    if (mediaUrl && isConfirmed !== true) {
+      setRecordingUrl(mediaUrl);
+      setShowReviewModal(true);
+      return; // Stop here until user confirms
+    }
+    setLoading(true);
     const formData = new FormData();
     if (blob) {
       formData.append("video", blob, "recording.webm");
@@ -310,6 +332,27 @@ export function Interview() {
   };
   return (
     <div className='min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-800 dark:via-indigo-950/30 dark:to-gray-700'>
+      <RecordingReviewModal
+        isOpen={showReviewModal}
+        onClose={() => setShowReviewModal(false)}
+        videoUrl={recordingUrl}
+        transcript={transcript}
+        written={written}
+        onReRecord={() => {
+          setRecordedBlob(null);
+          clearBlobUrl();
+          resetTranscript();
+          setWritten("");
+          setShowReviewModal(false);
+          SpeechRecognition.startListening({ continuous: true });
+          setIsAudioRecording(true);
+        }}
+        onConfirm={async () => {
+          setShowReviewModal(false);
+          sendResponse(true);
+        }}
+      />
+
       <div className='container mx-auto px-4 py-10 pb-2 pt-16'>
         <div className='w-full max-w-full mx-auto'>
           <div className='flex items-center justify-between mb-2'>
@@ -520,7 +563,7 @@ function InterviewHeader({
             </button>
 
             <button
-              onClick={sendResponse}
+              onClick={() => sendResponse(false)}
               disabled={loading}
               aria-label='Send response'
               className={`p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all duration-200 shadow-md ${
@@ -680,7 +723,7 @@ function ResponsesComponent({ written, setWritten, transcript, resetTranscript, 
         <div className='flex-1'>
           <h4 className='text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-3 flex items-center'>
             <Mic className='h-4 w-4 mr-2' />
-            Recorded Speech <span className='text-red-500 ml-1'>(Draft Only!)</span>
+            Recorded Speech <span className='text-red-500'>(Draft Only!)</span>
           </h4>
           <div className='min-h-24 max-h-max p-4 border border-indigo-100 dark:border-indigo-900/50 rounded-xl bg-white dark:bg-gray-800 shadow-inner'>
             <p className='text-gray-800 dark:text-gray-200' style={{ wordBreak: "break-word" }}>
@@ -717,6 +760,48 @@ function ResponsesComponent({ written, setWritten, transcript, resetTranscript, 
           <Info className='h-4 w-4 mr-2 text-indigo-500' />
           Click the send button when you're ready to submit your answer
         </p>
+      </div>
+    </div>
+  );
+}
+function RecordingReviewModal({ isOpen, onClose, videoUrl, transcript, written, onReRecord, onConfirm }) {
+  if (!isOpen) return null;
+
+  return (
+    <div className='max-h-screen overflow-y-auto fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4'>
+      <div className='w-full max-w-2xl rounded-2xl bg-white dark:bg-gray-900 shadow-xl overflow-hidden'>
+        <div className='flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700'>
+          <h2 className='text-xl font-semibold text-gray-900 dark:text-white'>Review Your Response</h2>
+          <button onClick={onClose} className='text-gray-500 hover:text-red-500'>
+            <X className='h-6 w-6' />
+          </button>
+        </div>
+
+        <div className='p-4 space-y-4 flex items-center flex-col'>
+          <video controls src={videoUrl} className='w-96 h-80 rounded-xl border border-gray-300 dark:border-gray-700' />
+
+          <div>
+            <h3 className='text-sm font-bold text-indigo-600 dark:text-indigo-400'>Transcript</h3>
+            <p className='mt-1 text-gray-800 dark:text-gray-200 whitespace-pre-wrap'>{transcript || "No transcript available."}</p>
+          </div>
+          <div>
+            <h3 className='text-sm font-bold text-indigo-600 dark:text-indigo-400'>Written</h3>
+            <p className='mt-1 text-gray-800 dark:text-gray-200 whitespace-pre-wrap'>{written || "No nothing was written."}</p>
+          </div>
+        </div>
+
+        <div className='flex justify-end gap-2 p-4 border-t border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800'>
+          <button
+            onClick={onReRecord}
+            className='flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:text-white border border-red-600 hover:bg-red-600 rounded-full font-medium'>
+            <Trash2 className='w-4 h-4' /> Re-record
+          </button>
+          <button
+            onClick={onConfirm}
+            className='flex items-center gap-2 px-4 py-2 text-sm text-white bg-indigo-600 hover:bg-indigo-700 rounded-full font-medium'>
+            <CheckCircle2 className='w-4 h-4' /> Confirm & Submit
+          </button>
+        </div>
       </div>
     </div>
   );
