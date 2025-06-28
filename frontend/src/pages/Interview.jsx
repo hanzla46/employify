@@ -473,6 +473,18 @@ function InterviewHeader({
   videoRecording,
   loading,
 }) {
+  const handleCombinedRecording = () => {
+    if (isAudioRecording || videoRecording) {
+      if (isAudioRecording) RecordAudio();
+      if (videoRecording) handleVideoRecord();
+    } else {
+      RecordAudio();
+      handleVideoRecord();
+    }
+  };
+
+  const isRecording = isAudioRecording && videoRecording;
+
   return (
     <div className='bg-gradient-to-r from-indigo-600 to-[var(--color-primary-400)] p-3'>
       <div className='flex flex-col md:flex-row justify-between items-center'>
@@ -487,44 +499,47 @@ function InterviewHeader({
         </div>
 
         {isStarted && !isCompleted && (
-          <div className='flex items-center gap-4 bg-white/10 backdrop-blur-sm rounded-full px-6 py-3 shadow-lg'>
+          <div className='flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 shadow-lg'>
             <button
               disabled={loading}
-              aria-label='Toggle microphone'
-              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
-                isAudioRecording ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"
+              aria-label={isRecording ? "Stop recording" : "Start recording"}
+              className={`p-2.5 rounded-full transition-all duration-200 shadow-md disabled:opacity-50 ${
+                isRecording ? "bg-red-500 text-white hover:bg-red-600" : "bg-white text-indigo-600 hover:bg-indigo-50"
               }`}
-              onClick={RecordAudio}>
-              <Mic className='h-5 w-5' />
+              onClick={handleCombinedRecording}>
+              {isRecording ? (
+                <div className='h-5 w-5 bg-white rounded-sm flex items-center justify-center'>
+                  <div className='h-3 w-3 bg-red-500 rounded-sm'></div>
+                </div>
+              ) : (
+                <div className='h-5 w-5 relative'>
+                  <div className='absolute inset-0 bg-indigo-600 rounded-full'></div>
+                  <div className='absolute inset-1 bg-white rounded-full'></div>
+                </div>
+              )}
             </button>
 
             <button
+              onClick={sendResponse}
               disabled={loading}
-              aria-label='Toggle video'
-              onClick={handleVideoRecord}
-              className={`p-3 rounded-full transition-all duration-300 shadow-md disabled:opacity-50 ${
-                videoRecording ? "bg-green-500 text-white hover:bg-green-600" : "bg-red-500 text-white hover:bg-red-600"
+              aria-label='Send response'
+              className={`p-2.5 bg-indigo-600 text-white rounded-full hover:bg-indigo-700 transition-all duration-200 shadow-md ${
+                loading ? "pl-3 pr-3" : ""
               }`}>
-              <Video className='h-5 w-5' />
-            </button>
-
-            {loading ? (
-              <Spinner />
-            ) : (
-              <button
-                onClick={sendResponse}
-                aria-label='Send message'
-                className='p-3 bg-white text-indigo-600 rounded-full hover:bg-indigo-50 transition-all duration-300 shadow-md'>
+              {loading ? (
+                <div className='h-5 w-5 flex items-center justify-center'>
+                  <Spinner size='sm' />
+                </div>
+              ) : (
                 <Send className='h-5 w-5' />
-              </button>
-            )}
+              )}
+            </button>
           </div>
         )}
       </div>
     </div>
   );
 }
-
 function InstructionsCard({ title, items, icon }) {
   return (
     <div className='min-h-72 bg-gradient-to-br from-white to-indigo-50 dark:from-gray-800 dark:to-indigo-950/30 rounded-2xl shadow-lg border border-indigo-100 dark:border-indigo-900/50 overflow-hidden'>
@@ -665,7 +680,7 @@ function ResponsesComponent({ written, setWritten, transcript, resetTranscript, 
         <div className='flex-1'>
           <h4 className='text-sm font-medium text-indigo-700 dark:text-indigo-400 mb-3 flex items-center'>
             <Mic className='h-4 w-4 mr-2' />
-            Recorded Speech
+            Recorded Speech <span className='text-red-500 ml-1'>(Draft Only!)</span>
           </h4>
           <div className='min-h-24 max-h-max p-4 border border-indigo-100 dark:border-indigo-900/50 rounded-xl bg-white dark:bg-gray-800 shadow-inner'>
             <p className='text-gray-800 dark:text-gray-200' style={{ wordBreak: "break-word" }}>

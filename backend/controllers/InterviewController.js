@@ -89,13 +89,13 @@ const continueInterview = async (req, res) => {
     const QId = interview.questions.length;
     if (video) {
       console.log("Video received - Size:", video.size / 1024 / 1024, "MB, Type:", video.mimetype);
-      ProcessVideo(video, QId, userId);
+      ProcessVideo(video, QId, userId, sessionId);
     } else {
       console.log("No video file uploaded.");
     }
     const result = await ContinueInterviewAI(interview);
 
-    console.log("Parsed Result:", result);
+    // console.log("Parsed Result:", result);
     const {
       overallAnalysis,
       currentAnalysis,

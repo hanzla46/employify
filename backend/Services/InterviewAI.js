@@ -14,11 +14,19 @@ const ContinueInterviewAI = async (interview) => {
       *   Intensity of emotions (e.g., slight, moderate, strong).
       *   Any inconsistencies between the candidate's verbal response and their nonverbal cues (e.g., saying they enjoyed a task while displaying microexpressions of frustration).
 
-  **3. Skills-Based Evaluation:**
+  **3. Audio Analysis:**
+  *   Analyze the provided audio analysis for each answer, focusing on:
+      *   Transcript accuracy and completeness.
+      *   Clarity and confidence in speech delivery.
+      *   Pace and tone (e.g., too fast, too slow, monotone, engaging).
+      *   Use of filler words and their impact on communication.
+      *   Any inconsistencies between audio cues and verbal/nonverbal content.
+
+  **4. Skills-Based Evaluation:**
   *   Evaluate the candidate's performance based on the pre-defined skills being assessed and the specified scoring framework. Consider the weighting assigned to each skill.
   *   Determine which skills have been adequately demonstrated and which require further assessment.
 
- **4. Natural Conversational Question Generation:**
+ **5. Natural Conversational Question Generation:**
     * Generate questions that mimic how human interviewers organically transition between topics:
     - Frame questions conversationally (e.g., "That's interesting... could you expand on..." instead of "Explain further about...")
     - Use natural bridging phrases ("Given what you just mentioned...", "Switching gears slightly...")
@@ -72,6 +80,22 @@ const ContinueInterviewAI = async (interview) => {
       : "No facial data available."
   }
 
+  - **Audio Analysis:**
+  ${
+    interview.questions && interview.questions.length > 0
+      ? interview.questions
+          .map(
+            (q, index) =>
+              ` ${index + 1}. **Question:** ${q.question}\n     **Audio Analysis:** ${
+                q.audioAnalysis && (q.audioAnalysis.transcript || q.audioAnalysis.clarity || q.audioAnalysis.confidence || q.audioAnalysis.paceAndTone || (q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0))
+                  ? `Transcript: ${q.audioAnalysis.transcript || "N/A"}; Clarity: ${q.audioAnalysis.clarity || "N/A"}; Confidence: ${q.audioAnalysis.confidence || "N/A"}; Pace & Tone: ${q.audioAnalysis.paceAndTone || "N/A"}; Filler Words: ${(q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0) ? q.audioAnalysis.fillerWords.join(", ") : "None"}`
+                  : "No audio data"
+              }`
+          )
+          .join("\n")
+      : "No audio data available."
+  }
+
   - **Current Overall Score (out of 100):** ${interview.overallScore || "N/A"}
 
   ---
@@ -81,8 +105,8 @@ const ContinueInterviewAI = async (interview) => {
 
   \`\`\`json
   {
-    "overallAnalysis": "[A concise summary of your assessment of the candidate's overall performance based on all previous questions, answers, and facial expressions, incorporating both verbal and nonverbal cues. This should include strengths, weaknesses, and any areas of concern. Provide constructive feedback and recommendations for improvement. WRITE it in the way that you are talking directly to the candidate. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else).",
-    "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression results. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point.].",
+    "overallAnalysis": "[A concise summary of your assessment of the candidate's overall performance based on all previous questions, answers, facial expressions, and audio analysis, incorporating both verbal and nonverbal cues. This should include strengths, weaknesses, and any areas of concern. Provide constructive feedback and recommendations for improvement. WRITE it in the way that you are talking directly to the candidate. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else).",
+    "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression and audio analysis results. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point.].",
     "generated_question": "[Conversational question that naturally progresses the interview while implicitly addressing assessment needs, is concise (15-20 words max) while remaining meaningful.]",
     "question_category": "[Category of the question you generated.]",
     "score": "[scores of the latest question assessment. out of 10. Apply the 'generous but fair' scoring philosophy.]",
@@ -94,7 +118,7 @@ const ContinueInterviewAI = async (interview) => {
 
   Ensure that the output is valid JSON. The values for each key ("aiSummary", "currentAnalysis", "generated_question", "score",'overallScore', "completed") MUST be strings. Avoid including any introductory or concluding text outside of the JSON object.
   `;
-  console.log("interview prompt: " + prompt);
+  // console.log("interview prompt: " + prompt);
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
   const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
   const result = await model.generateContent(prompt);
