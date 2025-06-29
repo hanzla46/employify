@@ -1,10 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import axios from "axios";
 axios.defaults.withCredentials = true;
 
 const url = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export function Connect() {
+  useEffect(() => {
+    document.title = "Connect | Employify";
+  }, []);
   const [dmProfile, setDmProfile] = useState("");
   const [dmPurpose, setDmPurpose] = useState("");
   const [dmResult, setDmResult] = useState("");
@@ -43,7 +46,7 @@ export function Connect() {
   return (
     <div className='min-h-screen bg-zinc-50 dark:bg-zinc-900 text-zinc-900 dark:text-white px-6 py-14'>
       <div className='max-w-5xl mx-auto'>
-        <header className='text-center mb-12'>
+        <header className='text-center mb-3'>
           <h1 className='text-4xl font-extrabold mb-2'>🔗 Connect: LinkedIn Power Tools</h1>
           <p className='text-zinc-600 dark:text-zinc-400 text-lg'>Slide into DMs or go viral — with zero cringe, maximum clout 💼✨</p>
         </header>
