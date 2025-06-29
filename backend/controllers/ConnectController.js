@@ -4,6 +4,33 @@ const { GoogleGenerativeAI } = require("@google/generative-ai");
 
 // Access your API key as an environment variable (e.g., process.env.GEMINI_API_KEY)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+function extractLinkedInUsername(input) {
+  // Normalize input
+  let trimmed = input.trim();
+
+  // If it’s already a username (no slashes or dots), just return
+  if (!trimmed.includes("/") && !trimmed.includes(".")) return trimmed;
+
+  try {
+    // Add protocol if missing so URL() doesn't break
+    if (!/^https?:\/\//i.test(trimmed)) {
+      trimmed = "https://" + trimmed;
+    }
+
+    const url = new URL(trimmed);
+    const paths = url.pathname.split("/").filter(Boolean);
+
+    // Find "in" segment and get what comes next
+    const inIndex = paths.indexOf("in");
+    if (inIndex !== -1 && paths.length > inIndex + 1) {
+      return paths[inIndex + 1].replace(/[^a-zA-Z0-9-_]/g, "");
+    }
+  } catch (e) {
+    // not a valid URL? just fallback to trimming
+  }
+
+  return trimmed;
+}
 
 const generateColdMessage = async (req, res) => {
   const userId = req.user._id; // Assuming req.user is populated by middleware
@@ -23,7 +50,7 @@ const generateColdMessage = async (req, res) => {
       userProfile.softSkills.map((s) => s.name).join(", ");
     const userLinkedIn = userProfile.linkedin || "your LinkedIn profile"; // Fallback
 
-    const linkedInUsername = req.query.username;
+    const linkedInUsername = extractLinkedInUsername(req.query.username);
     if (!linkedInUsername) {
       return res.status(400).json({ message: "LinkedIn username is required." });
     }
