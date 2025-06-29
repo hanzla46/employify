@@ -21,6 +21,7 @@ import { JobsProvider } from "./Context/JobsContext.jsx";
 import { DashboardProvider } from "./Context/DashboardContext.jsx";
 import Profile from "./pages/Profile";
 import FeedbackPage from "./pages/Feedbacks.jsx";
+import Connect from "./pages/Connect.jsx";
 function App() {
   const [darkMode, setDarkMode] = useState(false);
 
@@ -63,6 +64,8 @@ function App() {
                     <Route path='/pricing' element={<Pricing />} />
                     <Route path='/about' element={<About />} />
                     <Route path='/feedbacks' element={<FeedbackPage />} />
+                    <Route path='/connect' element={<Connect />} />
+                    {/* Catch-all route for 404 Not Found */}
                     <Route path='*' element={<NotFound />} />
                   </Routes>
                   <Footer />

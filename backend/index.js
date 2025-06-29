@@ -42,7 +42,7 @@ app.use("/roadmap", require("./routes/RoadmapRouter"));
 app.use("/jobs", require("./routes/JobRouter"));
 app.use("/feedbacks", require("./routes/FeedbackRouter"));
 app.use("/company", require("./routes/CompanyRouter"));
-
+app.use("/connect", require("./routes/ConnectRouter"));
 // ✅
 app.listen(PORT, () => {
   console.log("Server running on port " + PORT);
