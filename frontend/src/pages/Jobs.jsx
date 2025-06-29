@@ -10,6 +10,7 @@ import { SkillsContext } from "../Context/SkillsContext";
 import CompanyDetailsModal from "../components/CompanyDetails";
 const url = import.meta.env.VITE_API_URL;
 import axios from "axios";
+axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 
 export function Jobs() {
   const { hasProfile } = useContext(SkillsContext);
@@ -290,9 +291,26 @@ export function Jobs() {
       getEmails();
     }
   }, [company]);
+  useEffect(() => {
+    const fetchCompanyData = async () => {
+      if (company && company.website) {
+        setCompanyData(null);
+        const res = await axios.get(`${url}/company?name=${encodeURIComponent(company.name)}`);
+        if (res.data.success) {
+          setCompanyData(res.data.companyData);
+        } else {
+          setCompanyData(null);
+        }
+      }
+    };
+    fetchCompanyData();
+  }, [company]);
+  useEffect(() => {
+    console.log("cdd", companyData);
+  }, [companyData]);
   const openCompanyModal = (job) => {
     setCompany(job.company);
-    setCompanyData(job.companyData || null);
+    // setCompanyData(job.companyData || null);
     setEmailData(job.matchAnalysis ? job.matchAnalysis.email : null);
     setIsCompanyModalOpen(true);
   };

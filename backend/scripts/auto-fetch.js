@@ -151,53 +151,9 @@ function extractRequirementsForSkill(description = "", skill = "") {
   }
 }
 
-// Fetch and normalize Glassdoor company data
-async function getCompanyData(companyName) {
-  try {
-    const response = await axios.request({
-      ...GLASSDOOR_API_CONFIG,
-      headers: {
-        ...GLASSDOOR_API_CONFIG.headers,
-        "x-rapidapi-key": getNextApiKey(),
-      },
-      params: {
-        query: companyName,
-        limit: "1",
-        domain: "www.glassdoor.com",
-      },
-    });
-
-    const rawData = response.data?.data?.[0];
-    if (!rawData) return null;
-
-    return {
-      glassdoorId: rawData.company_id,
-      name: rawData.name,
-      rating: rawData.rating,
-      reviewCount: rawData.review_count,
-      salaryCount: rawData.salary_count,
-      size: rawData.company_size,
-      industry: rawData.industry,
-      workLifeBalance: rawData.work_life_balance_rating,
-      careerGrowth: rawData.career_opportunities_rating,
-      ceo: {
-        name: rawData.ceo,
-        approval: rawData.ceo_rating,
-      },
-      competitors: rawData.competitors?.map((c) => c.name) || [],
-      locations: rawData.office_locations,
-      lastUpdated: new Date(),
-    };
-  } catch (error) {
-    console.error(`[Glassdoor] Failed for ${companyName}:`, error.message);
-    return null;
-  }
-}
-
-// Process jobs with company data enrichment
+// Process jobs without company data enrichment
 async function processJobs(jobs, work_from_home) {
   const processedJobs = [];
-  const companyCache = new Map();
 
   for (const job of jobs) {
     try {
@@ -221,20 +177,6 @@ async function processJobs(jobs, work_from_home) {
         qualifications: job.job_highlights?.Qualifications || [],
         responsibilities: job.job_highlights?.Responsibilities || [],
       };
-
-      if (job.employer_name || job.employer_website) {
-        if (companyCache.has(job.employer_name)) {
-          jobCopy.companyData = companyCache.get(job.employer_name);
-        } else {
-          const companyData = await getCompanyData(job.employer_name);
-          if (companyData) {
-            companyCache.set(job.employer_name, companyData);
-            jobCopy.companyData = companyData;
-            jobCopy.companyId = companyData.glassdoorId;
-          }
-        }
-      }
-
       processedJobs.push(jobCopy);
     } catch (error) {
       console.error(`Error processing job ${job.job_id}:`, error.message);
