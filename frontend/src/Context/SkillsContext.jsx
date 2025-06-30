@@ -62,9 +62,9 @@ export const SkillsProvider = ({ children }) => {
   }, [user]);
   const fetchUpdatedProfile = async () => {
     try {
-      const response = await axios.get(url + "/profile/get");
-      if (response.data.success) {
-        setProfile(response.data.data);
+      const response = await axios.get(url + "/profile/check");
+      if (response.data.profile) {
+        setProfile(response.data.profileData);
         handleSuccess("Profile updated successfully");
       }
     } catch (error) {

@@ -92,12 +92,15 @@ const ProfileForm = ({ isEdit }) => {
       })
     );
   };
-
   useEffect(() => {
-    const fetchProfileData = async () => {
+    if (isEdit) {
+      fetchUpdatedProfile();
+    }
+  }, [isEdit]);
+  useEffect(() => {
+    const setProfileData = async () => {
       if (isEdit) {
         try {
-          await fetchUpdatedProfile();
           const p = profile;
           console.log("Existing profile data loaded:", p);
           setHardSkills(
@@ -125,7 +128,7 @@ const ProfileForm = ({ isEdit }) => {
         }
       }
     };
-    fetchProfileData();
+    setProfileData();
   }, [isEdit, url, profile]);
 
   const addSkill = (type) => {
