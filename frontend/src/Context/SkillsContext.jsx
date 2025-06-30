@@ -60,6 +60,17 @@ export const SkillsProvider = ({ children }) => {
     };
     checkProfile();
   }, [user]);
+  const fetchUpdatedProfile = async () => {
+    try {
+      const response = await axios.get(url + "/profile/get");
+      if (response.data.success) {
+        setProfile(response.data.data);
+        handleSuccess("Profile updated successfully");
+      }
+    } catch (error) {
+      console.error("Failed to fetch updated Profile:", error.message);
+    }
+  };
   useEffect(() => {
     console.log(roadmap);
     localStorage.setItem("roadmap", JSON.stringify(roadmap));
@@ -126,6 +137,7 @@ export const SkillsProvider = ({ children }) => {
         setCareerPath,
         suggestedChanges,
         setSuggestedChanges,
+        fetchUpdatedProfile,
       }}>
       {children}
     </SkillsContext.Provider>

@@ -9,7 +9,7 @@ import { useNavigate } from "react-router-dom";
 
 const ProfileForm = ({ isEdit }) => {
   const url = import.meta.env.VITE_API_URL;
-  const { hasProfile, setHasProfile, profile, setProfile } = useContext(SkillsContext);
+  const { hasProfile, setHasProfile, profile, setProfile, fetchUpdatedProfile } = useContext(SkillsContext);
   const navigate = useNavigate();
   useEffect(() => {
     if (isEdit && !hasProfile) {
@@ -97,6 +97,7 @@ const ProfileForm = ({ isEdit }) => {
     const fetchProfileData = async () => {
       if (isEdit) {
         try {
+          await fetchUpdatedProfile();
           const p = profile;
           console.log("Existing profile data loaded:", p);
           setHardSkills(
@@ -266,12 +267,17 @@ const ProfileForm = ({ isEdit }) => {
       formData.append("careerGoal", careerGoal);
       formData.append("location", JSON.stringify({ country: selectedCountry, city: selectedCity }));
       if (isEdit && education.length > 0) {
-        formData.append("education", JSON.stringify(education.map((edu) => ({
-          degree: edu.degree,
-          institute: edu.institute,
-          startYear: edu.startYear.toString(),
-          endYear: edu.endYear.toString(),
-        }))));
+        formData.append(
+          "education",
+          JSON.stringify(
+            education.map((edu) => ({
+              degree: edu.degree,
+              institute: edu.institute,
+              startYear: edu.startYear.toString(),
+              endYear: edu.endYear.toString(),
+            }))
+          )
+        );
       }
       if (isEdit) {
         formData.append("linkedin", linkedin);

@@ -210,7 +210,7 @@ const evaluateSubtask = async (req, res) => {
             const now = new Date();
             roadmap.completedProjects = Array.from(
               new Map([
-                ...((roadmap.completedProjects || []).map(p => [p.name, p])),
+                ...(roadmap.completedProjects || []).map((p) => [p.name, p]),
                 [subtask.name, { name: subtask.name, completedAt: now }],
               ]).values()
             );
@@ -219,7 +219,7 @@ const evaluateSubtask = async (req, res) => {
             const now = new Date();
             roadmap.completedCourses = Array.from(
               new Map([
-                ...((roadmap.completedCourses || []).map(c => [c.name, c])),
+                ...(roadmap.completedCourses || []).map((c) => [c.name, c]),
                 [subtask.name, { name: subtask.name, completedAt: now }],
               ]).values()
             );
@@ -231,19 +231,21 @@ const evaluateSubtask = async (req, res) => {
           if (profile) {
             let updated = false;
             for (const skillName of subtask.skills) {
-              if (!profile.hardSkills.some(hs => hs.name.toLowerCase() === skillName.toLowerCase())) {
+              if (!profile.hardSkills.some((hs) => hs.name.toLowerCase() === skillName.toLowerCase())) {
                 profile.hardSkills.push({ name: skillName, experience: "0", subskills: [] });
                 updated = true;
               }
             }
-            if (updated) await profile.save();
+            if (updated) {
+              await profile.save();
+              updateUserProfile(user._id); // Increment interaction count
+            }
           }
         }
         // --- End custom logic ---
 
         await roadmap.save();
         updateRoadmap(user._id);
-        updateUserProfile(user._id, analysis, subtask.name);
         return res.status(200).json({
           success: true,
           message: "Subtask evaluated successfully",
