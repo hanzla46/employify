@@ -137,18 +137,22 @@ const getSubskillsAI = async (skillName) => {
       },
     });
     // only useful subskills that are usually used in the industry
-    const prompt = `List only the most relevant and commonly required subskills for the skill "${normalizedSkillName}" in JSON format like this:
-    \`\`\`json
-    {
-      "subskills": ["Subskill1", "Subskill2", "Subskill3"]
-    }
-    \`\`\`
-    Focus on subskills that are:
-    - Frequently mentioned in job descriptions for this skill
-    - Widely used in professional, real-world projects
-    - Valued by employers in the industry
-    
-    ⚠️ Do NOT include niche, outdated, or overly generic subskills. If the skill is not recognized or lacks common subskills, return an empty array. No additional text or formatting.`;
+    const prompt = `List only the most relevant, distinct, and commonly required subskills for the skill "${normalizedSkillName}" in JSON format.
+The subskills must be ordered progressively from foundational/basic to advanced/expert level.
+
+\`\`\`json
+{
+  "subskills": ["FoundationalSubskill", "IntermediateSubskill", "AdvancedSubskill", "ExpertSubskill"]
+}
+\`\`\`
+
+Focus on subskills that are:
+- Frequently mentioned in job descriptions for this skill.
+- Widely used in professional, real-world projects.
+- Highly valued by employers in the industry.
+- Each subskill must be distinct and represent a unique capability, avoiding overlap or mere synonyms.
+
+⚠️ Do NOT include niche, outdated, or overly generic subskills. If the skill is not recognized or lacks common subskills, return an empty array. No additional text or formatting.`;
 
     const result = await model.generateContent(prompt);
     const content = result.response.candidates[0].content.parts[0].text;

@@ -108,16 +108,16 @@ export function Home() {
               </p>
               <div className='flex flex-col sm:flex-row gap-4 justify-center'>
                 <Link
-                  to={user ? "/dashboard" : "/signup"}
+                  to={user ? "/profile" : "/signup"}
                   className='bg-gradient-to-r from-[var(--color-primary-700)] to-purple-600 dark:from-[var(--color-primary-300)] dark:to-purple-500 text-white px-8 py-4 rounded-xl font-semibold hover:opacity-90 transition-all shadow-lg hover:shadow-indigo-500/25 inline-flex items-center justify-center text-lg'>
                   Get Started Free
                   <ArrowRight className='ml-2 h-5 w-5' />
                 </Link>
-                <Link
-                  to='/features'
+                <button
+                  onClick={() => document.getElementById("features").scrollIntoView()}
                   className='bg-white dark:bg-gray-800 text-gray-800 dark:text-white px-8 py-4 rounded-xl font-semibold border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-all shadow-md inline-flex items-center justify-center text-lg'>
                   Explore Features
-                </Link>
+                </button>
               </div>
             </div>
 
@@ -163,7 +163,7 @@ export function Home() {
         </header>
 
         {/* Enhanced Features Section */}
-        <section className='py-24 relative' data-aos='fade-up'>
+        <section id='features' className='py-24 relative' data-aos='fade-up'>
           <div className='max-w-6xl mx-auto'>
             <div className='text-center mb-16'>
               <span className='inline-block py-1 px-3 rounded-full bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 text-sm font-medium mb-4'>

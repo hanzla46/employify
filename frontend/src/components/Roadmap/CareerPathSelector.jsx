@@ -54,7 +54,7 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
   }, [contextLoading, roadmap]);
   if (loading) {
     return (
-      <p className='text-center text-gray-500'>
+      <p className='text-center text-gray-500 w-14 h-14'>
         <Spinner />
         Loading career paths.
       </p>
@@ -180,7 +180,7 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
           console.log("path selected!!");
           setIsPathSelected(true);
         }}
-        className={`fixed right-4 bottom-4 ${!selectedPathName ? "opacity-50 pointer-events-none" : ""}`}>
+        className={`fixed right-4 bottom-14 ${!selectedPathName ? "opacity-50 pointer-events-none" : ""}`}>
         <FancyButton text={"Choose"} disabled={!selectedPathName} />
       </div>
     </div>

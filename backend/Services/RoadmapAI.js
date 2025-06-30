@@ -216,29 +216,26 @@ Return ONLY the HTML string. No markdown, no comments, no pre/post text.`;
 const getCareerPathsAI = async (profile) => {
   const prompt = `You are an expert career strategist and global job market analyst.
 
-Given a user's profile, simulate **ALL realistic and high-potential career paths** they can pursue — from safe jobs to bold moves, from stable employment to freelance/startup gigs. Tailor suggestions to their **current skill set, education, career goals, AND location**.
+Given a user's profile, simulate **6-8 distinct, high-potential career paths** they can pursue — from safe jobs to bold moves, from stable employment to freelance/startup gigs. Tailor suggestions to their **current skill set, education, career goals, AND location**.
 
-📌 IMPORTANT:
+📌 IMPORTANT GUIDELINES:
 - The user may be a **complete beginner** with little or no real work experience.
 - They might be unsure what jobs to target — be a mentor, not just a calculator.
 - Use their **location** to determine salary ranges. Give **local currency** where possible, or USD with clear context (e.g., “USD, remote-friendly”).
 - Suggest beginner-friendly jobs and make no assumptions about prior knowledge.
-- Don’t repeat the same job paths with different titles — add variety (e.g., corporate vs. freelance vs. startup).
-- Include both conventional and non-traditional jobs, even emerging ones not yet mainstream.
+- Don’t repeat the same job paths with different titles — ensure each of the 3-5 paths offers genuine variety (e.g., corporate vs. freelance vs. startup).
+- Include both conventional and non-traditional jobs, especially emerging ones that might combine diverse skills.
 
 🎯 For each path, describe:
-- Clear Job Titles from entry-level to expert (use simple terms where needed).
-- Estimated promotion timeline (in years).
-- Salary range at each level, **realistic for user’s location**.
+- **Core Progression Stages**: List 2-3 **main job titles** representing a realistic progression (e.g., Entry-level, Mid-level, Senior/Specialist). **Do NOT go beyond 3-4 stages or more than 7-8 years into the future.**
+- **Estimated Progression Timeline**: State the approximate *total years to reach each listed stage*. Keep it concise and realistic (e.g., "Year 0 → Year 2 → Year 5").
+- **Salary Range**: Provide a realistic salary range for **EACH listed progression stage**. Use local currency or USD with context. **Keep these concise, reflecting only the distinct stages.**
 - Relevant industries and typical companies.
-- Risk level (Low, Medium, High) + honest market reality (e.g., over-saturated, niche).
-- AI Impact: Is this career at risk of automation?
-- Key skills the user needs to learn (list tools/skills. BE concise, only mention name. keep order of learning).
+- Risk level (Low, Medium, High) + honest market reality (e.g., over-saturated, niche, high demand).
+- AI Impact: Is this career at risk of automation or heavily augmented by AI?
+- **Key Skills to Learn**: List **3-5 highly impactful and distinct skills** for the entire path, ordered by typical learning progression. **No long lists; focus only on the absolute "main main" skills and tools.**
 - Shortcuts: Certifications, bootcamps, online projects, or freelancing hacks.
-- Include hybrid or cross-functional career paths that combine multiple fields if the user's skills suggest such overlap. 
-- Think creatively — mix roles like “AI + Product”, “Dev + Design”, “Tech + Business”, “Freelancer + Consultant”, “Engineer + Educator” etc. 
-- Emphasize how a mix of skills can open *unique* opportunities that are not available in traditional straight-line careers.
-
+- **Alternate/Hybrid Paths**: Emphasize how a mix of skills can open *unique* opportunities that are not available in traditional straight-line careers. Think creatively, suggesting roles like “AI + Product”, “Dev + Design”, “Tech + Business”, “Freelancer + Consultant”, “Engineer + Educator” etc. Ensure at least one suggested path is a clear alternate/hybrid direction.
 
 📚 Don’t assume the user only wants “safe” jobs. Include:
 - Remote roles
@@ -250,8 +247,8 @@ Given a user's profile, simulate **ALL realistic and high-potential career paths
 
 ⚠️ Be brutally honest. Don’t overhype “dream jobs.” Some paths are long and hard. Say it.
 
----  
-**User Data:**  
+---
+**User Data:**
 Hard Skills: ${profile.hardSkills
     .map(
       (skill) =>
@@ -260,30 +257,30 @@ Hard Skills: ${profile.hardSkills
         }]`
     )
     .join("\n")}
-Soft Skills: ${profile.softSkills.map((skill) => `${skill.name} (${skill.proficiency})`).join(", ")}  
-Work Experience: ${profile.jobs || "None / Beginner"}  
-Projects: ${profile.projects}  
+Soft Skills: ${profile.softSkills.map((skill) => `${skill.name} (${skill.proficiency})`).join(", ")}
+Work Experience: ${profile.jobs || "None / Beginner"}
+Projects: ${profile.projects}
 Education: ${profile.education}
-Career Goal: ${profile.careerGoal}  
-Location: ${profile.location}  
+Career Goal: ${profile.careerGoal}
+Location: ${profile.location}
 
----  
+---
 Output format:
 \`\`\`json
 {
 "paths": [
 {
-"Path_name": "STRING. Example - AI Engineer → AI Product Manager",
-"Stages": [ARRAY. "AI Intern", "Junior AI Developer", "Senior AI Developer", "AI Product Manager"],
-"Timeline": "STRING. 1 → 3 → 5 → 8 years",
-"Salary_range": "STRING. $10k (PKR, Entry) → $22k → $40k → $60k (remote USD)",
-"Industries": ["Tech", "Healthcare", "Fintech"],
+"Path_name": "STRING. Example - Data Analyst → Machine Learning Engineer",
+"Stages": ["Junior Data Analyst", "Data Scientist", "Machine Learning Engineer"],
+"Timeline": "STRING. Year 0 → Year 2 → Year 5",
+"Salary_range": "STRING. $40k USD (Entry) → $75k USD (Mid) → $120k USD (Senior)",
+"Industries": ["Tech", "Finance", "Healthcare"],
 "Risk_level": "STRING. Medium",
-"AI_impact": "Low (building AI > replaced by AI)",
-"Required_skills": [ARRAY. "Deep Learning", "Prompt Engineering", "Product Management"],
-"Accelerators": ["Tensorflow Certification", "Build AI SaaS MVP"],
+"AI_impact": "STRING. High (AI complements and augments data analysis)",
+"Required_skills": ["SQL", "Python (Pandas, Scikit-learn)", "Cloud Platforms (AWS/Azure)"],
+"Accelerators": ["Google Data Analytics Cert", "Kaggle Competitions"],
 },
-// more career paths
+// ... more than 7 more distinct career paths
 ]
 }
 \`\`\`
@@ -295,7 +292,7 @@ Output format:
       thinkingConfig: {
         thinkingBudget: 0,
       },
-      temperature: 2,
+      temperature: 1.4,
       response_mime_type: "application/json",
     },
   });

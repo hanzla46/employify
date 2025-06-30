@@ -5,6 +5,7 @@ import { handleSuccess, handleError } from "../utils";
 import { Clipboard, Wand2, MailPlus } from "lucide-react";
 import { SkillsContext } from "../Context/SkillsContext";
 import ProtectedRoute from "../Context/ProtectedRoute";
+import { Link } from "react-router-dom";
 const url = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export function Connect() {
@@ -91,7 +92,7 @@ export function Connect() {
               {" "}
               <Link to={"/profile"}>
                 {" "}
-                <h2 className='text-red-600 dark:text-red-400 underline'>
+                <h2 className='text-red-600 dark:text-red-400 underline self-center text-center mt-0 mb-4'>
                   ❗ Add Profile to unlock these features <span className='text-xl'>↗</span>
                 </h2>
               </Link>
@@ -127,18 +128,30 @@ export function Connect() {
                     value={dmPurpose}
                     onChange={(e) => setDmPurpose(e.target.value)}
                     required>
-                    <option value=''>Select purpose</option>
-                    <option value='referral'>Job referral</option>
-                    <option value='collab'>Professional collaboration</option>
-                    <option value='advice'>Career advice</option>
-                    <option value='networking'>Industry networking</option>
-                    <option value='other'>Other</option>
+                    <option className='bg-gray-700' value=''>
+                      Select purpose
+                    </option>
+                    <option className='bg-gray-700' value='referral'>
+                      Job referral
+                    </option>
+                    <option className='bg-gray-700' value='collab'>
+                      Professional collaboration
+                    </option>
+                    <option className='bg-gray-700' value='advice'>
+                      Career advice
+                    </option>
+                    <option className='bg-gray-700' value='networking'>
+                      Industry networking
+                    </option>
+                    <option className='bg-gray-700' value='other'>
+                      Other
+                    </option>
                   </select>
                 </div>
 
                 <button
                   type='submit'
-                  className='w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2.5 rounded-lg shadow transition-all duration-200 flex items-center justify-center'
+                  className='w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2.5 rounded-lg shadow transition-all duration-200 flex items-center justify-center disabled:opacity-45'
                   disabled={dmLoading || !hasProfile}>
                   {dmLoading ? (
                     <span className='flex items-center'>
@@ -245,7 +258,7 @@ export function Connect() {
 
                 <button
                   type='submit'
-                  className='w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-2.5 rounded-lg shadow transition-all duration-200'
+                  className='w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-2.5 rounded-lg shadow transition-all duration-200 disabled:opacity-45'
                   disabled={postLoading || !hasProfile}>
                   {postLoading
                     ? "Generating Professional Post..."

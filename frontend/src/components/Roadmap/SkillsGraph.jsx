@@ -201,7 +201,7 @@ const TaskNode = ({ data }) => {
                               dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors'>
                           Sources
                         </button>
-                        <MarketAnalysisButton subtaskLabel={subtask.label} onAnalysis={data.onMarketAnalysis} />
+                        <MarketAnalysisButton subtaskLabel={subtask.label} skills={subtask.skills} onAnalysis={data.onMarketAnalysis} />
                       </div>
                     </div>
                     {subtask.evaluation && (
@@ -214,6 +214,18 @@ const TaskNode = ({ data }) => {
                         {subtask.evaluation.analysis && (
                           <div className='mt-1 text-gray-600 dark:text-gray-400'>{subtask.evaluation.analysis}</div>
                         )}
+                      </div>
+                    )}
+                    {/* Subtask labels: subtle, below subtask label, less priority */}
+                    {subtask.labels && subtask.labels.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1 mb-0.5">
+                        {subtask.labels.map((label, idx) => (
+                          <span
+                            key={idx}
+                            className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-sm text-[10px] font-normal border border-gray-200 dark:border-gray-700 opacity-80">
+                            {label}
+                          </span>
+                        ))}
                       </div>
                     )}
                   </div>
@@ -327,6 +339,8 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
           id: st.id != null ? st.id : `${task.id}-sub-${index}`,
           label: st.name || "Unnamed Subtask",
           buttonText: st.buttonText || "Complete",
+          labels: st.labels || [],
+          skills: st.skills || [],
           sources: st.sources || "",
           completed: st.completed || false,
         })), // Pass other data for display in the node
@@ -594,7 +608,7 @@ const SkillsGraph = () => {
             setShowSuggestions={setShowSuggestions}
           />
           {showSourcesModal && (
-            <div className='w-1/3 fixed top-20 right-8 z-50 bg-white dark:bg-gray-800 border-2 border-gray-300 rounded-lg shadow-lg p-6'>
+            <div className='w-1/3 fixed top-20 right-8 z-50 bg-white border-2 border-gray-300 rounded-lg shadow-lg p-6'>
               <span className='absolute top-3 left-3'>Sources</span>
               <button className='absolute top-2 right-2 text-gray-500 hover:text-gray-700' onClick={() => setShowSourcesModal(false)}>
                 ❌
