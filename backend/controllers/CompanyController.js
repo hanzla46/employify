@@ -6,7 +6,7 @@ const GLASSDOOR_API_CONFIG = {
   method: "GET",
   url: "https://real-time-glassdoor-data.p.rapidapi.com/company-search",
   headers: {
-    "x-rapidapi-key": process.env.RAPIDAPI_KEYS?.split(",")[1] || "",
+    "x-rapidapi-key": process.env.RAPIDAPI_KEYS?.split(",")[0] || "",
     "x-rapidapi-host": "real-time-glassdoor-data.p.rapidapi.com",
   },
 };
@@ -82,5 +82,40 @@ exports.getCompanyData = async (req, res) => {
   } catch (err) {
     console.error("Error in getCompanyData controller:", err);
     return res.status(500).json({ error: "Internal server error" });
+  }
+};
+exports.getCompanyEmails = async (req, res) => {
+  try {
+    const { url } = req.query;
+    console.log("Fetching emails for company URL:", url);
+    const options = {
+      method: "GET",
+      url: "https://company-contact-scraper.p.rapidapi.com/search-by-url",
+      params: {
+        url: url,
+        "phone-limit": "100",
+        "email-limit": "100",
+        "filter-personal-emails": "false",
+      },
+      headers: {
+        "x-rapidapi-key": "ff82a3cb34msh70d1e319df0556bp1011c1jsnf3a797ae2c39",
+        "x-rapidapi-host": "company-contact-scraper.p.rapidapi.com",
+      },
+    };
+    try {
+      const response = await axios.request(options);
+      console.log(response.data);
+      res.status(200).json({ success: true, emails: response.data.emails, phones: response.data.phones });
+    } catch (error) {
+      console.error(error);
+      if (error.response && error.response.status === 404) {
+        res.status(404).json({ message: "No emails found for this company." });
+      } else {
+        res.status(500).json({ message: "Error fetching company emails." });
+      }
+    }
+  } catch (error) {
+    console.error("Error fetching company emails:", error);
+    res.status(500).json({ message: "Server Error!" });
   }
 };

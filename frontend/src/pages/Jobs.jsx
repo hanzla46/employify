@@ -283,7 +283,7 @@ export function Jobs() {
     if (company) {
       const getEmails = async () => {
         setEmailsLoading(true);
-        const res = await axios.get(url + "/jobs/get-company-emails?url=" + company.website);
+        const res = await axios.get(url + "/company/get-company-emails?url=" + company.website);
         if (res.data.success) setEmails(res.data.emails || []);
         else handleError(res.data.message || "Failed to fetch emails");
         setEmailsLoading(false);
