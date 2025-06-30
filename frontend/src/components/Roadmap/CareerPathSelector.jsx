@@ -13,9 +13,9 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
   const [pathsData, setPathsData] = useState({ paths: [] });
   const [selectedPathName, setSelectedPathName] = useState(null);
   const [preferences, setPreferences] = useState({
-    difficulty: "intermediate", // beginner, intermediate, advanced
-    timeframe: "6months", // 3months, 6months, 1year
-    focus: "balanced", // practical, theoretical, balanced
+    difficulty: "intermediate",
+    timeframe: "6months",
+    focus: "balanced",
   });
   const { roadmap, contextLoading } = useContext(SkillsContext);
 
@@ -52,14 +52,16 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
     };
     fetchPaths();
   }, [contextLoading, roadmap]);
+
   if (loading) {
     return (
-      <p className='text-center text-gray-500 w-14 h-14'>
-        <Spinner />
-        Loading career paths.
-      </p>
+      <div className='flex flex-col items-center justify-center min-h-[300px]'>
+        <Spinner className='w-20 h-20 text-blue-600' />
+        <p className='mt-4 text-lg font-medium text-gray-600 dark:text-gray-300'>Loading career paths...</p>
+      </div>
     );
   }
+
   const handleSelectionChange = (event) => {
     const selectedValue = event.target.value;
     setSelectedPathName(selectedValue);
@@ -74,115 +76,177 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
   };
 
   return (
-    <div>
-      <h2 className='text-2xl font-semibold text-center text-gray-800 dark:text-gray-200 mb-6'>Choose Your Desired Career Path:</h2>
+    <div className='max-w-6xl mx-auto px-4 py-8'>
+      <div className='text-center mb-10'>
+        <h2 className='text-3xl font-bold text-gray-800 dark:text-white mb-3'>Choose Your Career Path</h2>
+        <p className='text-gray-600 dark:text-gray-300 max-w-2xl mx-auto'>
+          Select a path that aligns with your goals and customize your learning experience
+        </p>
+      </div>
 
-      {/* Add preference controls */}
-      <div className='grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 bg-white dark:bg-gray-800 p-4 rounded-lg shadow'>
-        <div>
-          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Difficulty Level</label>
-          <select
-            value={preferences.difficulty}
-            onChange={(e) => setPreferences((prev) => ({ ...prev, difficulty: e.target.value }))}
-            className='w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'>
-            <option value='beginner'>Beginner</option>
-            <option value='intermediate'>Intermediate</option>
-            <option value='advanced'>Advanced</option>
-          </select>
-        </div>
+      {/* Preference controls */}
+      <div className='bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-gray-800 dark:to-gray-800 p-6 rounded-xl shadow-sm border border-gray-100 dark:border-gray-700 mb-10'>
+        <h3 className='text-lg font-semibold text-gray-800 dark:text-white mb-4'>Learning Preferences</h3>
+        <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Difficulty Level</label>
+            <div className='relative'>
+              <select
+                value={preferences.difficulty}
+                onChange={(e) => setPreferences((prev) => ({ ...prev, difficulty: e.target.value }))}
+                className='w-full pl-4 pr-10 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
+                <option value='beginner'>Beginner</option>
+                <option value='intermediate'>Intermediate</option>
+                <option value='advanced'>Advanced</option>
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none'>
+                <svg className='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+                </svg>
+              </div>
+            </div>
+          </div>
 
-        <div>
-          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Timeframe</label>
-          <select
-            value={preferences.timeframe}
-            onChange={(e) => setPreferences((prev) => ({ ...prev, timeframe: e.target.value }))}
-            className='w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'>
-            <option value='3months'>3 Months</option>
-            <option value='6months'>6 Months</option>
-            <option value='1year'>1 Year</option>
-          </select>
-        </div>
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Timeframe</label>
+            <div className='relative'>
+              <select
+                value={preferences.timeframe}
+                onChange={(e) => setPreferences((prev) => ({ ...prev, timeframe: e.target.value }))}
+                className='w-full pl-4 pr-10 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
+                <option value='3months'>3 Months</option>
+                <option value='6months'>6 Months</option>
+                <option value='1year'>1 Year</option>
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none'>
+                <svg className='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+                </svg>
+              </div>
+            </div>
+          </div>
 
-        <div>
-          <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Learning Focus</label>
-          <select
-            value={preferences.focus}
-            onChange={(e) => setPreferences((prev) => ({ ...prev, focus: e.target.value }))}
-            className='w-full p-2 rounded border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100'>
-            <option value='practical'>Practical (Hands-on Projects)</option>
-            <option value='theoretical'>Theoretical (In-depth Learning)</option>
-            <option value='balanced'>Balanced</option>
-          </select>
+          <div>
+            <label className='block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2'>Learning Focus</label>
+            <div className='relative'>
+              <select
+                value={preferences.focus}
+                onChange={(e) => setPreferences((prev) => ({ ...prev, focus: e.target.value }))}
+                className='w-full pl-4 pr-10 py-3 rounded-lg border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 text-gray-900 dark:text-gray-100 appearance-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500'>
+                <option value='practical'>Practical (Hands-on Projects)</option>
+                <option value='theoretical'>Theoretical (In-depth Learning)</option>
+                <option value='balanced'>Balanced</option>
+              </select>
+              <div className='absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none'>
+                <svg className='w-5 h-5 text-gray-400' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+                  <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M19 9l-7 7-7-7' />
+                </svg>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <form className='flex flex-wrap gap-5 m-auto'>
+      {/* Career Path Cards */}
+      <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12'>
         {pathsData.paths.map((path, index) => (
           <div
             key={path.Path_name || index}
-            // --- Apply base, hover, selected, and dark mode styles ---
-            className={`
-              border rounded-lg p-3 flex items-start cursor-pointer
-              transition duration-200 ease-in-out text-gray-700 dark:text-gray-300 w-[47%] m-auto min-h-80
+            className={`relative h-full flex flex-col rounded-xl overflow-hidden border transition-all duration-200 ease-in-out
               ${
                 selectedPathName === path.Path_name
-                  ? "border-blue-500 dark:border-blue-400 ring-2 ring-blue-500/50 dark:ring-blue-400/50 bg-blue-50 dark:bg-gray-700" // Selected: Light & Dark
-                  : "border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 hover:border-gray-400 dark:hover:border-gray-500 hover:bg-gray-50 dark:hover:bg-gray-700/50" // Default & Hover: Light & Dark
-              }
-            `}
-            // Make the whole div clickable to select the radio
+                  ? "border-blue-500 dark:border-blue-400 ring-4 ring-blue-500/20 dark:ring-blue-400/20 shadow-lg"
+                  : "border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-500 shadow-md hover:shadow-lg"
+              }`}
             onClick={() => handleDivClick(path.Path_name)}>
-            <input
-              type='radio'
-              id={`path-${index}`}
-              name='careerPath'
-              value={path.Path_name}
-              checked={selectedPathName === path.Path_name}
-              onChange={handleSelectionChange}
-              // --- Radio styles using @tailwindcss/forms recommendations + dark mode ---
-              className='mt-1 mr-4 h-4 w-4 shrink-0 cursor-pointer
-                         border-gray-300 dark:border-gray-500
-                         text-blue-600 dark:text-blue-500
-                         focus:ring-blue-500 dark:focus:ring-blue-400 focus:ring-offset-0
-                         dark:bg-gray-700 dark:checked:bg-blue-500' // Explicit dark bg/checked colors can help
-            />
-            <label htmlFor={`path-${index}`} className='flex-grow cursor-pointer'>
-              <h3 className='text-lg font-medium text-blue-700 dark:text-blue-400 mb-2'>{path.Path_name}</h3>
-              <div className='text-sm space-y-1 text-gray-600 dark:text-gray-400'>
-                <p>
-                  <strong className='font-semibold text-gray-700 dark:text-gray-300 mr-1'>Stages:</strong>
-                  {Array.isArray(path.Stages) ? path.Stages.join(" → ") : path.Stages}
-                </p>
-                <p>
-                  <strong className='font-semibold text-gray-700 dark:text-gray-300 mr-1'>Timeline:</strong>
-                  {path.Timeline}
-                </p>
-                <p>
-                  <strong className='font-semibold text-gray-700 dark:text-gray-300 mr-1'>Salary Range:</strong>
-                  {path.Salary_range}
-                </p>
-                <p>
-                  <strong className='font-semibold text-gray-700 dark:text-gray-300 mr-1'>Risk Level:</strong>
-                  {path.Risk_level}
-                </p>
-                <p>
-                  <strong className='font-semibold text-gray-700 dark:text-gray-300 mr-1'>Required Skills:</strong>
-                  {Array.isArray(path.Required_skills) ? path.Required_skills.join(", ") : path.Required_skills}
-                </p>
+            <div
+              className={`absolute top-0 left-0 w-full h-2 ${
+                selectedPathName === path.Path_name ? "bg-gradient-to-r from-blue-500 to-indigo-600" : "bg-gray-200 dark:bg-gray-700"
+              }`}></div>
+
+            <div className='p-6 flex-grow'>
+              <div className='flex items-start'>
+                <input
+                  type='radio'
+                  id={`path-${index}`}
+                  name='careerPath'
+                  value={path.Path_name}
+                  checked={selectedPathName === path.Path_name}
+                  onChange={handleSelectionChange}
+                  className='mt-1 mr-4 h-5 w-5 shrink-0 cursor-pointer border-gray-300 dark:border-gray-500 text-blue-600 dark:text-blue-500 focus:ring-blue-500 dark:focus:ring-blue-400'
+                />
+                <div className='flex-grow'>
+                  <h3 className='text-xl font-bold text-gray-800 dark:text-white mb-3'>{path.Path_name}</h3>
+                  <div className='space-y-3 text-gray-600 dark:text-gray-300'>
+                    <div>
+                      <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Stages</p>
+                      <p className='text-sm'>{Array.isArray(path.Stages) ? path.Stages.join(" → ") : path.Stages}</p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Timeline</p>
+                      <p className='text-sm'>{path.Timeline}</p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Salary Range</p>
+                      <p className='text-sm'>{path.Salary_range}</p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Risk Level</p>
+                      <p className='text-sm'>{path.Risk_level}</p>
+                    </div>
+                    <div>
+                      <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Required Skills</p>
+                      <p className='text-sm'>
+                        {Array.isArray(path.Required_skills) ? path.Required_skills.join(", ") : path.Required_skills}
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </div>
-            </label>
+            </div>
+
+            <div
+              className={`px-6 py-3 ${
+                selectedPathName === path.Path_name ? "bg-blue-50 dark:bg-gray-700" : "bg-gray-50 dark:bg-gray-800"
+              }`}>
+              <button
+                type='button'
+                className={`w-full py-2 px-4 rounded-md text-sm font-medium transition-colors ${
+                  selectedPathName === path.Path_name
+                    ? "bg-blue-600 hover:bg-blue-700 text-white"
+                    : "bg-gray-200 hover:bg-gray-300 text-gray-700 dark:bg-gray-700 dark:hover:bg-gray-600 dark:text-gray-200"
+                }`}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (selectedPathName === path.Path_name) {
+                    setIsPathSelected(true);
+                  } else {
+                    handleDivClick(path.Path_name);
+                  }
+                }}>
+                {selectedPathName === path.Path_name ? "Confirm Selection" : "Select Path"}
+              </button>
+            </div>
           </div>
         ))}
-      </form>
-      <div
-        onClick={() => {
-          if (!selectedPathName) return;
-          console.log("path selected!!");
-          setIsPathSelected(true);
-        }}
-        className={`fixed right-4 bottom-14 ${!selectedPathName ? "opacity-50 pointer-events-none" : ""}`}>
-        <FancyButton text={"Choose"} disabled={!selectedPathName} />
       </div>
+
+      {/* Floating Action Button */}
+      {selectedPathName && (
+        <div className='fixed right-6 bottom-6 animate-bounce'>
+          <button
+            onClick={() => {
+              console.log("path selected!!");
+              setIsPathSelected(true);
+            }}
+            className='bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-3 px-6 rounded-full shadow-lg transition-all duration-200 flex items-center'>
+            Continue with {selectedPathName}
+            <svg className='w-5 h-5 ml-2' fill='none' stroke='currentColor' viewBox='0 0 24 24'>
+              <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M9 5l7 7-7 7' />
+            </svg>
+          </button>
+        </div>
+      )}
     </div>
   );
 }

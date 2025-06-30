@@ -218,11 +218,11 @@ const TaskNode = ({ data }) => {
                     )}
                     {/* Subtask labels: subtle, below subtask label, less priority */}
                     {subtask.labels && subtask.labels.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1 mb-0.5">
+                      <div className='flex flex-wrap gap-1 mt-1 mb-0.5'>
                         {subtask.labels.map((label, idx) => (
                           <span
                             key={idx}
-                            className="bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-sm text-[10px] font-normal border border-gray-200 dark:border-gray-700 opacity-80">
+                            className='bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded-sm text-[10px] font-normal border border-gray-200 dark:border-gray-700 opacity-80'>
                             {label}
                           </span>
                         ))}
@@ -675,7 +675,7 @@ function InputArea({
 
 function Indicators({ progress }) {
   return (
-    <div className='fixed right-4 top-9 z-10 bg-white dark:bg-gray-800 rounded-md shadow-md p-3 pt-5 text-sm text-gray-800 dark:text-gray-200 flex flex-col space-y-3'>
+    <div className='fixed right-4 top-9 z-10 bg-white dark:bg-gray-800 rounded-md shadow-md p-3 pt-5 text-sm text-gray-800 dark:text-gray-200 flex flex-col space-y-1'>
       <div>
         <span className='font-semibold mr-2'>Priority:</span>
         <span className='inline-flex items-center space-x-1 mr-3'>
@@ -712,7 +712,7 @@ function Indicators({ progress }) {
 
       <div>
         <span className='font-semibold mr-2'>Progress:</span>
-        <div className='flex items-center gap-2 mt-1'>
+        <div className='flex items-center gap-2'>
           <div className='h-1.5 flex-1 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden'>
             <div className='h-full bg-gradient-to-r from-red-500 via-yellow-500 to-green-500' style={{ width: `${progress}%` }} />
           </div>
