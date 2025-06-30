@@ -269,11 +269,18 @@ export const useMarketAnalysis = () => {
 };
 
 // Market Analysis Button Component
+// This component renders a button that, when clicked, allows the user to trigger a market analysis
+// for a detected skill in the provided subtask label. If multiple skills are detected, a dropdown
+// is shown to select which skill to analyze. Handles loading state and dropdown visibility.
 export const MarketAnalysisButton = ({ subtaskLabel, onAnalysis, isLoading }) => {
+  // State to control whether the skill dropdown is visible
   const [showSkillDropdown, setShowSkillDropdown] = React.useState(false);
+  // Extract skills from the subtask label using the provided utility
   const skills = extractSkillsFromText(subtaskLabel);
+  // Ref to the dropdown element for click-outside detection
   const dropdownRef = React.useRef(null);
 
+  // Effect: Closes the dropdown if a click occurs outside the dropdown area
   React.useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -282,30 +289,39 @@ export const MarketAnalysisButton = ({ subtaskLabel, onAnalysis, isLoading }) =>
     };
 
     document.addEventListener("mousedown", handleClickOutside);
+    // Cleanup: Remove event listener on unmount
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // If no skills are detected, do not render the button
   if (skills.length === 0) return null;
 
+  // Handler: When a skill is selected from the dropdown, trigger analysis and close dropdown
   const handleSkillSelect = (skill) => {
     onAnalysis(skill);
     setShowSkillDropdown(false);
   };
 
   return (
+    // Wrapper div for dropdown positioning and click-outside logic
     <div className='relative' style={{ zIndex: 50 }} ref={dropdownRef}>
+      {/* Overlay to close dropdown when clicking outside */}
       <div className='absolute inset-0 z-0' onClick={() => setShowSkillDropdown(false)} />
+      {/* Main button: If only one skill, triggers analysis directly; if multiple, toggles dropdown */}
       <button
         onClick={() => (skills.length === 1 ? onAnalysis(skills[0]) : setShowSkillDropdown(!showSkillDropdown))}
         disabled={isLoading}
         className='px-3 py-1 rounded text-xs font-medium bg-purple-100 hover:bg-purple-200 
                   dark:bg-purple-900/20 dark:hover:bg-purple-800/30 text-purple-700 dark:text-purple-300 
                   transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed relative z-50'>
+        {/* Show loading spinner or bar chart icon */}
         {isLoading ? <Loader2 size={12} className='animate-spin' /> : <BarChart size={12} />}
         <span>{isLoading ? "Loading..." : "Market Insights"}</span>
+        {/* If multiple skills, show count */}
         {skills.length > 1 && !isLoading && <span className='ml-1 text-xs opacity-75'>({skills.length})</span>}
       </button>
 
+      {/* Dropdown: Only shown if multiple skills and dropdown is open */}
       {showSkillDropdown && skills.length > 1 && (
         <div
           className='absolute left-28 mt-1 py-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700'
@@ -313,6 +329,7 @@ export const MarketAnalysisButton = ({ subtaskLabel, onAnalysis, isLoading }) =>
           <div className='px-3 py-2 text-xs font-medium text-gray-500 dark:text-gray-400 border-b border-gray-200 dark:border-gray-700'>
             Select skill to analyze
           </div>
+          {/* Render a button for each detected skill */}
           {skills.map((skill, index) => (
             <button
               key={index}

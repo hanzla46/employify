@@ -416,16 +416,20 @@ export function Jobs() {
 
             {/* Job listings with enhanced animations */}
             <div className='space-y-4'>
+              {/* Render each filtered job card with all actions and details */}
               {filteredJobs.map((job) => {
+                // Get the current state for cover letter and resume actions for this job
                 const clState = jobActionStates[job.id]?.coverLetter || { status: "idle" };
                 const resumeState = jobActionStates[job.id]?.resume || { status: "idle" };
 
+                // Each job card displays job info, actions, and dynamic UI based on state
                 return (
                   <div
                     key={job.id}
                     className={`relative bg-white dark:bg-gray-800 rounded-xl shadow-md transition-all duration-300 hover:shadow-xl ${
                       job.featured ? "ring-2 ring-primary-500/50" : ""
                     } ${expandedJob === job.id ? "ring-2 ring-primary-500" : ""}`}>
+                    {/* If job is featured, show badge */}
                     {job.featured && (
                       <div className='absolute top-3 right-3 bg-gradient-to-r from-primary-500 to-purple-600 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg z-10 animate-pulse'>
                         FEATURED
@@ -434,7 +438,7 @@ export function Jobs() {
 
                     <div className='p-4'>
                       <div className='flex flex-col md:flex-row md:items-start gap-4'>
-                        {/* Company Logo with shine effect */}
+                        {/* Company logo with fallback */}
                         <div className='flex-shrink-0 relative group'>
                           <div className='bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-700 dark:to-gray-900 border border-gray-200 dark:border-gray-700 rounded-xl w-14 h-14 flex items-center justify-center overflow-hidden'>
                             <img
@@ -451,6 +455,7 @@ export function Jobs() {
                         <div className='flex-grow'>
                           <div className='flex flex-wrap items-start justify-between gap-3 mb-2'>
                             <div>
+                              {/* Job title, company, and AI match score */}
                               <h2 className='text-lg font-bold text-gray-900 dark:text-white hover:text-primary-600 dark:hover:text-primary-400 transition-colors'>
                                 {job.title}
                               </h2>
@@ -461,8 +466,7 @@ export function Jobs() {
                                   className='text-sm underline text-gray-600 dark:text-gray-300 hover:text-primary-500'>
                                   {job.company.name}
                                 </a>
-
-                                {/* AI Score with animated gradient */}
+                                {/* Show AI match score if available */}
                                 <div className='inline-flex items-center bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/10 dark:to-amber-600/10 border border-amber-400/30 rounded-full px-2 py-0.5'>
                                   <Sparkles className='h-3 w-3 text-amber-400 mr-1 animate-pulse' />
                                   <span className='text-xs font-medium text-amber-700 dark:text-amber-300'>
@@ -473,6 +477,7 @@ export function Jobs() {
                             </div>
 
                             <div className='flex gap-2'>
+                              {/* Save job button toggles saved state */}
                               <button
                                 onClick={() => toggleSaveJob(job.id)}
                                 className={`p-1.5 rounded-full transition-all ${
@@ -482,13 +487,14 @@ export function Jobs() {
                                 }`}>
                                 <BookmarkPlus className='h-4 w-4' />
                               </button>
+                              {/* Share button (functionality can be added) */}
                               <button className='p-1.5 rounded-full text-gray-500 hover:text-blue-500 bg-gray-100 dark:bg-gray-700 hover:bg-blue-100/50 dark:hover:bg-blue-900/20 transition-all'>
                                 <Share2 className='h-4 w-4' />
                               </button>
                             </div>
                           </div>
 
-                          {/* Compact Job Metadata */}
+                          {/* Job metadata: location, type, posted time */}
                           <div className='flex flex-wrap gap-2 mb-3'>
                             <div className='flex items-center text-xs text-gray-700 dark:text-gray-300 bg-gray-100/50 dark:bg-gray-700/50 rounded-lg px-2.5 py-1.5'>
                               <MapPin className='h-3 w-3 mr-1.5 text-gray-500 dark:text-gray-400' />
@@ -496,20 +502,19 @@ export function Jobs() {
                                 {job.location} {job.isRemote && "(Remote)"}
                               </span>
                             </div>
-
                             <div className='flex items-center text-xs text-gray-700 dark:text-gray-300 bg-gray-100/50 dark:bg-gray-700/50 rounded-lg px-2.5 py-1.5'>
                               <Briefcase className='h-3 w-3 mr-1.5 text-gray-500 dark:text-gray-400' />
                               <span>{job.type}</span>
                             </div>
-
                             <div className='flex items-center text-xs text-gray-700 dark:text-gray-300 bg-gray-100/50 dark:bg-gray-700/50 rounded-lg px-2.5 py-1.5'>
                               <Clock className='h-3 w-3 mr-1.5 text-gray-500 dark:text-gray-400' />
                               <span>{timeAgo(job.postedAt)}</span>
                             </div>
                           </div>
 
-                          {/* Why/Missing sections with slide-down animation */}
+                          {/* Why you match and what's missing, with expand/collapse */}
                           <div className='flex flex-col sm:flex-row gap-2 mb-3'>
+                            {/* Show why you match if available */}
                             {job.matchAnalysis?.why?.length > 0 && (
                               <div className='flex-1'>
                                 <button
@@ -535,7 +540,7 @@ export function Jobs() {
                                 )}
                               </div>
                             )}
-
+                            {/* Show what's missing if available, with add skill button */}
                             {job.matchAnalysis?.missing?.length > 0 && (
                               <div className='flex-1'>
                                 <button
@@ -554,6 +559,7 @@ export function Jobs() {
                                       {job.matchAnalysis.missing.map((item, index) => (
                                         <li key={index} className='flex items-center justify-between text-gray-600 dark:text-gray-300'>
                                           {item}
+                                          {/* Add missing skill to roadmap */}
                                           <button
                                             onClick={() => handleAddMissingSkill(item)}
                                             className='ml-2 px-1.5 py-0.5 text-[0.65rem] rounded bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-300 transition-colors'>
@@ -568,7 +574,7 @@ export function Jobs() {
                             )}
                           </div>
 
-                          {/* Job Description with smooth expand */}
+                          {/* Expandable job description */}
                           {expandedJob === job.id && (
                             <div className='mt-2 pt-3 border-t border-gray-200/50 dark:border-gray-700/50 animate-fadeIn'>
                               <h3 className='text-sm font-semibold text-gray-900 dark:text-white mb-2'>Job Description</h3>
@@ -576,6 +582,7 @@ export function Jobs() {
                             </div>
                           )}
 
+                          {/* Button to expand/collapse job details */}
                           <button
                             onClick={() => setExpandedJob(expandedJob === job.id ? null : job.id)}
                             className='mt-2 w-full py-1.5 text-center text-xs bg-gray-100/50 dark:bg-gray-700/50 hover:bg-gray-200/50 dark:hover:bg-gray-700 rounded-lg transition-colors'>
@@ -588,21 +595,25 @@ export function Jobs() {
                       </div>
                     </div>
 
-                    {/* Footer Actions with gradient background */}
+                    {/* Footer with all job actions */}
                     <div className='bg-gradient-to-r from-gray-50/70 to-gray-100/70 dark:from-gray-800/70 dark:to-gray-900/70 px-4 py-3 flex flex-col sm:flex-row justify-between items-center gap-2 border-t border-gray-200/50 dark:border-gray-700/50'>
+                      {/* Practice Interview navigates to interview page for this job */}
                       <Link
-                        to={"/interview?jobId=" + job.id}
+                        to={`/interview?jobId=${job.id}`}
                         className='w-full sm:w-auto text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium transition-all shadow-sm hover:shadow-md'>
                         Practice Interview
                       </Link>
 
+                      {/* Open company/contact info modal */}
                       <button
                         onClick={() => openCompanyModal(job)}
                         className='w-full sm:w-auto text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 hover:from-blue-600 hover:to-indigo-600 text-white font-medium transition-all shadow-sm hover:shadow-md'>
                         Company & Contact Info
                       </button>
 
+                      {/* Cover Letter and Resume generation/download */}
                       <div className='flex gap-2 w-full sm:w-auto'>
+                        {/* Cover Letter: get or download if ready */}
                         <button
                           onClick={() =>
                             clState.status === "loaded" ? handleDownloadFile(job.id, "coverLetter") : handleGetCoverLetter(job)
@@ -621,7 +632,7 @@ export function Jobs() {
                             "Get Cover Letter"
                           )}
                         </button>
-
+                        {/* Resume: get or download if ready */}
                         <button
                           onClick={() => (resumeState.status === "loaded" ? handleDownloadFile(job.id, "resume") : handleGetResume(job))}
                           disabled={resumeState.status === "loading" || !hasProfile}
@@ -640,14 +651,16 @@ export function Jobs() {
                         </button>
                       </div>
 
+                      {/* Apply Now and alternate apply options */}
                       <div className='flex items-center w-full sm:w-auto'>
+                        {/* Main apply link */}
                         <a
                           href={job.externalLink}
                           target='_blank'
                           className='flex-1 text-xs px-3 py-1.5 rounded-l-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium transition-all shadow-sm hover:shadow-md'>
                           Apply Now
                         </a>
-
+                        {/* Dropdown for alternate apply options if available */}
                         {job.applyOptions && job.applyOptions.length > 0 && (
                           <div className='relative'>
                             <button
@@ -655,7 +668,6 @@ export function Jobs() {
                               className='h-full px-2 py-1.5 text-xs bg-emerald-600 hover:bg-emerald-700 text-white rounded-r-lg transition-colors'>
                               <ChevronDown className='h-3 w-3' />
                             </button>
-
                             {openApplyDropdownJobId === job.id && (
                               <div className='absolute right-0 top-full mt-1 w-48 bg-white dark:bg-gray-800 rounded-lg shadow-xl z-30 overflow-hidden border border-gray-200 dark:border-gray-700 animate-fadeIn'>
                                 <div className='py-1'>

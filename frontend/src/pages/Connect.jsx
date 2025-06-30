@@ -9,24 +9,37 @@ import { Link } from "react-router-dom";
 const url = import.meta.env.VITE_API_URL || "http://localhost:8000";
 
 export function Connect() {
+  // Set page title on mount
   useEffect(() => {
     document.title = "Connect | Employify";
   }, []);
 
+  // Context: check if user has filled profile (required for features)
   const { hasProfile } = useContext(SkillsContext);
 
+  // --- DM Generator State ---
+  // LinkedIn username or profile URL input
   const [dmProfile, setDmProfile] = useState("");
+  // Purpose of the DM (dropdown)
   const [dmPurpose, setDmPurpose] = useState("");
+  // Resulting generated DM message
   const [dmResult, setDmResult] = useState("");
+  // Loading state for DM generation
   const [dmLoading, setDmLoading] = useState(false);
 
-  // Post Wizard state
+  // --- Post Generator State ---
+  // Mode: 'auto' (use profile) or 'custom' (user input)
   const [postMode, setPostMode] = useState("auto");
+  // Custom tone for post (dropdown)
   const [customTone, setCustomTone] = useState("");
+  // User input for post content (custom mode)
   const [postInput, setPostInput] = useState("");
+  // Resulting generated post
   const [postResult, setPostResult] = useState("");
+  // Loading state for post generation
   const [postLoading, setPostLoading] = useState(false);
 
+  // --- Function: Copy generated post to clipboard ---
   const handleCopyClick = async () => {
     try {
       if (!postResult) {
@@ -40,6 +53,8 @@ export function Connect() {
     }
   };
 
+  // --- Function: Handle DM form submit ---
+  // Calls backend to generate a cold message for LinkedIn
   const handleDmSubmit = async (e) => {
     e.preventDefault();
     setDmLoading(true);
@@ -58,6 +73,8 @@ export function Connect() {
     setDmLoading(false);
   };
 
+  // --- Function: Handle Post form submit ---
+  // Calls backend to generate a LinkedIn post (auto or custom)
   const handlePostSubmit = async (e) => {
     e.preventDefault();
     setPostLoading(true);
@@ -78,6 +95,7 @@ export function Connect() {
   return (
     <div className='min-h-screen bg-neutral-50 dark:bg-neutral-900 text-neutral-900 dark:text-white px-6 py-14'>
       <div className='max-w-5xl mx-auto'>
+        {/* Header section for page title and description */}
         <header className='text-center mb-12'>
           <h1 className='text-4xl font-bold mb-3 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-700'>
             LinkedIn Connection Toolkit
@@ -87,11 +105,10 @@ export function Connect() {
           </p>
         </header>
         <ProtectedRoute>
+          {/* If user has no profile, prompt to add profile for feature access */}
           {!hasProfile && (
             <div>
-              {" "}
               <Link to={"/profile"}>
-                {" "}
                 <h2 className='text-red-600 dark:text-red-400 underline self-center text-center mt-0 mb-4'>
                   ❗ Add Profile to unlock these features <span className='text-xl'>↗</span>
                 </h2>
@@ -99,7 +116,7 @@ export function Connect() {
             </div>
           )}
           <div className='grid md:grid-cols-2 gap-8'>
-            {/* DM Generator */}
+            {/* DM Generator section: handles form, API call, and result rendering */}
             <section className='bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-6 border border-neutral-200 dark:border-neutral-700'>
               <div className='flex items-center gap-3 mb-4'>
                 <MailPlus className='text-blue-600' size={24} />
@@ -108,6 +125,7 @@ export function Connect() {
               <p className='text-neutral-600 dark:text-neutral-400 mb-5 text-sm'>
                 Messages customized using your profile data and recipient's background for authentic outreach
               </p>
+              {/* DM form: collects recipient and purpose, triggers API on submit */}
               <form onSubmit={handleDmSubmit} className='space-y-4'>
                 <div>
                   <label className='block text-sm font-medium mb-2 text-neutral-700 dark:text-neutral-300'>Recipient's Profile</label>
@@ -149,6 +167,7 @@ export function Connect() {
                   </select>
                 </div>
 
+                {/* Submit button disables if loading or no profile */}
                 <button
                   type='submit'
                   className='w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-medium py-2.5 rounded-lg shadow transition-all duration-200 flex items-center justify-center disabled:opacity-45'
@@ -173,6 +192,7 @@ export function Connect() {
                   )}
                 </button>
               </form>
+              {/* Render generated DM result with copy button */}
               {dmResult && (
                 <div className='mt-6 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4'>
                   <div className='font-medium mb-2 text-blue-800 dark:text-blue-200 flex justify-between'>
@@ -191,7 +211,7 @@ export function Connect() {
               )}
             </section>
 
-            {/* Post Generator */}
+            {/* Post Generator section: handles form, API call, and result rendering */}
             <section className='bg-white dark:bg-neutral-800 rounded-xl shadow-lg p-6 border border-neutral-200 dark:border-neutral-700'>
               <div className='flex items-center gap-3 mb-4'>
                 <Wand2 className='text-indigo-600' size={24} />
@@ -201,6 +221,7 @@ export function Connect() {
                 Content crafted to match your professional brand and career narrative
               </p>
 
+              {/* Post mode toggle: auto or custom */}
               <div className='flex gap-3 mb-5'>
                 <button
                   type='button'
@@ -224,6 +245,7 @@ export function Connect() {
                 </button>
               </div>
 
+              {/* Post form: content and tone for custom, triggers API on submit */}
               <form onSubmit={handlePostSubmit} className='space-y-4'>
                 {postMode === "custom" && (
                   <>
@@ -256,6 +278,7 @@ export function Connect() {
                   </>
                 )}
 
+                {/* Submit button disables if loading or no profile */}
                 <button
                   type='submit'
                   className='w-full bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-medium py-2.5 rounded-lg shadow transition-all duration-200 disabled:opacity-45'
@@ -267,6 +290,7 @@ export function Connect() {
                     : "Create Custom Post"}
                 </button>
               </form>
+              {/* Render generated post result with copy button */}
               {postResult && (
                 <div className='mt-6 bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800 rounded-lg p-4'>
                   <div className='font-medium mb-2 text-indigo-800 dark:text-indigo-200 flex justify-between'>
@@ -283,6 +307,7 @@ export function Connect() {
             </section>
           </div>
 
+          {/* Footer note about personalization */}
           <div className='mt-12 text-center text-sm text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto'>
             <p>
               All content is personalized using your Employify profile data to maintain consistent professional branding across your

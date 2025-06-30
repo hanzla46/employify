@@ -30,30 +30,37 @@ import { SkillsContext } from "../Context/SkillsContext";
 const url = import.meta.env.VITE_API_URL;
 
 export function Interview() {
+  // Set page title on mount
   useEffect(() => {
     document.title = "Interview | Employify AI";
   }, []);
-  const [jobOrMock, setJobOrMock] = useState("mock");
-  const { jobs } = useContext(JobsContext);
-  const { user } = useContext(AuthContext);
-  const { hasProfile } = useContext(SkillsContext);
-  const [jobId, setJobId] = useState("");
-  const [sessionId, setSessionId] = useState("");
-  const [job, setJob] = useState(null);
-  const [searchParams, setSearchParams] = useSearchParams();
 
+  // State and context hooks
+  const [jobOrMock, setJobOrMock] = useState("mock"); // Determines if interview is for a job or mock
+  const { jobs } = useContext(JobsContext); // List of jobs from context
+  const { user } = useContext(AuthContext); // Authenticated user
+  const { hasProfile } = useContext(SkillsContext); // Whether user has a profile
+  const [jobId, setJobId] = useState(""); // Selected job ID
+  const [sessionId, setSessionId] = useState(""); // Interview session ID
+  const [job, setJob] = useState(null); // Selected job object
+  const [searchParams, setSearchParams] = useSearchParams(); // URL search params
+
+  // Update jobId from URL params
   useEffect(() => {
     setJobId(searchParams.get("jobId") || "");
   }, [searchParams]);
 
+  // Update sessionId from URL params (only on mount)
   useEffect(() => {
     setSessionId(searchParams.get("sessionId") || "");
   }, []);
 
+  // Update interviewData position from URL params
   useEffect(() => {
     setInterviewData((prev) => ({ ...prev, position: searchParams.get("position") || "" }));
   }, [searchParams]);
 
+  // Check for existing interview session if user and sessionId are present
   useEffect(() => {
     if (!user || !sessionId) return;
     const checkInterviewSession = async () => {
@@ -76,6 +83,7 @@ export function Interview() {
     checkInterviewSession();
   }, [user, sessionId]);
 
+  // Set job object if jobId is present
   useEffect(() => {
     if (jobId) {
       const matchingJob = jobs.find((item) => item["id"] === jobId);
@@ -90,18 +98,19 @@ export function Interview() {
     }
   }, [jobId, jobs]);
 
+  // Speech recognition and recording state
   const { transcript, resetTranscript, browserSupportsSpeechRecognition } = useSpeechRecognition();
   const [isRecording, setIsRecording] = useState(false); // Unified recording state
-  const [question, setQuestion] = useState("");
-  const [questionCount, setQuestionCount] = useState(0);
-  const [category, setCategory] = useState("");
-  const [written, setWritten] = useState("");
-  const [score, setScore] = useState();
-  const [isStarted, setIsStarted] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+  const [question, setQuestion] = useState(""); // Current interview question
+  const [questionCount, setQuestionCount] = useState(0); // Current question number
+  const [category, setCategory] = useState(""); // Current question category
+  const [written, setWritten] = useState(""); // Written response
+  const [score, setScore] = useState(); // Score for current response
+  const [isStarted, setIsStarted] = useState(false); // Interview started flag
+  const [isCompleted, setIsCompleted] = useState(false); // Interview completed flag
   // const [recordedBlob, setRecordedBlob] = useState(null); // No longer directly used
-  const [summary, setSummary] = useState("");
-  const [overallAnalysis, setOverallAnalysis] = useState("");
+  const [summary, setSummary] = useState(""); // AI summary for current response
+  const [overallAnalysis, setOverallAnalysis] = useState(""); // Overall interview analysis
   const [interviewData, setInterviewData] = useState({
     position: "",
     company: "",
@@ -110,11 +119,12 @@ export function Interview() {
     intensity: "",
     feedbackStyle: "",
   });
-  const [infoBox, setInfoBox] = useState(true);
-  const [loading, setLoading] = useState(false);
-  const [showReviewModal, setShowReviewModal] = useState(false);
-  const [recordingUrl, setRecordingUrl] = useState(null);
+  const [infoBox, setInfoBox] = useState(true); // Show info/instructions box
+  const [loading, setLoading] = useState(false); // Loading state
+  const [showReviewModal, setShowReviewModal] = useState(false); // Show review modal
+  const [recordingUrl, setRecordingUrl] = useState(null); // Video recording URL
 
+  // Video recording hooks from useReactMediaRecorder
   const {
     status, // Keep status if needed for debugging or more complex UI
     startRecording: startVideoRecording,
@@ -124,7 +134,7 @@ export function Interview() {
     clearBlobUrl,
   } = useReactMediaRecorder({ video: true, audio: true });
 
-  // question audio
+  // Play question as audio when it changes
   useEffect(() => {
     if (!question) return;
     const synth = window.speechSynthesis;
@@ -137,7 +147,7 @@ export function Interview() {
     synth.speak(utterance);
   }, [question]);
 
-  // key event
+  // Handle Enter key to send response (unless focused in textarea)
   const textareaRef = useRef(null);
   useEffect(() => {
     if (!isStarted) return;
@@ -156,6 +166,7 @@ export function Interview() {
     };
   }, [isStarted, loading, transcript, written, question, category, sessionId]); // Added relevant dependencies for sendResponse
 
+  // Start a new interview session
   const startInterview = async () => {
     try {
       setLoading(true); // Start loading when interview setup is confirmed
@@ -204,6 +215,7 @@ export function Interview() {
     }
   };
 
+  // Send response to current question (with optional confirmation)
   const sendResponse = async (isConfirmed) => {
     if (!transcript && !written) {
       handleError("Response can't be empty");
@@ -325,7 +337,7 @@ export function Interview() {
     }
   };
 
-  // Unified toggle function for recording
+  // Unified toggle function for recording (audio + video)
   const toggleRecording = () => {
     if (isRecording) {
       // If currently recording, stop both
@@ -340,11 +352,12 @@ export function Interview() {
     }
   };
 
+  // If browser does not support speech recognition, show message
   if (!browserSupportsSpeechRecognition) {
     return <p>Your browser does not support Speech Recognition. Please try Chrome for full functionality.</p>;
   }
 
-  //everything starts from here
+  // Start interview handler for DialogForm
   const start = () => {
     startInterview();
   };

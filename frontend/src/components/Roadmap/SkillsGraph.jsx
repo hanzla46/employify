@@ -64,10 +64,14 @@ const getLayoutedElements = (nodes, edges, direction = "LR") => {
 };
 
 // --- Custom Node Component ---
+// Renders each task node in the graph, including progress, subtasks, and actions.
 const TaskNode = ({ data }) => {
+  // State for expanding/collapsing subtasks
   const [expanded, setExpanded] = useState(false);
+  // State for hover effect
   const [isHovered, setIsHovered] = useState(false);
 
+  // Calculate progress for this node
   const completedSubtasks = data.subtasks?.filter((st) => st.completed)?.length || 0;
   const totalSubtasks = data.subtasks?.length || 0;
   const progress = totalSubtasks > 0 ? (completedSubtasks / totalSubtasks) * 100 : 0;
@@ -85,10 +89,11 @@ const TaskNode = ({ data }) => {
       style={{ maxWidth: `${NODE_WIDTH - 10}px` }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}>
+      {/* React Flow handles for edges */}
       <Handle type='target' position={Position.Left} style={{ background: "#3B82F6", left: 24 }} />
       <Handle type='source' position={Position.Right} style={{ background: "#3B82F6", right: 24 }} />
 
-      {/* Progress Bar */}
+      {/* Progress Bar for node completion */}
       <div className='absolute top-0 left-0 right-0 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-t overflow-hidden'>
         <div
           className='h-full transition-all duration-500 ease-out'
@@ -100,6 +105,7 @@ const TaskNode = ({ data }) => {
       </div>
 
       <div className='relative mt-2'>
+        {/* Tag for new/updated nodes */}
         <div
           className={`p-1 rounded-lg float-right text-sm font-semibold ${
             data.tag === "new"
@@ -111,9 +117,11 @@ const TaskNode = ({ data }) => {
           {data.tag}
         </div>
 
+        {/* Node label and description */}
         <div className='font-bold text-lg mb-2 dark:text-white'>{data.label}</div>
         <div className='text-sm text-gray-600 dark:text-gray-300 mb-3'>{data.description}</div>
 
+        {/* Node metadata: progress, category, difficulty, time */}
         <div className='text-xs space-x-2 mt-1 mb-1 border-t pt-1 dark:text-gray-400'>
           <span className='inline-flex items-center'>
             <span className='font-medium mr-1'>Progress:</span>
@@ -127,6 +135,7 @@ const TaskNode = ({ data }) => {
           <span>{data.estimated_time || "N/A"}</span>
         </div>
 
+        {/* Subtasks section: expandable, with completion and evaluation actions */}
         {data.subtasks?.length > 0 && (
           <>
             <button
@@ -149,6 +158,7 @@ const TaskNode = ({ data }) => {
 
             {expanded && (
               <div className='mt-3 space-y-2'>
+                {/* Render each subtask with completion, evaluation, and sources */}
                 {data.subtasks.map((subtask, index) => (
                   <div
                     key={subtask.id || index}
@@ -162,6 +172,7 @@ const TaskNode = ({ data }) => {
                       }`}>
                     <div className='flex items-center justify-between'>
                       <div className='flex items-center gap-2'>
+                        {/* Subtask status icon */}
                         {subtask.completed ? (
                           <div className='text-green-500 dark:text-green-400'>
                             <Check size={18} />
@@ -179,6 +190,7 @@ const TaskNode = ({ data }) => {
                       </div>
 
                       <div className='flex items-center gap-2'>
+                        {/* Complete/Reset/Evaluate subtask button */}
                         <button
                           className={`px-3 py-1 rounded text-xs font-medium transition-all duration-150 ${
                             subtask.completed ? "bg-red-500 hover:bg-red-600 text-white" : "bg-green-500 hover:bg-green-600 text-white"
@@ -195,15 +207,18 @@ const TaskNode = ({ data }) => {
                           disabled={subtask.evaluating}>
                           {subtask.evaluating ? "Evaluating..." : subtask.completed ? "Reset" : subtask.buttonText}
                         </button>{" "}
+                        {/* Show sources for subtask */}
                         <button
                           onClick={() => data.showSources(subtask.sources)}
                           className='px-3 py-1 rounded text-xs font-medium bg-gray-100 hover:bg-gray-200 
                               dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 transition-colors'>
                           Sources
                         </button>
+                        {/* Market analysis for subtask skills */}
                         <MarketAnalysisButton subtaskLabel={subtask.label} skills={subtask.skills} onAnalysis={data.onMarketAnalysis} />
                       </div>
                     </div>
+                    {/* Subtask evaluation feedback */}
                     {subtask.evaluation && (
                       <div
                         className='mt-2 text-xs p-2 rounded bg-gray-50 dark:bg-gray-800 border 
@@ -236,21 +251,24 @@ const TaskNode = ({ data }) => {
         )}
       </div>
 
+      {/* Show AI impact/importance if present */}
       {data.ai_impact && <div className='mt-2 text-xs text-purple-700 dark:text-purple-400 italic'>Importance: {data.ai_impact}</div>}
     </div>
   );
 };
 
-// --- Define Node Types ---
+// --- Define Node Types for React Flow ---
 const nodeTypes = {
   taskNode: TaskNode,
 };
 
 // --- Main Graph Component ---
+// Handles graph data, layout, and rendering the React Flow graph
 const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loading, error, onMarketAnalysis }) => {
-  // Renamed to avoid conflict with provider wrapper
+  // State for nodes and edges in React Flow
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  // State for evaluation modal (subtask completion)
   const [evaluationModal, setEvaluationModal] = useState({
     open: false,
     stId: null,
@@ -260,6 +278,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
     file: null,
     inputMessage: "",
   });
+  // Callback for subtask completion (opens modal)
   const checkCompleted = useCallback((taskId, stId, subTaskName, taskName) => {
     // Ensure IDs are numbers
     const parsedTaskId = parseInt(taskId);
@@ -288,6 +307,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       taskName,
     });
   }, []);
+  // Callback to show sources modal for a subtask
   const handleShowSourcesModal = useCallback(
     (sources) => {
       console.log(`Sources: ${sources}`);
@@ -295,9 +315,10 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       setShowSourcesModal(true);
     },
     [setSources, setShowSourcesModal]
-  ); // Added dependencies
+  );
 
-  // Process data and transform to ReactFlow format using Dagre layout
+  // --- Layout and Data Processing ---
+  // Whenever graphData changes, process and layout nodes/edges
   useEffect(() => {
     // Ensure graphData and tasks exist and are an array before processing
     if (!graphData || !Array.isArray(graphData.tasks)) {
@@ -321,7 +342,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
     const validTasks = graphData.tasks.filter((task) => task && task.id != null);
     const taskIds = new Set(validTasks.map((t) => t.id.toString()));
 
-    // 1. Transform tasks into initial nodes
+    // 1. Transform tasks into initial nodes for React Flow
     const initialNodes = validTasks.map((task) => ({
       id: task.id.toString(), // CRITICAL: Ensure ID is a string
       type: "taskNode",
@@ -353,7 +374,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
       },
     }));
 
-    // 2. Transform dependencies into initial edges
+    // 2. Transform dependencies into initial edges for React Flow
     const initialEdges = [];
     validTasks.forEach((task) => {
       if (task.dependencies && Array.isArray(task.dependencies)) {
@@ -364,17 +385,17 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
           // CRITICAL: Check if both source and target nodes actually exist
           if (taskIds.has(sourceId) && taskIds.has(targetId)) {
             initialEdges.push({
-              id: `e-${sourceId}-${targetId}`, // Ensure unique edge ID
+              id: `e-${sourceId}-${targetId}`,
               source: sourceId,
               target: targetId,
-              type: "default", // Or 'default', 'straight', 'step'
+              type: "default",
               animated: true,
               markerEnd: {
                 type: MarkerType.ArrowClosed,
-                width: 15, // Smaller arrow
+                width: 15,
                 height: 15,
               },
-              style: { stroke: "#3B82F6", strokeWidth: 4 }, // Example style
+              style: { stroke: "#3B82F6", strokeWidth: 4 },
             });
           } else {
             console.warn(`Skipping edge from ${sourceId} to ${targetId}: Node not found in task list.`);
@@ -403,6 +424,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
     }
   }, [graphData]); // Rerun layout when graphData changes
 
+  // --- Render states: loading, error, empty, or graph ---
   if (loading) {
     return <DynamicLoader />;
   }
@@ -419,7 +441,7 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
   return (
     // Height needs to be explicitly set on the container for ReactFlow
     <div style={{ width: "100%", height: "700px" }}>
-      {/* Calculate total progress */}
+      {/* Calculate total progress for all nodes */}
       <Indicators
         progress={
           (nodes.reduce((total, node) => {
@@ -443,12 +465,12 @@ const SkillsGraphInternal = ({ setSources, setShowSourcesModal, graphData, loadi
         minZoom={0.2} // Allow zooming out further
       >
         <div className='fixed left-3 bottom-6 z-20'>
-          {" "}
           <Controls />
         </div>
         {/* <MiniMap nodeStrokeColor='#ccc' nodeColor='#fff' nodeBorderRadius={2} pannable zoomable /> */}
         <Background variant='cross' gap={15} size={1} />
       </ReactFlow>
+      {/* Evaluation modal for subtask completion */}
       {evaluationModal.open && (
         <EvaluationModalUI setNodes={setNodes} evaluationModal={evaluationModal} setEvaluationModal={setEvaluationModal} />
       )}
