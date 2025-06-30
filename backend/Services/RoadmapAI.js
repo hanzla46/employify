@@ -368,7 +368,9 @@ const evaluateSubtaskAI = async (subtask, task, text, file) => {
   1. Areas of strength
   2. Areas for improvement.
   3. Relevance.
-  keep your response as short as possible, and do not include any additional information or instructions. dont add markdown or text formatting.`;
+  keep your response as short as possible, and do not include any additional information or instructions. dont add markdown or text formatting.
+  if file or text is not relevant to the subtask, then just say "not relevant" and do not give any analysis.
+  `;
 
   const result = await model.generateContent(promptText);
   analysis = result.response.text();

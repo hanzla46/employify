@@ -190,7 +190,13 @@ const evaluateSubtask = async (req, res) => {
     }
 
     let analysis = await evaluateSubtaskAI(subtask, task, text, req.file);
-
+    if (analysis && typeof analysis === "string" && analysis.startsWith("not relevant")) {
+      return res.status(400).json({
+        success: false,
+        message: "Subtask evaluation is not relevant",
+        error: "NOT_RELEVANT",
+      });
+    }
     let retries = 3;
     while (retries > 0) {
       try {
@@ -232,7 +238,7 @@ const evaluateSubtask = async (req, res) => {
             let updated = false;
             for (const skillName of subtask.skills) {
               if (!profile.hardSkills.some((hs) => hs.name.toLowerCase() === skillName.toLowerCase())) {
-                profile.hardSkills.push({ name: skillName, experience: "0", subskills: [] });
+                profile.hardSkills.push({ name: skillName, experience: "0.1", subskills: [] });
                 updated = true;
               }
             }

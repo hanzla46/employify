@@ -89,12 +89,18 @@ export default function EvaluationModalUI({ evaluationModal, setEvaluationModal,
             setEvaluationModal((prev) => ({ ...prev, open: false }));
           }, 2000);
         }
+      } else {
+        handleError(response.data.message || "Failed to evaluate subtask");
       }
     } catch (error) {
       console.error("Error evaluating subtask:", error);
+      let backendMessage = "Sorry, there was an error processing your submission. Please try again.";
+      if (error.response && error.response.data && error.response.data.message) {
+        backendMessage = error.response.data.message;
+      }
       const errorMessage = {
         sender: "ai",
-        text: "Sorry, there was an error processing your submission. Please try again.",
+        text: backendMessage,
         error: true,
       };
 
@@ -218,6 +224,10 @@ export default function EvaluationModalUI({ evaluationModal, setEvaluationModal,
       }
     } catch (error) {
       console.error("Error evaluating subtask:", error);
+      let backendMessage = "Failed to evaluate subtask. Please try again.";
+      if (error.response && error.response.data && error.response.data.message) {
+        backendMessage = error.response.data.message;
+      }
       // Show error state in the modal
       setEvaluationModal((prev) => ({
         ...prev,
@@ -225,7 +235,7 @@ export default function EvaluationModalUI({ evaluationModal, setEvaluationModal,
           ...prev.messages,
           {
             sender: "system",
-            text: "Failed to evaluate subtask. Please try again." + error,
+            text: backendMessage,
             error: true,
           },
         ],
