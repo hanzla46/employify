@@ -1,4 +1,5 @@
 const Roadmap = require("../models/RoadmapModel");
+const Profile = require("../models/ProfileModel");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const { safeJsonParse } = require("./JsonParse");
 //helper function to update roadmap dynamically

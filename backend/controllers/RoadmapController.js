@@ -203,6 +203,32 @@ const evaluateSubtask = async (req, res) => {
           score: null,
         };
 
+        // --- Custom logic for labels and skills ---
+        // Handle labels (projects/courses)
+        if (Array.isArray(subtask.labels) && subtask.labels.length > 0) {
+          if (subtask.labels.includes("project")) {
+            roadmap.completedProjects = Array.from(new Set([...(roadmap.completedProjects || []), subtask.name]));
+          }
+          if (subtask.labels.includes("course")) {
+            roadmap.completedCourses = Array.from(new Set([...(roadmap.completedCourses || []), subtask.name]));
+          }
+        }
+        // Handle skills (add to profile.hardSkills if not present)
+        if (Array.isArray(subtask.skills) && subtask.skills.length > 0) {
+          const profile = await Profile.findOne({ userId: user._id });
+          if (profile) {
+            let updated = false;
+            for (const skillName of subtask.skills) {
+              if (!profile.hardSkills.some(hs => hs.name.toLowerCase() === skillName.toLowerCase())) {
+                profile.hardSkills.push({ name: skillName, experience: "0", subskills: [] });
+                updated = true;
+              }
+            }
+            if (updated) await profile.save();
+          }
+        }
+        // --- End custom logic ---
+
         await roadmap.save();
         updateRoadmap(user._id);
         updateUserProfile(user._id, analysis, subtask.name);

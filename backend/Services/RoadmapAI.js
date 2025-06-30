@@ -84,6 +84,8 @@ Accelerators: ${selectedPath.Accelerators} \n
         *   'id': Unique identifier within the task (e.g., 101, 102).
         *   'name': A concrete action (e.g., "Implement feature X using library Y," "Draft outreach message using template Z," "Analyze top 5 competitor strategies"). Include specific tools/techniques where relevant (e.g., "Use [AI Tool Name] for initial draft").
         *   'buttonText': Action-oriented text reflecting the subtask (e.g., "Start Course Module", "Build Prototype", "Find Mentors", "Analyze Competitors", "Practice Pitch").
+        *   'skills': Array. only applies to hardskills not softskills any skills if this subtask mark the completion of that skills. make sure to not repeat same skill across multiple subtasks.
+        *   'labels': Array. you can add label such as project or course or both or empty array.
     *   'dependencies': Array of task IDs that are prerequisites.
     *   'category': **[Strategic Planning, Foundational Skills, Advanced Specialization, Portfolio Building, Networking & Visibility, Application & Interview Prep, Freelance Client Acquisition, Startup Validation & Launch, Soft Skill Enhancement, AI Integration & Augmentation]**. (Choose the MOST relevant).
     *   'difficulty': **Beginner / Intermediate / Advanced / Expert** (relative to the user's likely starting point for *this task*).
@@ -118,10 +120,10 @@ Accelerators: ${selectedPath.Accelerators} \n
           "description": "Deepen expertise in [Skill X] by applying it to solve problems where AI tools are prevalent. This demonstrates adaptability and higher-order thinking beyond basic automation.",
           "position": { "x": 50, "y": 100 },
           "subtasks": [
-            { "id": 101, "name": "Identify 3 industry problems solvable by Skill X + AI Tool Y", "buttonText": "Research Problems"},
-            { "id": 102, "name": "Build a small proof-of-concept integrating Skill X & AI Tool Y", "buttonText": "Build PoC"},
-            { "id": 103, "name": "Document process & results for portfolio", "buttonText": "Document Project"},
-            { "id": 104, "name": "Use AI writing assistant [e.g., Grammarly Pro, ChatGPT] to refine documentation", "buttonText": "Refine Docs w/ AI" },
+            { "id": 101, "name": "Identify 3 industry problems solvable by Skill X + AI Tool Y", "buttonText": "Research Problems",labels:['project','course'],skills:[]},
+            { "id": 102, "name": "Build a small proof-of-concept integrating Skill X & AI Tool Y", "buttonText": "Build PoC",labels:['project'],skills:['python']},
+            { "id": 103, "name": "Document process & results for portfolio", "buttonText": "Document Project",labels:[],skills:['tensorflow']},
+            { "id": 104, "name": "Use AI writing assistant [e.g., Grammarly Pro, ChatGPT] to refine documentation", "buttonText": "Refine Docs w/ AI",labels:[],skills:[] },
           ],
           "dependencies": [], // Example: might depend on foundational Skill X task if not already proficient
           "category": "AI Integration & Augmentation",

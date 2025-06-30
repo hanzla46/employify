@@ -7,6 +7,8 @@ const SubtaskSchema = new mongoose.Schema(
     buttonText: String,
     sources: { type: String, default: "" },
     completed: { type: Boolean, default: false },
+    labels: [String],
+    skills: [String],
     evaluation: {
       text: String,
       fileUrl: String,
@@ -47,7 +49,9 @@ const RoadmapSchema = new mongoose.Schema({
   tasks: [TaskSchema],
   changes: [String],
   missingSkills: [String], // New field to store missing skills added from job page
-  interactionCount: { type: Number, default: 0 }, // Track user interactions for roadmap update batching
+  interactionCount: { type: Number, default: 0 },
+  completedProjects: [String],
+  completedCourses: [String],
 });
 
 const Roadmap = mongoose.model("Roadmap", RoadmapSchema);
