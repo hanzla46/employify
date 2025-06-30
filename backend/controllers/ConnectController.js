@@ -1,7 +1,10 @@
 const axios = require("axios");
 const Profile = require("../models/ProfileModel");
 const { GoogleGenerativeAI } = require("@google/generative-ai");
-
+const {
+  GenerateCustomPostAI,
+  GenerateAutoPostAI,
+} = require("../Services/ConnectAI");
 // Access your API key as an environment variable (e.g., process.env.GEMINI_API_KEY)
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
 function extractLinkedInUsername(input) {
@@ -39,11 +42,15 @@ const generateColdMessage = async (req, res) => {
 
   try {
     const userProfile = await Profile.findOne({ userId });
-    if (!userProfile) return res.status(404).json({ message: "User profile not found." });
+    if (!userProfile)
+      return res.status(404).json({ message: "User profile not found." });
 
     // Ensure userProfile has necessary details for message generation
-    const userSummary = userProfile.profileSummary || "a driven professional looking to connect.";
-    const userCareerGoal = userProfile.careerGoal || "expand my professional network and learn from industry leaders.";
+    const userSummary =
+      userProfile.profileSummary || "a driven professional looking to connect.";
+    const userCareerGoal =
+      userProfile.careerGoal ||
+      "expand my professional network and learn from industry leaders.";
     const userSkills =
       userProfile.hardSkills.map((s) => s.name).join(", ") +
       (userProfile.softSkills.length ? ", " : "") +
@@ -52,7 +59,9 @@ const generateColdMessage = async (req, res) => {
 
     const linkedInUsername = extractLinkedInUsername(req.query.username);
     if (!linkedInUsername) {
-      return res.status(400).json({ message: "LinkedIn username is required." });
+      return res
+        .status(400)
+        .json({ message: "LinkedIn username is required." });
     }
     const linkedInUrl = `https://linkedin.com/in/${linkedInUsername}`;
     const rapidApiKey = process.env.RAPIDAPI_KEYS?.split(",")[1] || "";
@@ -92,18 +101,22 @@ const generateColdMessage = async (req, res) => {
     const targetProfile = {};
     targetProfile.profileName = data.full_name || "a professional";
     targetProfile.about = data.about || "no 'about' section available.";
-    targetProfile.last3Experience = (data.experiences || []).slice(0, 3).map((exp) => ({
-      title: exp.title || "N/A",
-      company: exp.company || "N/A",
-      dateRange: exp.date_range || "N/A",
-      location: exp.location || "N/A",
-    }));
-    targetProfile.last3Education = (data.educations || []).slice(0, 3).map((edu) => ({
-      school: edu.school || "N/A",
-      degree: edu.degree || "N/A",
-      fieldOfStudy: edu.field_of_study || "N/A",
-      dateRange: edu.date_range || "N/A",
-    }));
+    targetProfile.last3Experience = (data.experiences || [])
+      .slice(0, 3)
+      .map((exp) => ({
+        title: exp.title || "N/A",
+        company: exp.company || "N/A",
+        dateRange: exp.date_range || "N/A",
+        location: exp.location || "N/A",
+      }));
+    targetProfile.last3Education = (data.educations || [])
+      .slice(0, 3)
+      .map((edu) => ({
+        school: edu.school || "N/A",
+        degree: edu.degree || "N/A",
+        fieldOfStudy: edu.field_of_study || "N/A",
+        dateRange: edu.date_range || "N/A",
+      }));
     targetProfile.skills = (data.skills || "")
       .split("|")
       .map((skill) => skill.trim())
@@ -113,15 +126,19 @@ const generateColdMessage = async (req, res) => {
 
     // Prepare data for Gemini prompt
     const targetExperienceSummary =
-      targetProfile.last3Experience.map((exp) => `${exp.title} at ${exp.company} (${exp.dateRange})`).join("; ") ||
-      "no recent work experience listed.";
+      targetProfile.last3Experience
+        .map((exp) => `${exp.title} at ${exp.company} (${exp.dateRange})`)
+        .join("; ") || "no recent work experience listed.";
 
     const targetEducationSummary =
-      targetProfile.last3Education.map((edu) => `${edu.degree} from ${edu.school} (${edu.dateRange})`).join("; ") ||
-      "no recent education listed.";
+      targetProfile.last3Education
+        .map((edu) => `${edu.degree} from ${edu.school} (${edu.dateRange})`)
+        .join("; ") || "no recent education listed.";
 
     const targetSkillsList =
-      targetProfile.skills.length > 0 ? targetProfile.skills.join(", ") : "no specific skills listed.";
+      targetProfile.skills.length > 0
+        ? targetProfile.skills.join(", ")
+        : "no specific skills listed.";
 
     // Construct the prompt for Gemini
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
@@ -166,7 +183,9 @@ The message should be suitable for a LinkedIn connection request or an initial d
     const response = await result.response;
     const coldMessage = response.text();
 
-    res.status(200).json({ message: "Cold message generated successfully.", coldMessage });
+    res
+      .status(200)
+      .json({ message: "Cold message generated successfully.", coldMessage });
   } catch (error) {
     console.error("Error generating cold message:", error);
     if (error.response && error.response.data && error.response.data.error) {
@@ -176,11 +195,44 @@ The message should be suitable for a LinkedIn connection request or an initial d
         error: error.response.data.error.message || error.message,
       });
     }
-    res.status(500).json({ message: "An unexpected error occurred.", error: error.message });
+    res
+      .status(500)
+      .json({ message: "An unexpected error occurred.", error: error.message });
   }
 };
+const generateLinkedInPost = async (req, res) => {
+  const { content, tone, mode } = req.body;
+  const userId = req.user._id;
 
+  if (mode == "custom" && !content) {
+    return res
+      .status(400)
+      .json({
+        message: "Custom content is required for custom mode.",
+        success: false,
+      });
+  }
+  try {
+    if (mode == "auto") {
+      const post = await GenerateAutoPostAI(userId);
+      return res.status(200).json({ generatedPost: post, success: true });
+    }
+    if (mode == "custom") {
+      const post = await GenerateCustomPostAI(userId, content, tone);
+      return res.status(200).json({ generatedPost: post, success: true });
+    }
+  } catch (err) {
+    console.error("Error generating LinkedIn post:", err);
+    res
+      .status(500)
+      .json({
+        message: "Failed to generate LinkedIn post.",
+        error: err.message,
+        success:false
+      });
+  }
+};
 module.exports = {
   generateColdMessage,
-  // ... other controller functions if any
+  generateLinkedInPost,
 };

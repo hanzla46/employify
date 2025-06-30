@@ -100,7 +100,7 @@ const updateUserProfile = async (userId, analysis, subtaskName) => {
     \`\`\` json\n{\n  "profileSummary": "...updated summary...",\n  "jobKeywords": ["keyword1", "keyword2", ...]\n}\`\`\`\n`;
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
     const model = genAI.getGenerativeModel({
-      model: "gemini-2.5-flash-preview-05-20",
+      model: "gemini-2.5-flash",
       generation_config: {
         temperature: 1,
         response_mime_type: "application/json",

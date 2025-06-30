@@ -50,8 +50,18 @@ const RoadmapSchema = new mongoose.Schema({
   changes: [String],
   missingSkills: [String], // New field to store missing skills added from job page
   interactionCount: { type: Number, default: 0 },
-  completedProjects: [String],
-  completedCourses: [String],
+  completedProjects: [
+    {
+      name: String,
+      completedAt: { type: Date, default: Date.now },
+    },
+  ],
+  completedCourses: [
+    {
+      name: String,
+      completedAt: { type: Date, default: Date.now },
+    },
+  ],
 });
 
 const Roadmap = mongoose.model("Roadmap", RoadmapSchema);

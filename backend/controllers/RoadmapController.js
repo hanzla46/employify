@@ -207,10 +207,22 @@ const evaluateSubtask = async (req, res) => {
         // Handle labels (projects/courses)
         if (Array.isArray(subtask.labels) && subtask.labels.length > 0) {
           if (subtask.labels.includes("project")) {
-            roadmap.completedProjects = Array.from(new Set([...(roadmap.completedProjects || []), subtask.name]));
+            const now = new Date();
+            roadmap.completedProjects = Array.from(
+              new Map([
+                ...((roadmap.completedProjects || []).map(p => [p.name, p])),
+                [subtask.name, { name: subtask.name, completedAt: now }],
+              ]).values()
+            );
           }
           if (subtask.labels.includes("course")) {
-            roadmap.completedCourses = Array.from(new Set([...(roadmap.completedCourses || []), subtask.name]));
+            const now = new Date();
+            roadmap.completedCourses = Array.from(
+              new Map([
+                ...((roadmap.completedCourses || []).map(c => [c.name, c])),
+                [subtask.name, { name: subtask.name, completedAt: now }],
+              ]).values()
+            );
           }
         }
         // Handle skills (add to profile.hardSkills if not present)

@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
 axios.defaults.withCredentials = true;
-
+import {handleSuccess, handleError} from "../utils";
+import { Clipboard } from "lucide-react";
 const url = import.meta.env.VITE_API_URL || "http://localhost:5000";
 
 export function Connect() {
@@ -13,10 +14,24 @@ export function Connect() {
   const [dmResult, setDmResult] = useState("");
   const [dmLoading, setDmLoading] = useState(false);
 
+  // Post Wizard state
+  const [postMode, setPostMode] = useState("auto"); // "auto" or "custom"
+  const [customTone, setCustomTone] = useState("");
   const [postInput, setPostInput] = useState("");
   const [postResult, setPostResult] = useState("");
   const [postLoading, setPostLoading] = useState(false);
-
+ const handleCopyClick = async () => {
+    try {
+      if(!postResult) {
+        handleError("No post generated to copy!");
+        return;
+      }
+      await navigator.clipboard.writeText(postResult);
+      handleSuccess("Post copied to clipboard!");
+    } catch (err) {
+      handleError('Failed to copy text: ' + err);
+    }
+  };
   const handleDmSubmit = async (e) => {
     e.preventDefault();
     setDmLoading(true);
@@ -35,12 +50,17 @@ export function Connect() {
     e.preventDefault();
     setPostLoading(true);
     setPostResult("");
-    setTimeout(() => {
-      setPostResult(
-        `Excited to share: ${postInput}\n\nGrateful for the journey and everyone who’s been part of it. Let’s keep growing! #LinkedIn #Career`
-      );
-      setPostLoading(false);
-    }, 1200);
+    try {
+      const res = await axios.post(`${url}/connect/linkedin-post`, {
+        content: postInput,
+        tone: customTone,
+        mode: postMode,
+      });
+      setPostResult(res.data.generatedPost);
+    } catch (err) {
+      setPostResult("Error generating post. Please try again.");
+    }
+    setPostLoading(false);
   };
 
   return (
@@ -96,24 +116,67 @@ export function Connect() {
           <section className='bg-zinc-100 dark:bg-zinc-800 rounded-2xl shadow-md p-6'>
             <h2 className='text-2xl font-semibold mb-2'>🧠 Post Wizard</h2>
             <p className='text-zinc-600 dark:text-zinc-400 mb-4'>“Just posted on LinkedIn” but it’s not ✨ cringe ✨ anymore.</p>
+            <div className='flex gap-4 mb-4'>
+              <button
+                type='button'
+                className={`px-3 py-1 rounded font-semibold border ${
+                  postMode === "auto"
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white"
+                }`}
+                onClick={() => setPostMode("auto")}>
+                Auto
+              </button>
+              <button
+                type='button'
+                className={`px-3 py-1 rounded font-semibold border ${
+                  postMode === "custom"
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white dark:bg-zinc-900 border-zinc-300 dark:border-zinc-700 text-zinc-900 dark:text-white"
+                }`}
+                onClick={() => setPostMode("custom")}>
+                Custom
+              </button>
+            </div>
             <form onSubmit={handlePostSubmit} className='space-y-4'>
-              <textarea
-                className='w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-                rows={4}
-                placeholder='What do you want to post about? (achievement, update, etc.)'
-                value={postInput}
-                onChange={(e) => setPostInput(e.target.value)}
-                required
-              />
+              {postMode === "custom" && (
+                <>
+                  <textarea
+                    className='w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+                    rows={4}
+                    placeholder='What do you want to post about? (achievement, update, etc.)'
+                    value={postInput}
+                    onChange={(e) => setPostInput(e.target.value)}
+                    required
+                  />
+                  <select
+                    className='w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-700 rounded px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400'
+                    value={customTone}
+                    onChange={(e) => setCustomTone(e.target.value)}
+                    required>
+                    <option value=''>Select Tone</option>
+                    <option value='professional'>Professional</option>
+                    <option value='casual'>Casual</option>
+                    <option value='inspirational'>Inspirational</option>
+                    <option value='celebratory'>Celebratory</option>
+                  </select>
+                </>
+              )}
               <button
                 type='submit'
                 className='bg-blue-600 hover:bg-blue-700 text-white font-semibold px-4 py-2 rounded shadow transition-all duration-200'
                 disabled={postLoading}>
-                {postLoading ? "Generating..." : "Generate LinkedIn Post"}
+                {postLoading ? "Generating..." : postMode === "auto" ? "Generate LinkedIn Post" : "Generate Custom Post"}
               </button>
             </form>
             {postResult && (
               <div className='mt-6 bg-blue-100 dark:bg-blue-900 border border-blue-300 dark:border-blue-600 rounded p-4'>
+                <button
+                  type='button'
+                  className='float-right text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 transition-all duration-200'
+                  onClick={handleCopyClick}>
+                  <Clipboard />
+                </button>
                 <div className='font-semibold mb-2 text-blue-900 dark:text-blue-200'>Your LinkedIn Post:</div>
                 <pre className='whitespace-pre-wrap text-zinc-800 dark:text-zinc-100'>{postResult}</pre>
               </div>
