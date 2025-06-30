@@ -54,7 +54,9 @@ const ContinueInterviewAI = async (interview) => {
       ? interview.questions
           .map(
             (q, index) =>
-              `  ${index + 1}. **Q:** ${q.question}\n     **A:** ${q.answer} \n     **Category:** ${
+              `  ${index + 1}. **Q:** ${q.question}\n     **A:** ${
+                q.answer
+              } \n     **Category:** ${
                 q.category || "General"
               }\n     **Score:** ${q.score || "0"}`
           )
@@ -68,11 +70,19 @@ const ContinueInterviewAI = async (interview) => {
       ? interview.questions
           .map(
             (q, index) =>
-              ` ${index + 1}. **Question:** ${q.question}\n     **Facial Analysis:** ${
+              ` ${index + 1}. **Question:** ${
+                q.question
+              }\n     **Facial Analysis:** ${
                 q.facialAnalysis?.emotions?.length > 0
                   ? q.facialAnalysis.emotions
-                      .map((fa) => `Expression: ${fa.emotion}, Intensity: ${fa.intensity}`)
-                      .join("; ") + ` | Analysis: ${q.facialAnalysis.expressionAnalysis || "N/A"}`
+                      .map(
+                        (fa) =>
+                          `Expression: ${fa.emotion}, Intensity: ${fa.intensity}`
+                      )
+                      .join("; ") +
+                    ` | Analysis: ${
+                      q.facialAnalysis.expressionAnalysis || "N/A"
+                    }`
                   : "No facial data"
               }`
           )
@@ -86,9 +96,30 @@ const ContinueInterviewAI = async (interview) => {
       ? interview.questions
           .map(
             (q, index) =>
-              ` ${index + 1}. **Question:** ${q.question}\n     **Audio Analysis:** ${
-                q.audioAnalysis && (q.audioAnalysis.transcript || q.audioAnalysis.clarity || q.audioAnalysis.confidence || q.audioAnalysis.paceAndTone || (q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0))
-                  ? `Transcript: ${q.audioAnalysis.transcript || "N/A"}; Clarity: ${q.audioAnalysis.clarity || "N/A"}; Confidence: ${q.audioAnalysis.confidence || "N/A"}; Pace & Tone: ${q.audioAnalysis.paceAndTone || "N/A"}; Filler Words: ${(q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0) ? q.audioAnalysis.fillerWords.join(", ") : "None"}`
+              ` ${index + 1}. **Question:** ${
+                q.question
+              }\n     **Audio Analysis:** ${
+                q.audioAnalysis &&
+                (q.audioAnalysis.transcript ||
+                  q.audioAnalysis.clarity ||
+                  q.audioAnalysis.confidence ||
+                  q.audioAnalysis.paceAndTone ||
+                  (q.audioAnalysis.fillerWords &&
+                    q.audioAnalysis.fillerWords.length > 0))
+                  ? `Transcript: ${
+                      q.audioAnalysis.transcript || "N/A"
+                    }; Clarity: ${
+                      q.audioAnalysis.clarity || "N/A"
+                    }; Confidence: ${
+                      q.audioAnalysis.confidence || "N/A"
+                    }; Pace & Tone: ${
+                      q.audioAnalysis.paceAndTone || "N/A"
+                    }; Filler Words: ${
+                      q.audioAnalysis.fillerWords &&
+                      q.audioAnalysis.fillerWords.length > 0
+                        ? q.audioAnalysis.fillerWords.join(", ")
+                        : "None"
+                    }`
                   : "No audio data"
               }`
           )
@@ -120,14 +151,27 @@ const ContinueInterviewAI = async (interview) => {
   `;
   // console.log("interview prompt: " + prompt);
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    generation_config: {
+      thinkingConfig: {
+        thinkingBudget: 0,
+      },
+    },
+  });
   const result = await model.generateContent(prompt);
   const content = result.response.candidates[0].content.parts[0].text;
   const jsonString = content.match(/```json\n([\s\S]*?)\n```/)[1];
   const parsedResult = JSON.parse(jsonString);
   return parsedResult;
 };
-const GetInterviewInfoAI = async (profile, jobOrMock, job, interviewData, previousInterviews) => {
+const GetInterviewInfoAI = async (
+  profile,
+  jobOrMock,
+  job,
+  interviewData,
+  previousInterviews
+) => {
   const jobInfo = `
 ### Job-Based Interview Context:
 - Role Title: ${job?.title}
@@ -201,14 +245,21 @@ DO NOT generate any summaries, even partial ones. If the data is recognizable, g
 Format your output as a clear, concise, professional summary in **one paragraph**. Make sure all the data provided in the summary fits logically and contextually into an interview preparation scenario.
   `;
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
-  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-preview-05-20" });
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash-preview-05-20",
+  });
   const result = await model.generateContent(prompt);
   const content = result.response.candidates[0].content.parts[0].text;
   console.log("Generated info summary:", content);
   return content;
 };
 
-const getSuggestedInterviewAI = async (completedSubtasks, careerPath, ProfileSummary, weaknesses) => {
+const getSuggestedInterviewAI = async (
+  completedSubtasks,
+  careerPath,
+  ProfileSummary,
+  weaknesses
+) => {
   const prompt = `
 You are an AI interview assistant responsible for generating a detailed, high-signal summary of an upcoming interview session.
 
@@ -221,10 +272,14 @@ User Data:
 Profile Summary: ${ProfileSummary} \n
 Career Path: ${careerPath} \n
 - Last 3 completed subtasks: ${
-    completedSubtasks && completedSubtasks.length > 0 ? completedSubtasks.join(", ") : "None"
+    completedSubtasks && completedSubtasks.length > 0
+      ? completedSubtasks.join(", ")
+      : "None"
   }
 - Career Path: ${careerPath || "Not specified"}
-- Weaknesses from last 3 interviews: ${weaknesses && weaknesses.length > 0 ? weaknesses.join(", ") : "None"}
+- Weaknesses from last 3 interviews: ${
+    weaknesses && weaknesses.length > 0 ? weaknesses.join(", ") : "None"
+  }
 
 Instructions:
 1. Analyze the user's recent learning/progress (subtasks), their career path, and their recent weaknesses.
@@ -251,4 +306,8 @@ Example Output:
   return parsed;
 };
 
-module.exports = { ContinueInterviewAI, GetInterviewInfoAI, getSuggestedInterviewAI };
+module.exports = {
+  ContinueInterviewAI,
+  GetInterviewInfoAI,
+  getSuggestedInterviewAI,
+};
