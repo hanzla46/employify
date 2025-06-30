@@ -165,7 +165,10 @@ export function Connect() {
                   <div className='font-medium mb-2 text-blue-800 dark:text-blue-200 flex justify-between'>
                     <span>Your Tailored Message</span>
                     <button
-                      onClick={() => navigator.clipboard.writeText(dmResult)}
+                      onClick={() => {
+                        navigator.clipboard.writeText(dmResult);
+                        handleSuccess("Message copied");
+                      }}
                       className='text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300'>
                       <Clipboard size={18} />
                     </button>

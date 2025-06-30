@@ -45,7 +45,6 @@ const generateColdMessage = async (req, res) => {
     if (!userProfile)
       return res.status(404).json({ message: "User profile not found." });
 
-    // Ensure userProfile has necessary details for message generation
     const userSummary =
       userProfile.profileSummary || "a driven professional looking to connect.";
     const userCareerGoal =
@@ -64,7 +63,7 @@ const generateColdMessage = async (req, res) => {
         .json({ message: "LinkedIn username is required." });
     }
     const linkedInUrl = `https://linkedin.com/in/${linkedInUsername}`;
-    const rapidApiKey = process.env.RAPIDAPI_KEYS?.split(",")[1] || "";
+    const rapidApiKey = process.env.RAPIDAPI_KEYS?.split(",")[0] || "";
 
     if (!rapidApiKey) {
       return res.status(500).json({ message: "RapidAPI key not configured." });
@@ -140,7 +139,6 @@ const generateColdMessage = async (req, res) => {
         ? targetProfile.skills.join(", ")
         : "no specific skills listed.";
 
-    // Construct the prompt for Gemini
     const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
 
     const prompt = `
