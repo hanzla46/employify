@@ -66,8 +66,11 @@ const getJobs = async (req, res) => {
     const matchingJobs = await Job.find(finalQuery).lean();
     console.log(`Found ${matchingJobs.length} matching jobs for user ${userId}.`);
 
+    // Limit to top 300 jobs (most recent/matching)
+    const limitedJobs = matchingJobs.slice(0, 400);
+
     // Split jobs into chunks of 50
-    const jobChunks = chunkArray(matchingJobs, 50);
+    const jobChunks = chunkArray(limitedJobs, 50);
     console.log(`Split jobs into ${jobChunks.length} chunks of 50 jobs each`); // Process each chunk in parallel and ensure we get analysis for each job
     const analysisResults = await Promise.all(
       jobChunks.map(async (chunk) => {
@@ -102,7 +105,7 @@ const getJobs = async (req, res) => {
     const jobAnalysis = analysisResults.flat();
     const analysisMap = new Map(jobAnalysis.map((analysis) => [analysis.id, analysis]));
 
-    const sortedJobs = matchingJobs
+    const sortedJobs = limitedJobs
       .map((job) => ({
         ...job,
         matchAnalysis: analysisMap.get(job._id.toString()) || {
