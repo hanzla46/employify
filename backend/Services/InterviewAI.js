@@ -42,7 +42,13 @@ const ContinueInterviewAI = async (interview) => {
     - Allow natural pauses between topics rather than forced category switches
     - explore alot of categories while keeping in mind the interview data
 
-  ---
+    **6. Detect Robotic or AI Responses:**
+    *   Identify responses that exhibit robotic or overly formulaic patterns, such as:
+      *   Monotone speech without variation in pitch or emotion.
+      *   Overly structured responses that follow a rigid format.
+      *   Lack of personal anecdotes or examples.
+      *   Repetitive phrasing or vocabulary.
+      *   Inability to engage in spontaneous conversation.
 
   **Input Data:**
   Interview Information:
@@ -87,8 +93,21 @@ const ContinueInterviewAI = async (interview) => {
           .map(
             (q, index) =>
               ` ${index + 1}. **Question:** ${q.question}\n     **Audio Analysis:** ${
-                q.audioAnalysis && (q.audioAnalysis.transcript || q.audioAnalysis.clarity || q.audioAnalysis.confidence || q.audioAnalysis.paceAndTone || (q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0))
-                  ? `Transcript: ${q.audioAnalysis.transcript || "N/A"}; Clarity: ${q.audioAnalysis.clarity || "N/A"}; Confidence: ${q.audioAnalysis.confidence || "N/A"}; Pace & Tone: ${q.audioAnalysis.paceAndTone || "N/A"}; Filler Words: ${(q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0) ? q.audioAnalysis.fillerWords.join(", ") : "None"}`
+                q.audioAnalysis &&
+                (q.audioAnalysis.transcript ||
+                  q.audioAnalysis.clarity ||
+                  q.audioAnalysis.confidence ||
+                  q.audioAnalysis.paceAndTone ||
+                  (q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0))
+                  ? `Transcript: ${q.audioAnalysis.transcript || "N/A"}; Clarity: ${
+                      q.audioAnalysis.clarity || "N/A"
+                    }; Confidence: ${q.audioAnalysis.confidence || "N/A"}; Pace & Tone: ${
+                      q.audioAnalysis.paceAndTone || "N/A"
+                    }; Filler Words: ${
+                      q.audioAnalysis.fillerWords && q.audioAnalysis.fillerWords.length > 0
+                        ? q.audioAnalysis.fillerWords.join(", ")
+                        : "None"
+                    }`
                   : "No audio data"
               }`
           )
@@ -106,7 +125,7 @@ const ContinueInterviewAI = async (interview) => {
   \`\`\`json
   {
     "overallAnalysis": "[A concise summary of your assessment of the candidate's overall performance based on all previous questions, answers, facial expressions, and audio analysis, incorporating both verbal and nonverbal cues. This should include strengths, weaknesses, and any areas of concern. Provide constructive feedback and recommendations for improvement. WRITE it in the way that you are talking directly to the candidate. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else).",
-    "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression and audio analysis results. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point.].",
+    "currentAnalysis": "Analysis of the latest question, its answer, and its corresponding facial expression and audio analysis results. although you will use audio and video analysis, but if they are not present then you dont mention them. it should be in html format and use style attribute. make it a list, use ul and li tags, give them colors (proper shades not solid color values, according to gray background) according to their type (is it a recommendation, or feedback or warning or appreciation or something else). keep it short and to the point.].",
     "generated_question": "[Conversational question that naturally progresses the interview while implicitly addressing assessment needs, is concise (15-20 words max) while remaining meaningful.]",
     "question_category": "[Category of the question you generated.]",
     "score": "[scores of the latest question assessment. out of 10. Apply the 'generous but fair' scoring philosophy.]",

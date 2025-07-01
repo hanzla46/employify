@@ -6,7 +6,7 @@ const GLASSDOOR_API_CONFIG = {
   method: "GET",
   url: "https://real-time-glassdoor-data.p.rapidapi.com/company-search",
   headers: {
-    "x-rapidapi-key": process.env.RAPIDAPI_KEYS?.split(",")[0] || "",
+    "x-rapidapi-key": process.env.RAPIDAPI_KEYS?.split(",")[1] || "",
     "x-rapidapi-host": "real-time-glassdoor-data.p.rapidapi.com",
   },
 };

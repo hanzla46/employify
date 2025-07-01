@@ -258,7 +258,7 @@ You are a **modern frontend engineer and UX-centric resume stylist**. Your task 
 - subskills of each skill does not need to be added in resume.
 - Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
 
-❌ DO NOT ADD ANY PLACEHOLDERS.
+❌ DO NOT ADD ANY PLACEHOLDERS. If user does not have job experience than dont add any as placeholder. similarly if user has no education than dont add any as placeholder. If user has no projects than dont add any as placeholder. If user has no career goal than dont add any as placeholder. If user has no soft skills than dont add any as placeholder. If user has no hard skills than dont add any as placeholder. If user has no languages than dont add any as placeholder.
 
 📄 FINAL OUTPUT:
 - Return a **standalone HTML document** with embedded <style> in <head>.
