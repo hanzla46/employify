@@ -18,7 +18,7 @@ import EvaluationModalUI from "./EvaluationModalUI.jsx";
 import { useMarketAnalysis, MarketAnalysisButton, MarketAnalysisModal } from "./MarketAnalysis";
 import { Atom } from "react-loading-indicators";
 import { handleError, handleSuccess } from "../../utils";
-import { Send, ChevronDown, ChevronRight, Loader2, Circle, Check, BarChart } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Loader2, Circle, Check, RefreshCcw } from "lucide-react";
 const url = import.meta.env.VITE_API_URL;
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -489,8 +489,17 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-  const { contextLoading, setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
-    useContext(SkillsContext); // State for handling the roadmap data and UI
+  const {
+    contextLoading,
+    setIsPathSelected,
+    isPathSelected,
+    roadmap,
+    setRoadmap,
+    setCareerPath,
+    suggestedChanges,
+    setSuggestedChanges,
+    updateRoadmap,
+  } = useContext(SkillsContext); // State for handling the roadmap data and UI
 
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -640,7 +649,12 @@ const SkillsGraph = () => {
               </div>
             </div>
           )}
-
+          <div className='fixed bottom-2 left-48 z-50 mb-2'>
+            <button onClick={updateRoadmap} className='text-gray-200 hover:text-gray-400'>
+              <span className='font-semibold'>update Roadmap</span>
+              <RefreshCcw size={16} />
+            </button>
+          </div>
           {showMarketModal && marketAnalysisData && (
             <MarketAnalysisModal data={marketAnalysisData} skillName={selectedSkill} onClose={closeMarketModal} />
           )}

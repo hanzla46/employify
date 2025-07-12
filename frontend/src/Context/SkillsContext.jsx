@@ -60,6 +60,19 @@ export const SkillsProvider = ({ children }) => {
     };
     checkProfile();
   }, [user]);
+  const updateRoadmap = async () => {
+    try {
+      console.log("Updating Roadmap...");
+      handleSuccess("Updating Roadmap...");
+      const response = await axios.post(url + "/roadmap/update");
+      if (response.data.success) {
+        setRoadmap(response.data.data.tasks);
+        handleSuccess("Roadmap updated successfully");
+      }
+    } catch (error) {
+      console.error("Failed to update Roadmap:", error.message);
+    }
+  };
   const fetchUpdatedProfile = async () => {
     try {
       const response = await axios.get(url + "/profile/check");
@@ -125,6 +138,7 @@ export const SkillsProvider = ({ children }) => {
         contextLoading,
         roadmap,
         setRoadmap,
+        updateRoadmap,
         evaluated,
         setEvaluated,
         hasProfile,
