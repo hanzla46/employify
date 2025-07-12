@@ -189,7 +189,7 @@ async function updateMarketAnalysis(jobs = []) {
 
   for (const job of jobs) {
     try {
-      const skills = extractSkills(job.job_description);
+      const skills = extractSkills(job.description);
       const salary = job.salary_max || job.salary_min || 0;
 
       skills.forEach((skill) => {
@@ -206,7 +206,7 @@ async function updateMarketAnalysis(jobs = []) {
         data.jobCount++;
         data.salarySum += salary;
 
-        extractRequirementsForSkill(job.job_description, skill).forEach((req) => {
+        extractRequirementsForSkill(job.description, skill).forEach((req) => {
           data.requirements.set(req, (data.requirements.get(req) || 0) + 1);
         });
 
