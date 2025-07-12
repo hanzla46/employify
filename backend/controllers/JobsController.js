@@ -58,16 +58,17 @@ const getJobs = async (req, res) => {
     }
     const finalQuery = {
       $and: [
-        baseQuery,
+        // baseQuery,
         skillRegex ? { description: { $regex: skillRegex } } : { _id: null },
         { $or: locationOrRemoteConditions },
       ],
     };
+    console.log(`Final query for user ${userId}:`, JSON.stringify(finalQuery, null, 2));
     const matchingJobs = await Job.find(finalQuery).lean();
     console.log(`Found ${matchingJobs.length} matching jobs for user ${userId}.`);
 
-    // Limit to top 300 jobs (most recent/matching)
-    const limitedJobs = matchingJobs.slice(0, 400);
+    // Limit to top 100 jobs (most recent/matching)
+    const limitedJobs = matchingJobs.slice(0, 100);
 
     // Split jobs into chunks of 50
     const jobChunks = chunkArray(limitedJobs, 50);

@@ -366,8 +366,8 @@ export function Jobs() {
             {/* Compact Filters */}
             {!isOpenedsavedJobs && (
               <div className='bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-md p-4 mb-6 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-lg'>
-                <div className='grid grid-cols-1 md:grid-cols-4 gap-3'>
-                  <div className='md:col-span-2'>
+                <div className='grid grid-cols-1 md:grid-cols-8 gap-3'>
+                  <div className='md:col-span-3'>
                     <div className='relative'>
                       <input
                         type='text'
@@ -380,9 +380,9 @@ export function Jobs() {
                     </div>
                   </div>
 
-                  <div className='flex gap-3'>
+                  <div className='flex gap-3 md:col-span-4'>
                     <select
-                      className='w-full px-3 py-2 text-sm rounded-lg border border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
+                      className='w-full px-3 py-2 text-sm rounded-lg border text-black dark:text-gray-200 border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
                       value={filters.location}
                       onChange={(e) => setFilters({ ...filters, location: e.target.value })}>
                       {uniqueLocations.map((location) => (
@@ -393,7 +393,7 @@ export function Jobs() {
                     </select>
 
                     <select
-                      className='w-full px-3 py-2 text-sm rounded-lg border border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
+                      className='w-full px-3 py-2 text-sm rounded-lg border text-black dark:text-gray-200 border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
                       value={filters.jobType}
                       onChange={(e) => setFilters({ ...filters, jobType: e.target.value })}>
                       {uniqueJobTypes.map((type) => (
@@ -446,7 +446,7 @@ export function Jobs() {
                                 job.company.logo ||
                                 "https://img.freepik.com/premium-vector/building-logo-icon-design-template-vector_67715-555.jpg?w=360"
                               }
-                              alt={`${job.company.name} logo`}
+                              alt={` logo`}
                               className='w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-110'
                             />
                           </div>
@@ -461,10 +461,10 @@ export function Jobs() {
                               </h2>
                               <div className='flex items-center gap-2'>
                                 <a
-                                  href={job.company.website}
+                                  href={job.company ? job.company.website : "#"}
                                   target='_blank'
                                   className='text-sm underline text-gray-600 dark:text-gray-300 hover:text-primary-500'>
-                                  {job.company.name}
+                                  {job.company ? job.company.name : "Unknown Company"}
                                 </a>
                                 {/* Show AI match score if available */}
                                 <div className='inline-flex items-center bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/10 dark:to-amber-600/10 border border-amber-400/30 rounded-full px-2 py-0.5'>

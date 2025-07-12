@@ -258,7 +258,7 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
 
       {/* Floating Action Button: Allows user to continue after selecting a path */}
       {selectedPathName && (
-        <div className='fixed right-6 bottom-6 animate-bounce'>
+        <div className='fixed right-6 bottom-8'>
           <button
             onClick={() => {
               console.log("path selected!!");

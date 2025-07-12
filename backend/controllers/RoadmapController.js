@@ -347,7 +347,6 @@ const addMissingSkills = async (req, res) => {
     }
     // Add only unique new skills
     roadmap.missingSkills = Array.from(new Set([...(roadmap.missingSkills || []), ...skills]));
-    updateRoadmap(userId); // Increment interaction count
     await roadmap.save();
     return res.status(200).json({
       success: true,

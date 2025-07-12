@@ -12,11 +12,9 @@ export const JobsProvider = ({ children }) => {
   const [filteredJobs, setFilteredJobs] = useState(jobs);
   const [contextLoading, setContextLoading] = useState(true);
   const { user } = useContext(AuthContext);
-  const { profile, contextLoading: skillsContextLoading } = useContext(SkillsContext);
   useEffect(() => {
     if (!user) return;
     async function fetchJobs() {
-      if (skillsContextLoading) return;
       try {
         setContextLoading(true);
         const response = await axios.get(url + "/jobs/getJobs", {
@@ -29,14 +27,14 @@ export const JobsProvider = ({ children }) => {
         const data = response.data;
         setJobs(data.jobs);
         setFilteredJobs(data.jobs);
-        console.log(jobs);
+        console.log(data.jobs);
       } catch (err) {
         console.error("Failed to fetch jobs 😵", err);
       }
       setContextLoading(false);
     }
     fetchJobs();
-  }, [user, profile, skillsContextLoading]);
+  }, [user]);
   return (
     <JobsContext.Provider value={{ contextLoading, jobs, setJobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs }}>
       {children}
