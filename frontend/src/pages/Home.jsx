@@ -8,10 +8,6 @@ import {
   MessageSquare,
   Target,
   ArrowRight,
-  UserCheck,
-  Zap,
-  Search,
-  ChevronRight,
   BarChart2,
   FileText,
   Video,
@@ -25,7 +21,7 @@ import {
 import { Link } from "react-router-dom";
 import { AuthContext } from "../Context/AuthContext";
 
-function EnhancedFeatureHighlight({ icon: Icon, title, description }) {
+function EnhancedFeatureHighlight({ icon: Icon, title }) {
   return (
     <div className='flex items-center p-4 bg-white/80 dark:bg-gray-800/50 rounded-xl backdrop-blur-sm border border-gray-200 dark:border-gray-700'>
       <div className='mr-4 mt-1 bg-indigo-100 dark:bg-indigo-900/30 p-2 rounded-lg'>
@@ -51,21 +47,6 @@ function HowItWorksStep({ icon: Icon, title, description, step }) {
       </div>
       <h3 className='text-lg font-semibold mb-2 dark:text-white'>{title}</h3>
       <p className='text-gray-600 dark:text-gray-300 text-sm'>{description}</p>
-    </div>
-  );
-}
-
-function Testimonial({ quote, author, role, avatar }) {
-  return (
-    <div className='bg-white dark:bg-gray-800/40 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700 backdrop-blur-sm'>
-      <p className='text-gray-700 dark:text-gray-200 italic mb-6 leading-relaxed'>"{quote}"</p>
-      <div className='flex items-center'>
-        <img src={avatar} alt={author} className='h-12 w-12 rounded-full mr-4 object-cover' />
-        <div>
-          <p className='font-semibold dark:text-white'>{author}</p>
-          <p className='text-gray-500 dark:text-gray-400 text-sm'>{role}</p>
-        </div>
-      </div>
     </div>
   );
 }
@@ -288,80 +269,6 @@ export function Home() {
           </div>
         </section>
 
-        {/* Testimonials Section */}
-        <section className='py-24 bg-gray-50 dark:bg-gray-800/20 rounded-3xl my-10' data-aos='fade-up'>
-          <div className='max-w-6xl mx-auto px-4'>
-            <div className='text-center mb-16'>
-              <span className='inline-block py-1 px-3 rounded-full bg-purple-100 dark:bg-purple-900/40 text-purple-600 dark:text-purple-400 text-sm font-medium mb-4'>
-                SUCCESS STORIES
-              </span>
-              <h2 className='text-4xl font-bold mb-6 dark:text-white'>Transforming Careers</h2>
-              <p className='text-xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto'>
-                See how professionals accelerated their careers with Employify AI
-              </p>
-            </div>
-
-            <div className='grid md:grid-cols-2 gap-8'>
-              <Testimonial
-                quote='The skills gap analysis showed me exactly what I needed to learn. Within 3 months I transitioned to a data science role with a 40% salary increase.'
-                author='Alex Johnson'
-                role='Data Scientist'
-                avatar='https://randomuser.me/api/portraits/men/32.jpg'
-              />
-              <Testimonial
-                quote='The video analysis helped me improve my interview presence. I went from 0 offers to 3 competing offers in just 6 weeks!'
-                author='Sarah Chen'
-                role='Product Manager'
-                avatar='https://randomuser.me/api/portraits/women/44.jpg'
-              />
-            </div>
-          </div>
-        </section>
-
-        {/* Stats Section */}
-        <section className='py-24 relative overflow-hidden' data-aos='fade-up'>
-          <div className='absolute inset-0 bg-indigo-50 dark:bg-indigo-900/10 rounded-3xl'></div>
-          <div className='max-w-6xl mx-auto px-4 relative'>
-            <div className='text-center mb-16'>
-              <span className='inline-block py-1 px-3 rounded-full bg-blue-100 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 text-sm font-medium mb-4'>
-                OUR IMPACT
-              </span>
-              <h2 className='text-4xl font-bold mb-6 dark:text-white'>Proven Results</h2>
-            </div>
-
-            <div className='grid md:grid-cols-4 gap-8 max-w-5xl mx-auto'>
-              <div className='text-center bg-white dark:bg-gray-800/40 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700'>
-                <div className='inline-flex items-center justify-center mb-4 p-3 bg-green-100 dark:bg-green-900/30 rounded-xl'>
-                  <Target className='h-8 w-8 text-green-600 dark:text-green-400' />
-                </div>
-                <div className='text-5xl font-bold text-green-600 dark:text-green-400 mb-2'>95%</div>
-                <p className='text-gray-600 dark:text-gray-300'>Interview Success Rate</p>
-              </div>
-              <div className='text-center bg-white dark:bg-gray-800/40 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700'>
-                <div className='inline-flex items-center justify-center mb-4 p-3 bg-indigo-100 dark:bg-indigo-900/30 rounded-xl'>
-                  <Briefcase className='h-8 w-8 text-indigo-600 dark:text-indigo-400' />
-                </div>
-                <div className='text-5xl font-bold text-indigo-600 dark:text-indigo-400 mb-2'>10k+</div>
-                <p className='text-gray-600 dark:text-gray-300'>Career Transitions</p>
-              </div>
-              <div className='text-center bg-white dark:bg-gray-800/40 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700'>
-                <div className='inline-flex items-center justify-center mb-4 p-3 bg-purple-100 dark:bg-purple-900/30 rounded-xl'>
-                  <FileText className='h-8 w-8 text-purple-600 dark:text-purple-400' />
-                </div>
-                <div className='text-5xl font-bold text-purple-600 dark:text-purple-400 mb-2'>25k+</div>
-                <p className='text-gray-600 dark:text-gray-300'>Resumes Generated</p>
-              </div>
-              <div className='text-center bg-white dark:bg-gray-800/40 p-8 rounded-2xl shadow-lg border border-gray-100 dark:border-gray-700'>
-                <div className='inline-flex items-center justify-center mb-4 p-3 bg-blue-100 dark:bg-blue-900/30 rounded-xl'>
-                  <TrendingUp className='h-8 w-8 text-blue-600 dark:text-blue-400' />
-                </div>
-                <div className='text-5xl font-bold text-blue-600 dark:text-blue-400 mb-2'>3.5x</div>
-                <p className='text-gray-600 dark:text-gray-300'>More Interviews</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
         {/* CTA Section */}
         <section className='py-24 my-10 rounded-3xl relative overflow-hidden' data-aos='fade-up'>
           <div className='absolute inset-0 bg-gradient-to-r from-indigo-600 to-purple-600 dark:from-indigo-800 dark:to-purple-800'></div>
@@ -377,15 +284,10 @@ export function Home() {
             </p>
             <div className='flex flex-col sm:flex-row gap-4 justify-center'>
               <Link
-                to='/signup'
+                to={`${!user ? "/signup" : "/profile"}`}
                 className='bg-white text-indigo-600 px-8 py-4 rounded-xl font-semibold hover:bg-gray-100 transition-all shadow-lg text-lg'>
                 Start Your Journey
                 <Target className='ml-2 h-5 w-5 inline' />
-              </Link>
-              <Link
-                to='/demo'
-                className='bg-transparent text-white border-2 border-white/30 backdrop-blur-sm px-8 py-4 rounded-xl font-semibold hover:bg-white/10 transition-all shadow-lg text-lg'>
-                Watch Demo
               </Link>
             </div>
           </div>
