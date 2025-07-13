@@ -614,7 +614,13 @@ const SkillsGraph = () => {
       setModifyLoading(false);
     }
   };
-
+  if (contextLoading) {
+    return (
+      <div className='flex items-center justify-center h-screen'>
+        <Atom size={50} color='#3B82F6' />
+      </div>
+    );
+  }
   return (
     <>
       {" "}

@@ -58,7 +58,10 @@ export const SkillsProvider = ({ children }) => {
       } catch (error) {
         console.error("Failed to check Profile:", error.message);
       } finally {
-        setContextLoading(false);
+        //wait for 1 second to ensure the context is fully loaded
+        setTimeout(() => {
+          setContextLoading(false);
+        }, 1000);
       }
     };
     checkProfile();
@@ -78,6 +81,23 @@ export const SkillsProvider = ({ children }) => {
       handleError("Failed to update Roadmap: " + error.message);
     } finally {
       setUpdationLoading(false);
+    }
+  };
+  const fetchUpdatedRoadmap = async () => {
+    try {
+      const response = await axios.get(url + "/roadmap/get");
+      if (response.data.success) {
+        setRoadmap(response.data.data.tasks);
+        setMissingSkills(response.data.data.missingSkills);
+        setSuggestedChanges(response.data.data.changes);
+        handleSuccess("Roadmap fetched successfully");
+      } else {
+        handleError("No roadmap found");
+        setRoadmap([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch Roadmap:", error.message);
+      handleError("Failed to fetch Roadmap: " + error.message);
     }
   };
   const fetchUpdatedProfile = async () => {
@@ -114,6 +134,7 @@ export const SkillsProvider = ({ children }) => {
         suggestedChanges,
         setSuggestedChanges,
         fetchUpdatedProfile,
+        fetchUpdatedRoadmap,
         updationLoading,
       }}>
       {children}

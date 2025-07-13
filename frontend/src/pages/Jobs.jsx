@@ -13,7 +13,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 
 export function Jobs() {
-  const { hasProfile, setMissingSkills } = useContext(SkillsContext);
+  const { hasProfile, setMissingSkills, missingSkills } = useContext(SkillsContext);
   const { user } = useContext(AuthContext);
   const { contextLoading, jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -554,11 +554,13 @@ export function Jobs() {
                                         <li key={index} className='flex items-center justify-between text-gray-600 dark:text-gray-300'>
                                           {item}
                                           {/* Add missing skill to roadmap */}
-                                          <button
-                                            onClick={() => handleAddMissingSkill(item)}
-                                            className='ml-2 px-1.5 py-0.5 text-[0.65rem] rounded bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-300 transition-colors'>
-                                            + Add
-                                          </button>
+                                          {!missingSkills.includes(item) && (
+                                            <button
+                                              onClick={() => handleAddMissingSkill(item)}
+                                              className='ml-2 px-1.5 py-0.5 text-[0.65rem] rounded bg-blue-200 hover:bg-blue-300 text-blue-900 border border-blue-300 transition-colors'>
+                                              + Add
+                                            </button>
+                                          )}
                                         </li>
                                       ))}
                                     </ul>

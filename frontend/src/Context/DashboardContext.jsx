@@ -10,12 +10,13 @@ export const DashboardProvider = ({ children }) => {
   const [interviewScores, setInterviewScores] = useState([]);
   const [weaknesses, setWeaknesses] = useState([]);
   const [suggestedInterview, setSuggestedInterview] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   useEffect(() => {
     const fetchData = async () => {
       if (!user) return;
 
       try {
+        setLoading(true);
         // Fetch interviews
         const interviewsRes = await axios.get(`${url}/interview/get-all-interviews`);
         const scores = interviewsRes.data.interviews?.map((i) => Number(i.overallScore)).filter((score) => !isNaN(score)) || [];

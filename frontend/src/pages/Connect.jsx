@@ -268,11 +268,21 @@ export function Connect() {
                         value={customTone}
                         onChange={(e) => setCustomTone(e.target.value)}
                         required>
-                        <option value=''>Select professional tone</option>
-                        <option value='professional'>Formal</option>
-                        <option value='casual'>Conversational</option>
-                        <option value='inspirational'>Motivational</option>
-                        <option value='celebratory'>Achievement-focused</option>
+                        <option className='bg-gray-700' value=''>
+                          Select professional tone
+                        </option>
+                        <option className='bg-gray-700' value='professional'>
+                          Formal
+                        </option>
+                        <option className='bg-gray-700' value='casual'>
+                          Conversational
+                        </option>
+                        <option className='bg-gray-700' value='inspirational'>
+                          Motivational
+                        </option>
+                        <option className='bg-gray-700' value='celebratory'>
+                          Achievement-focused
+                        </option>
                       </select>
                     </div>
                   </>
