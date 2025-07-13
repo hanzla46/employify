@@ -43,6 +43,7 @@ const generateRoadmap = async (req, res) => {
       success: true,
       data: {
         tasks: tasks,
+        missingSkills: [],
       },
       changes: [],
     });
@@ -154,6 +155,7 @@ Output:
     message: "Roadmap updated successfully",
     data: {
       tasks: roadmap.tasks,
+      missingSkills: roadmap.missingSkills || [],
     },
   });
 };

@@ -496,6 +496,8 @@ const SkillsGraph = () => {
     isPathSelected,
     roadmap,
     setRoadmap,
+    missingSkills,
+    setMissingSkills,
     setCareerPath,
     suggestedChanges,
     setSuggestedChanges,
@@ -542,7 +544,8 @@ const SkillsGraph = () => {
             result.data.data.tasks.length > 0
           ) {
             setGraphData(result.data.data); // Store raw data
-            setRoadmap(result.data.data.tasks); // Update context
+            setRoadmap(result.data.data.tasks);
+            setMissingSkills(result.data.data.missingSkills);
             setSuggestedChanges(result.data.changes);
           } else {
             console.warn("No roadmap tasks found in API response.");
@@ -651,7 +654,7 @@ const SkillsGraph = () => {
               </div>
             </div>
           )}
-          <div className='fixed bottom-3 left-1/4 -translate-x-1/2 z-50'>
+          <div className='fixed bottom-3 left-1/4 -translate-x-1/2 z-50 group'>
             <button
               onClick={updateRoadmap}
               disabled={updationLoading || modifyLoading}
@@ -659,7 +662,18 @@ const SkillsGraph = () => {
               <RefreshCcw size={16} />
               Update Roadmap
             </button>
+            {missingSkills.length > 0 && (
+              <div className='absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-max max-w-xs rounded-lg bg-zinc-900 px-4 py-3 text-xs text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50'>
+                <div className='font-semibold mb-1 text-sm text-gray-100'>Based on these missing skills:</div>
+                <ul className='list-disc list-inside space-y-1 text-gray-300'>
+                  {missingSkills.map((skill, i) => (
+                    <li key={i}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
+
           {showMarketModal && marketAnalysisData && (
             <MarketAnalysisModal data={marketAnalysisData} skillName={selectedSkill} onClose={closeMarketModal} />
           )}

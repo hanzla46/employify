@@ -13,7 +13,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 
 export function Jobs() {
-  const { hasProfile } = useContext(SkillsContext);
+  const { hasProfile, setMissingSkills } = useContext(SkillsContext);
   const { user } = useContext(AuthContext);
   const { contextLoading, jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -258,6 +258,7 @@ export function Jobs() {
       const res = await axios.post(url + "/roadmap/add-missing-skills", { skills: [skill] }, { withCredentials: true });
       if (res.data.success) {
         handleSuccess(`Added '${skill}' to your roadmap suggestions!`);
+        setMissingSkills((prev) => [...prev, skill]); // Update context state
       } else {
         handleError(res.data.message || "Failed to add skill");
       }
@@ -265,13 +266,6 @@ export function Jobs() {
       handleError("Server error: could not add skill");
     }
   };
-
-  // Common button classes
-  const baseActionBtnClass =
-    "flex-1 inline-flex items-center justify-center px-2 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl text-white";
-  const disabledBtnClass = "opacity-70 cursor-not-allowed";
-  const clBtnColors = "bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800";
-  const resumeBtnColors = "bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-800 hover:to-purple-800";
 
   const [company, setCompany] = useState(null);
   const [companyData, setCompanyData] = useState(null);
