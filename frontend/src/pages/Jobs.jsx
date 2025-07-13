@@ -324,7 +324,7 @@ export function Jobs() {
       />
 
       {/* Compact Header */}
-      <header className='sticky top-11 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm'>
+      <header className='md:sticky top-11 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm'>
         <div className='container mx-auto px-4 py-3'>
           <div className='flex flex-col md:flex-row md:items-center justify-between gap-3'>
             <h1 className='text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-purple-600'>
@@ -597,7 +597,7 @@ export function Jobs() {
                       <Link
                         to={`/interview?jobId=${job.id}`}
                         className='w-full sm:w-auto text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium transition-all shadow-sm hover:shadow-md'>
-                        Practice Interview
+                        <center>Practice Interview</center>
                       </Link>
 
                       {/* Open company/contact info modal */}
@@ -608,7 +608,7 @@ export function Jobs() {
                       </button>
 
                       {/* Cover Letter and Resume generation/download */}
-                      <div className='flex gap-2 w-full sm:w-auto'>
+                      <div className='flex gap-2 justify-evenly items-stretch'>
                         {/* Cover Letter: get or download if ready */}
                         <button
                           onClick={() =>
@@ -654,7 +654,7 @@ export function Jobs() {
                           href={job.externalLink}
                           target='_blank'
                           className='flex-1 text-xs px-3 py-1.5 rounded-l-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium transition-all shadow-sm hover:shadow-md'>
-                          Apply Now
+                          <center>Apply Now</center>
                         </a>
                         {/* Dropdown for alternate apply options if available */}
                         {job.applyOptions && job.applyOptions.length > 0 && (
