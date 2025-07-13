@@ -84,14 +84,36 @@ const updateRoadmap = async (req, res) => {
   const missingSkills = roadmap.missingSkills || [];
 
   // Prepare prompt for Gemini
-  const prompt = `You are an expert career coach AI. The user has made progress on their roadmap. Your job is to update ONLY the incomplete tasks/subtasks in the roadmap below, using the user's latest progress and missing skills.\n\n---\n\nCurrent Roadmap Tasks (JSON, exact schema, only incomplete tasks/subtasks):\n\n\`json\n${JSON.stringify(
-    roadmap.tasks,
-    null,
-    2
-  )}\n\`\n\n---\n\nMissing Skills the user wants to add:\n${missingSkills.join(
-    ", "
-  )}\n\n---\n\nUpdate the roadmap to reflect the user's new skills and progress. You may:\n- Add, remove, or update tasks/subtasks as needed.\n- Only modify tasks/subtasks that are not completed.\n- Keep the schema EXACTLY the same as input.\n- Return ONLY the updated tasks array in JSON, no extra text.\n\n
-    \`\`\` json\n{ "tasks":[updated tasks array]} \n\`\`\``;
+  const prompt = `
+You are an expert career coach AI. The user has made progress on their roadmap. Your job is to update the roadmap based on the user's latest progress and any missing skills they want to add.
+
+Instructions:
+- Do NOT modify or remove any completed subtasks or tasks.
+- Only update tasks/subtasks that are NOT completed.
+- Add, remove, or update tasks/subtasks as needed to incorporate the user's missing skills.
+- Maintain the exact input schema for tasks and subtasks.
+- Return ONLY the updated tasks array in JSON format, with no extra explanation or text.
+- there are some fixed values for subtasks' labels which are "project" and "course". If a subtask is a project, add the label "project" to it. If it is a course, add the label "course" to it or leave the array empty.
+- update tasks' tags (new,updated,existing).
+- if sources are missing from any subtask then you can those too in exact string format
+
+Input:
+---
+Current Roadmap Tasks (JSON):
+\`\`\`json
+${JSON.stringify(roadmap.tasks, null, 2)}
+\`\`\`
+---
+Missing Skills to Add:
+${missingSkills.length > 0 ? missingSkills.join(", ") : "None! you can improve based on completed subtasks"}
+
+Output:
+\`\`\`json
+{
+  "tasks": [/* updated tasks array */]
+}
+\`\`\`
+`;
   console.log("Update prompt:", prompt);
   // Call Gemini API
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
@@ -106,16 +128,24 @@ const updateRoadmap = async (req, res) => {
   const result = await model.generateContent(prompt);
   const content = result.response.candidates[0].content.parts[0].text;
   const match = content.match(/```json\n([\s\S]*?)\n```/);
-  if (!match) return; // fail silently for now
+  if (!match)
+    return res.status(500).json({
+      success: false,
+      message: "Failed to parse AI response",
+    });
   const roadmapData = await safeJsonParse(match[1]);
-  if (!roadmapData.tasks || !Array.isArray(roadmapData.tasks)) {
+  if (Array.isArray(roadmapData)) {
+    roadmap.tasks = roadmapData;
+  } else if (roadmapData && Array.isArray(roadmapData.tasks)) {
+    roadmap.tasks = roadmapData.tasks;
+  } else {
     console.error("Gemini response JSON did not contain a valid 'tasks' array:", roadmapData);
     return res.status(500).json({
       success: false,
       message: "Invalid roadmap data received from AI",
     });
   }
-  roadmap.tasks = roadmapData.tasks;
+
   roadmap.missingSkills = [];
   await roadmap.save();
   console.log(`Roadmap dynamically updated successfully: ${roadmap.tasks.length} tasks`);

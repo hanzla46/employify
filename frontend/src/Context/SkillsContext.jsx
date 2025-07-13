@@ -16,6 +16,7 @@ export const SkillsProvider = ({ children }) => {
   const [evaluated, setEvaluated] = useState(false);
   const [isPathSelected, setIsPathSelected] = useState(false);
   const [careerPath, setCareerPath] = useState("");
+  const [updationLoading, setUpdationLoading] = useState(false);
   const url = import.meta.env.VITE_API_URL;
   console.log(url);
   useEffect(() => {
@@ -62,7 +63,7 @@ export const SkillsProvider = ({ children }) => {
   }, [user]);
   const updateRoadmap = async () => {
     try {
-      console.log("Updating Roadmap...");
+      setUpdationLoading(true);
       handleSuccess("Updating Roadmap...");
       const response = await axios.post(url + "/roadmap/update");
       if (response.data.success) {
@@ -71,6 +72,9 @@ export const SkillsProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Failed to update Roadmap:", error.message);
+      handleError("Failed to update Roadmap: " + error.message);
+    } finally {
+      setUpdationLoading(false);
     }
   };
   const fetchUpdatedProfile = async () => {
@@ -152,6 +156,7 @@ export const SkillsProvider = ({ children }) => {
         suggestedChanges,
         setSuggestedChanges,
         fetchUpdatedProfile,
+        updationLoading,
       }}>
       {children}
     </SkillsContext.Provider>

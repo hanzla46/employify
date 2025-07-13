@@ -182,7 +182,7 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
                 selectedPathName === path.Path_name ? "bg-gradient-to-r from-blue-500 to-indigo-600" : "bg-gray-200 dark:bg-gray-700"
               }`}></div>
 
-            <div className='p-6 flex-grow'>
+            <div className='p-4 flex-grow'>
               <div className='flex items-start'>
                 {/* Radio input for selecting a path */}
                 <input
@@ -196,7 +196,7 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
                 />
                 <div className='flex-grow'>
                   <h3 className='text-xl font-bold text-gray-800 dark:text-white mb-3'>{path.Path_name}</h3>
-                  <div className='space-y-3 text-gray-600 dark:text-gray-300'>
+                  <div className='space-y-2 text-gray-600 dark:text-gray-300'>
                     {/* Stages info */}
                     <div>
                       <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Stages</p>
@@ -206,11 +206,6 @@ function CareerPathSelector({ onPathSelect, setIsPathSelected }) {
                     <div>
                       <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Timeline</p>
                       <p className='text-sm'>{path.Timeline}</p>
-                    </div>
-                    {/* Salary range info */}
-                    <div>
-                      <p className='text-sm font-medium text-gray-500 dark:text-gray-400'>Salary Range</p>
-                      <p className='text-sm'>{path.Salary_range}</p>
                     </div>
                     {/* Risk level info */}
                     <div>

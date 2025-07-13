@@ -216,7 +216,7 @@ Return ONLY the HTML string. No markdown, no comments, no pre/post text.`;
 const getCareerPathsAI = async (profile) => {
   const prompt = `You are an expert career strategist and global job market analyst.
 
-Given a user's profile, simulate **6-8 distinct, high-potential career paths** they can pursue — from safe jobs to bold moves, from stable employment to freelance/startup gigs. Tailor suggestions to their **current skill set, education, career goals, AND location**.
+Given a user's profile, simulate **5-7 distinct, high-potential career paths** they can pursue — from safe jobs to bold moves, from stable employment to freelance/startup gigs. Tailor suggestions to their **current skill set, education, career goals, AND location**.
 
 📌 IMPORTANT GUIDELINES:
 - The user may be a **complete beginner** with little or no real work experience.
@@ -225,17 +225,14 @@ Given a user's profile, simulate **6-8 distinct, high-potential career paths** t
 - Suggest beginner-friendly jobs and make no assumptions about prior knowledge.
 - Don’t repeat the same job paths with different titles — ensure each of the 3-5 paths offers genuine variety (e.g., corporate vs. freelance vs. startup).
 - Include both conventional and non-traditional jobs, especially emerging ones that might combine diverse skills.
+- Alternate/Hybrid Paths: Emphasize how a mix of skills can open *unique* opportunities that are not available in traditional straight-line careers. Think creatively, suggesting roles like “AI + Product”, “Dev + Design”, “Tech + Business”, “Freelancer + Consultant”, “Engineer + Educator” etc. Ensure at least one suggested path is a clear alternate/hybrid direction.
 
-🎯 For each path, describe:
+🎯 For each path, consider:
 - **Core Progression Stages**: List 2-3 **main job titles** representing a realistic progression (e.g., Entry-level, Mid-level, Senior/Specialist). **Do NOT go beyond 3-4 stages or more than 7-8 years into the future.**
 - **Estimated Progression Timeline**: State the approximate *total years to reach each listed stage*. Keep it concise and realistic (e.g., "Year 0 → Year 2 → Year 5").
-- **Salary Range**: Provide a realistic salary range for **EACH listed progression stage**. Use local currency or USD with context. **Keep these concise, reflecting only the distinct stages.**
-- Relevant industries and typical companies.
 - Risk level (Low, Medium, High) + honest market reality (e.g., over-saturated, niche, high demand).
-- AI Impact: Is this career at risk of automation or heavily augmented by AI?
-- **Key Skills to Learn**: List **3-5 highly impactful and distinct skills** for the entire path, ordered by typical learning progression. **No long lists; focus only on the absolute "main main" skills and tools.**
-- Shortcuts: Certifications, bootcamps, online projects, or freelancing hacks.
-- **Alternate/Hybrid Paths**: Emphasize how a mix of skills can open *unique* opportunities that are not available in traditional straight-line careers. Think creatively, suggesting roles like “AI + Product”, “Dev + Design”, “Tech + Business”, “Freelancer + Consultant”, “Engineer + Educator” etc. Ensure at least one suggested path is a clear alternate/hybrid direction.
+- **Key Skills to Learn**: List **3-5 highly impactful and distinct skills** for the entire path, ordered by typical learning progression. **No long lists; focus only on the absolute "main main" skills and tools including Shortcuts: Certifications, bootcamps, online projects, or freelancing hacks.
+
 
 📚 Don’t assume the user only wants “safe” jobs. Include:
 - Remote roles
@@ -265,7 +262,7 @@ Career Goal: ${profile.careerGoal}
 Location: ${profile.location}
 
 ---
-Output format:
+strictly follow this Output format without any extra fields, text or markdown:
 \`\`\`json
 {
 "paths": [
@@ -273,14 +270,11 @@ Output format:
 "Path_name": "STRING. Example - Data Analyst → Machine Learning Engineer",
 "Stages": ["Junior Data Analyst", "Data Scientist", "Machine Learning Engineer"],
 "Timeline": "STRING. Year 0 → Year 2 → Year 5",
-"Salary_range": "STRING. $40k USD (Entry) → $75k USD (Mid) → $120k USD (Senior)",
-"Industries": ["Tech", "Finance", "Healthcare"],
 "Risk_level": "STRING. Medium",
-"AI_impact": "STRING. High (AI complements and augments data analysis)",
 "Required_skills": ["SQL", "Python (Pandas, Scikit-learn)", "Cloud Platforms (AWS/Azure)"],
 "Accelerators": ["Google Data Analytics Cert", "Kaggle Competitions"],
 },
-// ... more than 7 more distinct career paths
+// ... more than 5 more distinct career paths
 ]
 }
 \`\`\`
