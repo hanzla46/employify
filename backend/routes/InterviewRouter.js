@@ -4,6 +4,7 @@ const {
   checkInterviewSession,
   getAllInterviews,
   getSuggestedInterview,
+  endInterview,
 } = require("../controllers/InterviewController");
 const ensureAuthenticated = require("../middlewares/Auth");
 const { upload } = require("../middlewares/uploadMulter");
@@ -18,6 +19,7 @@ router.post(
   ]),
   continueInterview
 );
+router.post("/end", ensureAuthenticated, endInterview);
 router.get("/get-all-interviews", ensureAuthenticated, getAllInterviews);
 router.get("/suggested-interview", ensureAuthenticated, getSuggestedInterview);
 router.get("/check-session", ensureAuthenticated, checkInterviewSession);

@@ -250,4 +250,22 @@ const checkInterviewSession = async (req, res) => {
     return res.status(500).json({ success: false, message: "Server error", error: err.message });
   }
 };
-module.exports = { startInterview, continueInterview, checkInterviewSession, getAllInterviews, getSuggestedInterview };
+const endInterview = async (req, res) => {
+  try {
+    const userId = req.user._id;
+    const { sessionId } = req.body;
+    if (!sessionId) {
+      return res.status(400).json({ success: false, message: "Session ID required" });
+    }
+    const interview = await Interview.findOne({ _id: sessionId, userId, status: "ongoing" });
+    if (!interview) {
+      return res.status(404).json({ success: false, message: "Ongoing interview not found" });
+    }
+    interview.status = "completed";
+    await interview.save();
+    return res.status(200).json({ success: true, message: "Interview ended successfully" });
+  } catch (err) {
+    return res.status(500).json({ success: false, message: "Server error", error: err.message });
+  }
+};
+module.exports = { startInterview,endInterview, continueInterview, checkInterviewSession, getAllInterviews, getSuggestedInterview };

@@ -361,6 +361,11 @@ export function Interview() {
   const start = () => {
     startInterview();
   };
+  const endInterview = async () => {
+    await axios.post(url + "/interview/end", { sessionId }, { withCredentials: true });
+    setIsCompleted(true);
+    setIsStarted(false);
+  };
   return (
     <div className='min-h-screen bg-gradient-to-b from-indigo-50 via-blue-50 to-white dark:from-gray-800 dark:via-indigo-950/30 dark:to-gray-700'>
       <RecordingReviewModal
@@ -490,8 +495,7 @@ export function Interview() {
                       className='mt-5 relative group'
                       onClick={() => {
                         if (questionCount < 4) return;
-                        setIsCompleted(true);
-                        setIsStarted(false);
+                        endInterview();
                       }}>
                       <FancyButton disabled={questionCount < 4} text={"End Interview"} />
                       {questionCount < 4 && (
