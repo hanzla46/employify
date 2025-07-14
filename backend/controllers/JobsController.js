@@ -32,7 +32,8 @@ const getJobs = async (req, res) => {
       profile.profileSummary.length <= 0
     ) {
       console.log("sending all recent jobs");
-      const jobs = await Job.find();
+      // Limit to top 400 jobs
+      const jobs = await Job.find().limit(400);
       return res.status(200).json({ message: "fetched all jobs", jobs: jobs });
     }
 
@@ -63,7 +64,8 @@ const getJobs = async (req, res) => {
         { $or: locationOrRemoteConditions },
       ],
     };
-    const matchingJobs = await Job.find(finalQuery).lean();
+    // Limit to top 400 jobs for AI analysis and client response
+    let matchingJobs = await Job.find(finalQuery).lean().limit(400);
     console.log(`Found ${matchingJobs.length} matching jobs for user ${userId}.`);
 
     // Split jobs into chunks of 50
