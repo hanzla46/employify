@@ -18,7 +18,7 @@ import EvaluationModalUI from "./EvaluationModalUI.jsx";
 import { useMarketAnalysis, MarketAnalysisButton, MarketAnalysisModal } from "./MarketAnalysis";
 import { Atom } from "react-loading-indicators";
 import { handleError, handleSuccess } from "../../utils";
-import { Send, ChevronDown, ChevronRight, Loader2, Circle, Check, BarChart } from "lucide-react";
+import { Send, ChevronDown, ChevronRight, Loader2, Circle, Check, RefreshCcw } from "lucide-react";
 const url = import.meta.env.VITE_API_URL;
 const dagreGraph = new dagre.graphlib.Graph();
 dagreGraph.setDefaultEdgeLabel(() => ({}));
@@ -170,7 +170,7 @@ const TaskNode = ({ data }) => {
                           ? "border-blue-400 bg-blue-50 dark:bg-blue-900/20 animate-pulse scale-100"
                           : "border-gray-200 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-500 hover:scale-[1.02]"
                       }`}>
-                    <div className='flex items-center justify-between'>
+                    <div className='flex flex-col items-center justify-between'>
                       <div className='flex items-center gap-2'>
                         {/* Subtask status icon */}
                         {subtask.completed ? (
@@ -189,7 +189,7 @@ const TaskNode = ({ data }) => {
                         <span className='text-sm dark:text-gray-200'>{subtask.label}</span>
                       </div>
 
-                      <div className='flex items-center gap-2'>
+                      <div className='flex items-center gap-2 mt-1'>
                         {/* Complete/Reset/Evaluate subtask button */}
                         <button
                           className={`px-3 py-1 rounded text-xs font-medium transition-all duration-150 ${
@@ -489,8 +489,20 @@ const SkillsGraph = () => {
     console.log("Selected Path Object:", pathObject);
     setSelectedPath(pathObject);
   };
-  const { contextLoading, setIsPathSelected, isPathSelected, roadmap, setRoadmap, setCareerPath, suggestedChanges, setSuggestedChanges } =
-    useContext(SkillsContext); // State for handling the roadmap data and UI
+  const {
+    contextLoading,
+    updationLoading,
+    setIsPathSelected,
+    isPathSelected,
+    roadmap,
+    setRoadmap,
+    missingSkills,
+    setMissingSkills,
+    setCareerPath,
+    suggestedChanges,
+    setSuggestedChanges,
+    updateRoadmap,
+  } = useContext(SkillsContext); // State for handling the roadmap data and UI
 
   const [graphData, setGraphData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -532,7 +544,8 @@ const SkillsGraph = () => {
             result.data.data.tasks.length > 0
           ) {
             setGraphData(result.data.data); // Store raw data
-            setRoadmap(result.data.data.tasks); // Update context
+            setRoadmap(result.data.data.tasks);
+            setMissingSkills(result.data.data.missingSkills);
             setSuggestedChanges(result.data.changes);
           } else {
             console.warn("No roadmap tasks found in API response.");
@@ -601,7 +614,13 @@ const SkillsGraph = () => {
       setModifyLoading(false);
     }
   };
-
+  if (contextLoading) {
+    return (
+      <div className='flex items-center justify-center h-screen'>
+        <Atom size={50} color='#3B82F6' />
+      </div>
+    );
+  }
   return (
     <>
       {" "}
@@ -621,6 +640,7 @@ const SkillsGraph = () => {
           </ReactFlowProvider>
           <InputArea
             modifyLoading={modifyLoading}
+            updationLoading={updationLoading}
             modify={modify}
             handleSuggestionClick={handleSuggestionClick}
             showSuggestions={showSuggestions}
@@ -640,6 +660,25 @@ const SkillsGraph = () => {
               </div>
             </div>
           )}
+          <div className='fixed bottom-3 left-1/4 -translate-x-1/2 z-50 group'>
+            <button
+              onClick={updateRoadmap}
+              disabled={updationLoading || modifyLoading}
+              className='flex items-center gap-2 rounded-xl bg-gray-800 px-4 py-2 text-sm font-semibold text-gray-200 transition hover:bg-gray-700 hover:text-white shadow-md disabled:opacity-50'>
+              <RefreshCcw size={16} />
+              Update Roadmap
+            </button>
+            {missingSkills.length > 0 && (
+              <div className='absolute bottom-full mb-3 left-1/2 -translate-x-1/2 w-max max-w-xs rounded-lg bg-zinc-900 px-4 py-3 text-xs text-white shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none z-50'>
+                <div className='font-semibold mb-1 text-sm text-gray-100'>Based on these missing skills:</div>
+                <ul className='list-disc list-inside space-y-1 text-gray-300'>
+                  {missingSkills.map((skill, i) => (
+                    <li key={i}>{skill}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
 
           {showMarketModal && marketAnalysisData && (
             <MarketAnalysisModal data={marketAnalysisData} skillName={selectedSkill} onClose={closeMarketModal} />
@@ -652,6 +691,7 @@ const SkillsGraph = () => {
 
 function InputArea({
   modifyLoading,
+  updationLoading,
   modify,
   handleSuggestionClick,
   showSuggestions,
@@ -685,7 +725,7 @@ function InputArea({
           />
           <button
             onClick={modify}
-            disabled={modifyLoading}
+            disabled={modifyLoading || updationLoading}
             className={`bg-purple-600 hover:bg-purple-700 text-white p-2 rounded-full transition shadow-md disabled:opacity-50`}>
             <Send size={16} />
           </button>

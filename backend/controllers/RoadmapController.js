@@ -8,8 +8,9 @@ const {
   getCareerPathsAI,
   evaluateSubtaskAI,
 } = require("../Services/RoadmapAI.js");
-const { updateRoadmap, updateUserProfile } = require("../Services/DynamicUpdates.js");
-
+const { updateUserProfile } = require("../Services/DynamicUpdates.js");
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const { safeJsonParse } = require("../Services/JsonParse.js");
 const generateRoadmap = async (req, res) => {
   try {
     const user = req.user;
@@ -42,6 +43,7 @@ const generateRoadmap = async (req, res) => {
       success: true,
       data: {
         tasks: tasks,
+        missingSkills: [],
       },
       changes: [],
     });
@@ -74,6 +76,90 @@ const generateRoadmap = async (req, res) => {
     return res.status(500).json({ success: false, message: error.message });
   }
 };
+
+const updateRoadmap = async (req, res) => {
+  const userId = req.user._id;
+  const roadmap = await Roadmap.findOne({ userId });
+  if (!roadmap) return res.status(404).json({ success: false, message: "Roadmap not found" });
+
+  const missingSkills = roadmap.missingSkills || [];
+
+  // Prepare prompt for Gemini
+  const prompt = `
+You are an expert career coach AI. The user has made progress on their roadmap. Your job is to update the roadmap based on the user's latest progress and any missing skills they want to add.
+
+Instructions:
+- Do NOT modify or remove any completed subtasks or tasks.
+- Only update tasks/subtasks that are NOT completed.
+- Add, remove, or update tasks and subtasks as needed to incorporate the user's missing skills.
+- Maintain the exact input schema for tasks and subtasks.
+- Return ONLY the updated tasks array in JSON format, with no extra explanation or text.
+- there are some fixed values for subtasks' labels which are "project" and "course". If a subtask is a project, add the label "project" to it. If it is a course, add the label "course" to it or leave the array empty.
+- update tasks' tags (new,updated,existing).
+- if sources are missing from any subtask then you can add those too in exact string format
+
+Input:
+---
+Current Roadmap Tasks (JSON):
+\`\`\`json
+${JSON.stringify(roadmap.tasks, null, 2)}
+\`\`\`
+---
+Missing Skills to Add:
+${missingSkills.length > 0 ? missingSkills.join(", ") : "None! you can improve based on completed subtasks"}
+
+Output:
+\`\`\`json
+{
+  "tasks": [/* updated tasks array */]
+}
+\`\`\`
+`;
+  console.log("Update prompt:", prompt);
+  // Call Gemini API
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({
+    model: "gemini-2.5-flash",
+    generation_config: {
+      thinkingBudget: 0,
+      temperature: 1,
+      response_mime_type: "application/json",
+    },
+  });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  const match = content.match(/```json\n([\s\S]*?)\n```/);
+  if (!match)
+    return res.status(500).json({
+      success: false,
+      message: "Failed to parse AI response",
+    });
+  const roadmapData = await safeJsonParse(match[1]);
+  if (Array.isArray(roadmapData)) {
+    roadmap.tasks = roadmapData;
+  } else if (roadmapData && Array.isArray(roadmapData.tasks)) {
+    roadmap.tasks = roadmapData.tasks;
+  } else {
+    console.error("Gemini response JSON did not contain a valid 'tasks' array:", roadmapData);
+    return res.status(500).json({
+      success: false,
+      message: "Invalid roadmap data received from AI",
+    });
+  }
+
+  roadmap.missingSkills = [];
+  await roadmap.save();
+  console.log(`Roadmap dynamically updated successfully: ${roadmap.tasks.length} tasks`);
+  return res.status(200).json({
+    success: true,
+    message: "Roadmap updated successfully",
+    data: {
+      tasks: roadmap.tasks,
+      missingSkills: roadmap.missingSkills || [],
+    },
+  });
+};
+
 const get = async (req, res) => {
   const user = req.user;
   const existingRoadmap = await Roadmap.findOne({ userId: user._id });
@@ -251,7 +337,6 @@ const evaluateSubtask = async (req, res) => {
         // --- End custom logic ---
 
         await roadmap.save();
-        updateRoadmap(user._id);
         return res.status(200).json({
           success: true,
           message: "Subtask evaluated successfully",
@@ -347,7 +432,6 @@ const addMissingSkills = async (req, res) => {
     }
     // Add only unique new skills
     roadmap.missingSkills = Array.from(new Set([...(roadmap.missingSkills || []), ...skills]));
-    updateRoadmap(userId); // Increment interaction count
     await roadmap.save();
     return res.status(200).json({
       success: true,
@@ -363,6 +447,7 @@ const addMissingSkills = async (req, res) => {
 
 module.exports = {
   generateRoadmap,
+  updateRoadmap,
   get,
   getAllCareerPaths,
   modify,

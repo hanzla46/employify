@@ -13,7 +13,7 @@ export function Signup() {
 
   const redirectPath = new URLSearchParams(location.search).get("redirect") || "/";
   const { user, loading, setUser } = useContext(AuthContext);
-  const [otp, setOtp] = useState(0);
+  const [otp, setOtp] = useState();
   const { signup } = useContext(AuthContext);
   const navigate = useNavigate();
   useEffect(() => {

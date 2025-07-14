@@ -1,5 +1,6 @@
 const {
   generateRoadmap,
+  updateRoadmap,
   get,
   getAllCareerPaths,
   modify,
@@ -12,6 +13,7 @@ const { fileUpload } = require("../middlewares/uploadMulter");
 const ensureAuthenticated = require("../middlewares/Auth");
 
 router.post("/generate", ensureAuthenticated, generateRoadmap);
+router.post("/update", ensureAuthenticated, updateRoadmap);
 router.get("/get", ensureAuthenticated, get);
 router.get("/career-paths", ensureAuthenticated, getAllCareerPaths);
 router.get("/modify", ensureAuthenticated, modify);

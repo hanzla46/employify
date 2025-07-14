@@ -13,7 +13,7 @@ import axios from "axios";
 axios.defaults.withCredentials = true; // Ensure cookies are sent with requests
 
 export function Jobs() {
-  const { hasProfile } = useContext(SkillsContext);
+  const { hasProfile, setMissingSkills, missingSkills } = useContext(SkillsContext);
   const { user } = useContext(AuthContext);
   const { contextLoading, jobs, savedJobs, setSavedJobs, filteredJobs, setFilteredJobs } = useContext(JobsContext);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -258,6 +258,7 @@ export function Jobs() {
       const res = await axios.post(url + "/roadmap/add-missing-skills", { skills: [skill] }, { withCredentials: true });
       if (res.data.success) {
         handleSuccess(`Added '${skill}' to your roadmap suggestions!`);
+        setMissingSkills((prev) => [...prev, skill]); // Update context state
       } else {
         handleError(res.data.message || "Failed to add skill");
       }
@@ -265,13 +266,6 @@ export function Jobs() {
       handleError("Server error: could not add skill");
     }
   };
-
-  // Common button classes
-  const baseActionBtnClass =
-    "flex-1 inline-flex items-center justify-center px-2 rounded-xl font-medium transition-all duration-200 shadow-lg hover:shadow-xl text-white";
-  const disabledBtnClass = "opacity-70 cursor-not-allowed";
-  const clBtnColors = "bg-gradient-to-r from-blue-600 to-indigo-700 hover:from-blue-700 hover:to-indigo-800";
-  const resumeBtnColors = "bg-gradient-to-r from-indigo-700 to-purple-700 hover:from-indigo-800 hover:to-purple-800";
 
   const [company, setCompany] = useState(null);
   const [companyData, setCompanyData] = useState(null);
@@ -330,7 +324,7 @@ export function Jobs() {
       />
 
       {/* Compact Header */}
-      <header className='sticky top-11 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm'>
+      <header className='md:sticky top-11 z-10 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm shadow-sm'>
         <div className='container mx-auto px-4 py-3'>
           <div className='flex flex-col md:flex-row md:items-center justify-between gap-3'>
             <h1 className='text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-purple-600'>
@@ -366,8 +360,8 @@ export function Jobs() {
             {/* Compact Filters */}
             {!isOpenedsavedJobs && (
               <div className='bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm rounded-xl shadow-md p-4 mb-6 border border-gray-200/50 dark:border-gray-700/50 transition-all duration-300 hover:shadow-lg'>
-                <div className='grid grid-cols-1 md:grid-cols-4 gap-3'>
-                  <div className='md:col-span-2'>
+                <div className='grid grid-cols-1 md:grid-cols-8 gap-3'>
+                  <div className='md:col-span-3'>
                     <div className='relative'>
                       <input
                         type='text'
@@ -380,9 +374,9 @@ export function Jobs() {
                     </div>
                   </div>
 
-                  <div className='flex gap-3'>
+                  <div className='flex gap-3 md:col-span-4'>
                     <select
-                      className='w-full px-3 py-2 text-sm rounded-lg border border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
+                      className='w-full px-3 py-2 text-sm rounded-lg border text-black dark:text-gray-200 border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
                       value={filters.location}
                       onChange={(e) => setFilters({ ...filters, location: e.target.value })}>
                       {uniqueLocations.map((location) => (
@@ -393,7 +387,7 @@ export function Jobs() {
                     </select>
 
                     <select
-                      className='w-full px-3 py-2 text-sm rounded-lg border border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
+                      className='w-full px-3 py-2 text-sm rounded-lg border text-black dark:text-gray-200 border-gray-300/70 dark:border-gray-600/70 bg-white/70 dark:bg-gray-700/70 focus:ring-2 focus:ring-primary-500/50 focus:border-transparent'
                       value={filters.jobType}
                       onChange={(e) => setFilters({ ...filters, jobType: e.target.value })}>
                       {uniqueJobTypes.map((type) => (
@@ -446,7 +440,7 @@ export function Jobs() {
                                 job.company.logo ||
                                 "https://img.freepik.com/premium-vector/building-logo-icon-design-template-vector_67715-555.jpg?w=360"
                               }
-                              alt={`${job.company.name} logo`}
+                              alt={` logo`}
                               className='w-10 h-10 object-contain transition-transform duration-300 group-hover:scale-110'
                             />
                           </div>
@@ -461,10 +455,10 @@ export function Jobs() {
                               </h2>
                               <div className='flex items-center gap-2'>
                                 <a
-                                  href={job.company.website}
+                                  href={job.company ? job.company.website : "#"}
                                   target='_blank'
                                   className='text-sm underline text-gray-600 dark:text-gray-300 hover:text-primary-500'>
-                                  {job.company.name}
+                                  {job.company ? job.company.name : "Unknown Company"}
                                 </a>
                                 {/* Show AI match score if available */}
                                 <div className='inline-flex items-center bg-gradient-to-r from-amber-500/20 to-amber-600/20 dark:from-amber-500/10 dark:to-amber-600/10 border border-amber-400/30 rounded-full px-2 py-0.5'>
@@ -560,11 +554,13 @@ export function Jobs() {
                                         <li key={index} className='flex items-center justify-between text-gray-600 dark:text-gray-300'>
                                           {item}
                                           {/* Add missing skill to roadmap */}
-                                          <button
-                                            onClick={() => handleAddMissingSkill(item)}
-                                            className='ml-2 px-1.5 py-0.5 text-[0.65rem] rounded bg-amber-200 hover:bg-amber-300 text-amber-900 border border-amber-300 transition-colors'>
-                                            + Add
-                                          </button>
+                                          {!missingSkills.includes(item) && (
+                                            <button
+                                              onClick={() => handleAddMissingSkill(item)}
+                                              className='ml-2 px-1.5 py-0.5 text-[0.65rem] rounded bg-blue-200 hover:bg-blue-300 text-blue-900 border border-blue-300 transition-colors'>
+                                              + Add
+                                            </button>
+                                          )}
                                         </li>
                                       ))}
                                     </ul>
@@ -601,7 +597,7 @@ export function Jobs() {
                       <Link
                         to={`/interview?jobId=${job.id}`}
                         className='w-full sm:w-auto text-xs px-3 py-1.5 rounded-lg bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-medium transition-all shadow-sm hover:shadow-md'>
-                        Practice Interview
+                        <center>Practice Interview</center>
                       </Link>
 
                       {/* Open company/contact info modal */}
@@ -612,7 +608,7 @@ export function Jobs() {
                       </button>
 
                       {/* Cover Letter and Resume generation/download */}
-                      <div className='flex gap-2 w-full sm:w-auto'>
+                      <div className='flex gap-2 justify-evenly items-stretch'>
                         {/* Cover Letter: get or download if ready */}
                         <button
                           onClick={() =>
@@ -658,7 +654,7 @@ export function Jobs() {
                           href={job.externalLink}
                           target='_blank'
                           className='flex-1 text-xs px-3 py-1.5 rounded-l-lg bg-gradient-to-r from-green-500 to-emerald-500 hover:from-green-600 hover:to-emerald-600 text-white font-medium transition-all shadow-sm hover:shadow-md'>
-                          Apply Now
+                          <center>Apply Now</center>
                         </a>
                         {/* Dropdown for alternate apply options if available */}
                         {job.applyOptions && job.applyOptions.length > 0 && (

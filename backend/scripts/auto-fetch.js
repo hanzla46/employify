@@ -94,46 +94,40 @@ async function logCleanupStats() {
 
 // Cleanup old jobs and update market analysis
 async function cleanupOldJobs() {
-  try {
-    console.log("Starting job cleanup process...");
-    await logCleanupStats();
-
-    const tenDaysAgo = new Date();
-    tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
-
-    const oldJobs = await Job.find({ postedAt: { $lt: tenDaysAgo } });
-    console.log(`Found ${oldJobs.length} jobs older than 10 days`);
-
-    if (oldJobs.length > 0) {
-      const skillsToUpdate = new Set();
-      oldJobs.forEach((job) => {
-        const jobSkills = extractSkills(job.description);
-        jobSkills.forEach((skill) => skillsToUpdate.add(skill));
-      });
-
-      for (const skill of skillsToUpdate) {
-        const analysis = await MarketAnalysis.findOne({ skill: skill.toLowerCase() });
-        if (analysis) {
-          const currentJobs = await Job.find({
-            description: new RegExp(skill, "i"),
-            postedAt: { $gte: tenDaysAgo },
-          });
-          analysis.marketDemand.totalJobs = currentJobs.length;
-          analysis.marketDemand.lastUpdated = new Date();
-          await analysis.save();
-        }
-      }
-
-      const deleteResult = await Job.deleteMany({ postedAt: { $lt: tenDaysAgo } });
-      console.log(`Deleted ${deleteResult.deletedCount} old jobs`);
-    }
-
-    console.log("Job cleanup process completed successfully");
-    console.log("\nAfter cleanup:");
-    await logCleanupStats();
-  } catch (error) {
-    console.error("Error during job cleanup:", error);
-  }
+  // try {
+  //   console.log("Starting job cleanup process...");
+  //   await logCleanupStats();
+  //   const tenDaysAgo = new Date();
+  //   tenDaysAgo.setDate(tenDaysAgo.getDate() - 10);
+  //   const oldJobs = await Job.find({ postedAt: { $lt: tenDaysAgo } });
+  //   console.log(`Found ${oldJobs.length} jobs older than 10 days`);
+  //   if (oldJobs.length > 0) {
+  //     const skillsToUpdate = new Set();
+  //     oldJobs.forEach((job) => {
+  //       const jobSkills = extractSkills(job.description);
+  //       jobSkills.forEach((skill) => skillsToUpdate.add(skill));
+  //     });
+  //     for (const skill of skillsToUpdate) {
+  //       const analysis = await MarketAnalysis.findOne({ skill: skill.toLowerCase() });
+  //       if (analysis) {
+  //         const currentJobs = await Job.find({
+  //           description: new RegExp(skill, "i"),
+  //           postedAt: { $gte: tenDaysAgo },
+  //         });
+  //         analysis.marketDemand.totalJobs = currentJobs.length;
+  //         analysis.marketDemand.lastUpdated = new Date();
+  //         await analysis.save();
+  //       }
+  //     }
+  //     const deleteResult = await Job.deleteMany({ postedAt: { $lt: tenDaysAgo } });
+  //     console.log(`Deleted ${deleteResult.deletedCount} old jobs`);
+  //   }
+  //   console.log("Job cleanup process completed successfully");
+  //   console.log("\nAfter cleanup:");
+  //   await logCleanupStats();
+  // } catch (error) {
+  //   console.error("Error during job cleanup:", error);
+  // }
 }
 
 // Extract requirements that co-occur with a skill
@@ -195,7 +189,7 @@ async function updateMarketAnalysis(jobs = []) {
 
   for (const job of jobs) {
     try {
-      const skills = extractSkills(job.job_description);
+      const skills = extractSkills(job.description);
       const salary = job.salary_max || job.salary_min || 0;
 
       skills.forEach((skill) => {
@@ -212,7 +206,7 @@ async function updateMarketAnalysis(jobs = []) {
         data.jobCount++;
         data.salarySum += salary;
 
-        extractRequirementsForSkill(job.job_description, skill).forEach((req) => {
+        extractRequirementsForSkill(job.description, skill).forEach((req) => {
           data.requirements.set(req, (data.requirements.get(req) || 0) + 1);
         });
 
@@ -324,6 +318,7 @@ const autoFetchJobs = async () => {
             let jobs = response.data.data;
             if (jobs && jobs.length > 0) {
               jobs = await processJobs(jobs, work_from_home);
+
               await Job.insertMany(jobs, { ordered: false });
               await updateMarketAnalysis(jobs);
               console.log(`Processed ${jobs.length} jobs from ${country} for query "${query}"`);

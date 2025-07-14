@@ -10,12 +10,14 @@ export const SkillsProvider = ({ children }) => {
   const { user } = useContext(AuthContext);
   const [contextLoading, setContextLoading] = useState(true);
   const [roadmap, setRoadmap] = useState([]);
+  const [missingSkills, setMissingSkills] = useState([]);
   const [suggestedChanges, setSuggestedChanges] = useState(["change1", "change2", "change3"]);
   const [hasProfile, setHasProfile] = useState(false);
   const [profile, setProfile] = useState({});
   const [evaluated, setEvaluated] = useState(false);
   const [isPathSelected, setIsPathSelected] = useState(false);
   const [careerPath, setCareerPath] = useState("");
+  const [updationLoading, setUpdationLoading] = useState(false);
   const url = import.meta.env.VITE_API_URL;
   console.log(url);
   useEffect(() => {
@@ -41,6 +43,7 @@ export const SkillsProvider = ({ children }) => {
             console.log("Roadmap found:", getRoadmap.data.data);
             setEvaluated(true);
             await setRoadmap(getRoadmap.data.data.tasks);
+            setMissingSkills(getRoadmap.data.data.missingSkills);
             setSuggestedChanges(getRoadmap.data.data.changes);
             setIsPathSelected(true);
             console.log("Roadmap:", roadmap);
@@ -55,11 +58,48 @@ export const SkillsProvider = ({ children }) => {
       } catch (error) {
         console.error("Failed to check Profile:", error.message);
       } finally {
-        setContextLoading(false);
+        //wait for 1 second to ensure the context is fully loaded
+        setTimeout(() => {
+          setContextLoading(false);
+        }, 1000);
       }
     };
     checkProfile();
   }, [user]);
+  const updateRoadmap = async () => {
+    try {
+      setUpdationLoading(true);
+      handleSuccess("Updating Roadmap...");
+      const response = await axios.post(url + "/roadmap/update");
+      if (response.data.success) {
+        setRoadmap(response.data.data.tasks);
+        setMissingSkills([]);
+        handleSuccess("Roadmap updated successfully");
+      }
+    } catch (error) {
+      console.error("Failed to update Roadmap:", error.message);
+      handleError("Failed to update Roadmap: " + error.message);
+    } finally {
+      setUpdationLoading(false);
+    }
+  };
+  const fetchUpdatedRoadmap = async () => {
+    try {
+      const response = await axios.get(url + "/roadmap/get");
+      if (response.data.success) {
+        setRoadmap(response.data.data.tasks);
+        setMissingSkills(response.data.data.missingSkills);
+        setSuggestedChanges(response.data.data.changes);
+        handleSuccess("Roadmap fetched successfully");
+      } else {
+        handleError("No roadmap found");
+        setRoadmap([]);
+      }
+    } catch (error) {
+      console.error("Failed to fetch Roadmap:", error.message);
+      handleError("Failed to fetch Roadmap: " + error.message);
+    }
+  };
   const fetchUpdatedProfile = async () => {
     try {
       const response = await axios.get(url + "/profile/check");
@@ -71,60 +111,16 @@ export const SkillsProvider = ({ children }) => {
       console.error("Failed to fetch updated Profile:", error.message);
     }
   };
-  useEffect(() => {
-    console.log(roadmap);
-    localStorage.setItem("roadmap", JSON.stringify(roadmap));
-  }, [roadmap]);
 
-  useEffect(() => {
-    if (!user) return;
-
-    let isMounted = true;
-    let attempts = 0;
-    const maxAttempts = 20; // ~10 minutes max
-
-    const interval = setInterval(async () => {
-      if (!isMounted || attempts >= maxAttempts) {
-        clearInterval(interval);
-        return;
-      }
-
-      // ❗ check the current roadmap only once per poll
-      if (!roadmapHasSubtasksWithoutSources(roadmap)) {
-        clearInterval(interval);
-        return;
-      }
-
-      try {
-        const response = await axios.get(`${url}/roadmap/get`);
-        if (!isMounted) return;
-
-        if (response.data.success) {
-          const updatedRoadmap = response.data.data.tasks;
-          setRoadmap(updatedRoadmap);
-          attempts++;
-        }
-      } catch (err) {
-        console.error("Roadmap update failed:", err);
-        attempts++;
-      }
-    }, 60000); // every 60 seconds
-
-    return () => {
-      isMounted = false;
-      clearInterval(interval);
-    };
-  }, [user]); // 👈 no roadmap here!!!
-
-  function roadmapHasSubtasksWithoutSources(roadmap) {
-    return roadmap.some((task) => task.subtasks.some((subtask) => !subtask.sources || subtask.sources.length === 0));
-  }
   return (
     <SkillsContext.Provider
       value={{
         contextLoading,
         roadmap,
         setRoadmap,
+        missingSkills,
+        setMissingSkills,
+        updateRoadmap,
         evaluated,
         setEvaluated,
         hasProfile,
@@ -138,6 +134,8 @@ export const SkillsProvider = ({ children }) => {
         suggestedChanges,
         setSuggestedChanges,
         fetchUpdatedProfile,
+        fetchUpdatedRoadmap,
+        updationLoading,
       }}>
       {children}
     </SkillsContext.Provider>
