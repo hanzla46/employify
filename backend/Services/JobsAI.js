@@ -4,6 +4,7 @@ const puppeteer = require("puppeteer");
 const path = require("path");
 const fs = require("fs");
 const { safeJsonParse } = require("./JsonParse");
+const { profile } = require("console");
 const CalculateRelevancyScoresAI = async (jobs, profile) => {
   try {
     const prompt = `
@@ -133,161 +134,178 @@ const getCoverLetterDataAI = async (summary, job) => {
   console.log("cover letter data: " + content);
   return content;
 };
-const getResumeDataAI = async (profile, job) => {
-  const prompt = generatePrompt(profile, job);
-  console.log("prompt: " + prompt);
-  const ai = new GoogleGenAI({
-    apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
-  });
-  const modelName = "gemini-2.5-flash-preview-05-20";
-  let files;
-  let config;
-  try {
-    console.log("Starting generating resume...");
-    files = [await ai.files.upload({ file: path.join(__dirname, "example_resume_creative.png") })];
-    config = {
-      responseMimeType: "text/plain",
-    };
-    console.log(`example resume uploaded successfully. File URI: ${files[0].uri}, File Name: ${files[0].name}`);
-  } catch (error) {
-    console.error("Error uploading example resume file:", error);
-    throw new Error("Failed to upload example resume for processing.");
-  }
-  const contents = [
-    {
-      role: "user",
-      parts: [
-        {
-          fileData: {
-            fileUri: files[0].uri,
-            mimeType: files[0].mimeType,
-          },
-        },
-        {
-          text: prompt,
-        },
-      ],
-    },
-  ];
-  let content = "";
-  try {
-    console.log("Generating content from example resume...");
-    const result = await ai.models.generateContent({
-      model: modelName,
-      contents: contents,
-      config,
-    });
-    content = result.candidates[0].content.parts[0].text;
-    content = content
-      .replace(/^```html\s*/, "")
-      .replace(/^```\s*/, "")
-      .replace(/```$/, "");
-    console.log("Raw response text:", content);
-  } catch (error) {
-    console.error("Error generating resume content: ", error);
-    throw error;
-  }
-  console.log("resume data: " + content);
-  const { buffer, filePath } = await generatePDF(content, `NormalResume${job.id}_123.pdf`);
-  fs.unlinkSync(filePath);
-  return buffer;
-};
+// const resumeData = require("./resumeData");
 
-//HELPER FUNCTIONS
-//func 1 - for pdf generation
-const generatePDF = async (htmlString, fileName = "output.pdf") => {
-  const browser = await puppeteer.launch({ headless: "new" });
+async function getResumeDataAI(profile, job) {
+  const resumeData = await GeminiResumeData(profile, job);
+  const htmlTemplatePath = path.join(__dirname, "resumeTemplate.html");
+  let htmlContent = fs.readFileSync(htmlTemplatePath, "utf8");
+
+  const injectedHtml = htmlContent.replace(
+    "<body>",
+    `<body>\n<script>window.resumeData = ${JSON.stringify(resumeData)};</script>\n`
+  );
+
+  const browser = await puppeteer.launch({
+    headless: true,
+    args: ["--no-sandbox", "--disable-setuid-sandbox"],
+  });
+
   const page = await browser.newPage();
 
-  await page.setContent(htmlString, { waitUntil: "networkidle0" });
+  await page.setContent(injectedHtml, { waitUntil: "networkidle0" });
 
-  const outputPath = path.join(__dirname, "pdfs");
-  if (!fs.existsSync(outputPath)) {
-    fs.mkdirSync(outputPath);
-  }
+  // Execute the rendering function within the page's context.
+  await page.evaluate(() => {
+    window.renderResume(window.resumeData);
+  });
 
-  const fullPath = path.join(outputPath, fileName);
+  // Wait for a Font Awesome icon to be rendered to ensure the stylesheet is loaded.
+  await page.waitForSelector(".fa-solid.fa-envelope", { timeout: 5000 });
 
-  // 🧠 BUFFER MODE
+  // Wait for the profile image to load before generating the PDF.
+  // await page.waitForSelector("#profileImageInjected", { timeout: 5000 });
+
+  const bodyHeight = await page.evaluate(() => document.body.scrollHeight);
+
   const buffer = await page.pdf({
-    format: "A4",
+    width: "1000px",
+    height: `${bodyHeight + 50}px`,
     printBackground: true,
-    preferCSSPageSize: false,
-    displayHeaderFooter: false,
-    headerTemplate: "<span></span>",
-    footerTemplate: "<span></span>",
     margin: {
-      top: "1cm",
-      right: "1cm",
-      bottom: "1cm",
-      left: "1cm",
+      top: "20px",
+      right: "20px",
+      bottom: "20px",
+      left: "20px",
     },
   });
 
-  // 💾 SAVE TO DISK
-  fs.writeFileSync(fullPath, buffer); // write buffer directly
-
+  console.log("PDF resume has been generated successfully!");
   await browser.close();
+  return buffer;
+}
+// resume ai helper function
+const GeminiResumeData = async (profile, job) => {
+  const prompt = `
+  you are member of ATS cult. get this user's profile and a job's description and give me resume data in json.
 
-  // 📦 Return both like a boss
-  return {
-    buffer,
-    filePath: fullPath,
-  };
+  // 👤 USER PROFILE:
+// Name: ${profile.name || "John Doe"}
+// Email: ${profile.email || "example@gmail.com"}
+// phone:  ${profile.phone || "+923445450151"}
+// linkedin: ${profile.linkedin || "Dont include it"}
+// languages: English & (dynamically add according to user's location)
+// Hard Skills: ${profile.hardSkills}
+// Soft Skills: ${profile.softSkills}
+// Work Experience: ${profile.jobs}
+// Projects: ${profile.projects}
+// Education: ${profile.education}
+// Career Goal: ${profile.careerGoal}
+// Location: ${profile.location}
+
+---
+
+// job description
+${job.description} \n\n
+
+---
+
+response in json like this:
+\`\`\`json
+{
+  personalInfo: {
+    firstName: "Sarah",
+    lastName: "Johnson",
+    title: "Digital Marketing Manager",
+    email: "sarah.johnson@email.com",
+    phone: "+1 (555) 123-4567",
+    location: "New York, NY",
+    linkedin: "linkedin.com/in/sarahjohnson",
+    website: "sarahjohnson.com",
+    image: "https://randomuser.me/api/portraits/women/44.jpg",
+  },
+  summary:
+    "Results-driven Digital Marketing Manager with <b> 6+ years </b> of experience in developing and executing comprehensive marketing strategies. Proven track record of increasing brand awareness by 150% and driving revenue growth through data-driven campaigns. Expert in social media marketing, content strategy, and marketing automation with a passion for innovative digital solutions." // max 70 words,
+  experience: [
+    {
+      title: "Digital Marketing Manager",
+      company: "TechStart Solutions",
+      duration: "Mar 2022 - Present",
+      description:
+        "Lead digital marketing initiatives for B2B SaaS company. Increased qualified <b> leads by 200% </b> through strategic content marketing and SEO optimization. Manage marketing <b> budget of $500K+ <b> and oversee team of 4 marketing specialists."// max 25 words,
+    },
+    {
+      title: "Marketing Coordinator",
+      company: "Brand Builders LLC",
+      duration: "Aug 2018 - May 2020",
+      description:
+        "Coordinated multi-channel marketing campaigns and managed email marketing automation. Assisted in rebranding initiative that resulted in <b> 45% increase </b> in brand recognition metrics.",
+    },
+  ],
+  projects: [
+    {
+      name: "Brand Awareness Campaign",
+      description:
+        "Comprehensive multi-platform campaign that increased <b> brand recognition by 150% </b> over 6 months. Integrated social media, content marketing, and influencer partnerships to reach target demographics."// max 25 words,
+      skills: ["Google Analytics", "HubSpot", "Hootsuite", "Canva", "Facebook Ads"],
+      links: {
+        case_study: "https://sarahjohnson.com/brand-campaign",
+      },
+    },
+    {
+      name: "Marketing Automation System",
+      description:
+        "Implemented comprehensive marketing automation workflows that improved lead nurturing <b> efficiency by 300%<b>. Designed customer journey mapping and personalized email sequences.",
+      skills: ["Marketo", "Salesforce", "Zapier", "Google Tag Manager"],
+      links: {
+        portfolio: "https://sarahjohnson.com/automation-case-study",
+      },
+    },
+  ],
+  education: [
+    {
+      degree: "Master of Business Administration (MBA)",
+      school: "Columbia Business School",
+      duration: "2016 - 2018",
+    },
+    {
+      degree: "Bachelor of Arts in Communications",
+      school: "New York University",
+      duration: "2012 - 2016",
+    },
+  ],
+  skills: [
+    { name: "Digital Marketing Strategy", score: 90 },
+    { name: "Social Media Marketing", score: 85 },
+    { name: "Content Creation", score: 80 },
+    { name: "SEO/SEM", score: 75 },
+    { name: "Marketing Analytics", score: 88 },
+    { name: "Email Marketing", score: 82 },
+    { name: "Project Management", score: 87 },
+  ],
+  languages: [
+    { name: "English", proficiency: "Native" },
+    { name: "Spanish", proficiency: "Fluent" },
+  ],
+  certifications: [
+    { name: "Google Analytics Certification", date: "2020" },
+    { name: "HubSpot Marketing Software", date: "2019" },
+  ],
+}\`\`\`
+
+---
+some instructions:
+you dont need to add all skills and subskills.. just main ones.
+To bold important data use html's bold tag not * or anything else.
+if user has 3+ projects or experience then give only top 3 according to job
+  `;
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
+  const result = await model.generateContent(prompt);
+  const content = result.response.candidates[0].content.parts[0].text;
+  console.log("Generated resume Response:", content);
+  return JSON.parse(content.match(/```json\n([\s\S]*?)\n```/)[1]);
 };
-// func 2
-const generatePrompt = (profile, job) => {
-  let promptBase = `
-You are a **modern frontend engineer and UX-centric resume stylist**. Your task is to generate a clean, modern, and fully responsive **HTML + embedded CSS** resume inspired by the attached **MODERN reference resume** design.
-
-📌 YOU MUST:
-- Mirror the **layout, typography, and overall aesthetic** of the reference resume attached.
-- Keep max width at 800px, centered.
-- Use clean, neutral fonts like 'Segoe UI' or Helvetica.
-- Stick to dark text (#1A1A1A) and blue highlights (#007ACC).
-- Use CSS Grid or Flexbox for clear, modular layout.
-- Ensure it's 100% print-friendly and screen-readable.
-
-🧱 STRUCTURE:
-- Use semantic HTML (<section>, <article>, <header>, etc.).
-- Include sections according to the reference resume.
-- CSS should be perfectly aligned with the design.
-- Use clear section dividers, consistent padding/margin.
-- Integrate job description keywords naturally. Dont change title exact to job title but align content with it.
-- In education data, if you dont get fieldof study than add appropriate field by yourself for example computer science  for BS software engineering.
-- subskills of each skill does not need to be added in resume.
-- Use profile data according to refernce resume. you might not need all data from profile. and dont add any paceholders.
-
-❌ DO NOT ADD ANY PLACEHOLDERS.
-
-📄 FINAL OUTPUT:
-- Return a **standalone HTML document** with embedded <style> in <head>.
-- **DO NOT** use markdown, placeholders, or explanations.
-
-💡 This resume must follow the **modern resume example** attached. Style, spacing, and layout should be visibly aligned.
-
-👤 USER PROFILE:
-Name: ${profile.name || "John Doe"}
-Email: ${profile.email || "example@gmail.com"}
-phone:  ${profile.phone || "+923445450151"}
-linkedin: ${profile.linkedin || "Dont include it"}
-languages: English & (dynamically add according to user's location)
-Hard Skills: ${profile.hardSkills}  
-Soft Skills: ${profile.softSkills}  
-Work Experience: ${profile.jobs}  
-Projects: ${profile.projects}  
-Education: ${profile.education}  
-Career Goal: ${profile.careerGoal}  
-Location: ${profile.location}
-
-🎯 JOB DESCRIPTION:
-Title: ${job.title}  
-Description: ${job.description}
-    `;
-
-  return promptBase.trim();
-};
-
 module.exports = {
   CalculateRelevancyScoresAI,
   getCoverLetterDataAI,
