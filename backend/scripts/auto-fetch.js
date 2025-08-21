@@ -44,7 +44,7 @@ const GLASSDOOR_API_CONFIG = {
   method: "GET",
   url: "https://real-time-glassdoor-data.p.rapidapi.com/company-search",
   headers: {
-    "x-rapidapi-key": "be6e459e24msha7b59aacb49a197p18a90fjsndc025d66ac28",
+    "x-rapidapi-key": process.env.RAPIDAPI_KEYS?.split(",")[0] || "",
     "x-rapidapi-host": "real-time-glassdoor-data.p.rapidapi.com",
   },
 };
@@ -53,7 +53,7 @@ const JSEARCH_API_CONFIG = {
   method: "GET",
   url: "https://jsearch.p.rapidapi.com/search",
   headers: {
-    "X-RapidAPI-Key": "73dfebafaamsh693cbbe6778ea66p17cf03jsn44cb2f06bfe0",
+    "X-RapidAPI-Key": process.env.RAPIDAPI_KEYS?.split(",")[0] || "",
     "X-RapidAPI-Host": "jsearch.p.rapidapi.com",
   },
 };

@@ -98,7 +98,7 @@ exports.getCompanyEmails = async (req, res) => {
         "filter-personal-emails": "false",
       },
       headers: {
-        "x-rapidapi-key": "ff82a3cb34msh70d1e319df0556bp1011c1jsnf3a797ae2c39",
+        "x-rapidapi-key": process.env.RAPIDAPI_KEYS?.split(",")[0] || "",
         "x-rapidapi-host": "company-contact-scraper.p.rapidapi.com",
       },
     };

@@ -370,13 +370,7 @@ const evaluateSubtaskAI = async (subtask, task, text, file) => {
   analysis = result.response.text();
   return analysis;
 };
-const GEMINI_API_KEYS = [
-  "AIzaSyA3-kU0Oo4A_kZRp1ceogRhoUhWHawXPvI",
-  "AIzaSyCWeJAjae2FE25b1AcKHBm4-vRFiC-g5pc",
-  "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
-  "AIzaSyDe6QFfQ19BVsYCXWbZwVMYyq1ysK_BNUc",
-  "AIzaSyB_YoYW79NMhSsbS9dGLkjq5hrkUJmd2jw",
-];
+const GEMINI_API_KEYS = process.env.GEMINI_API_KEYS?.split(",");
 function getRandomGeminiKey() {
   const validKeys = GEMINI_API_KEYS.filter(Boolean);
   return validKeys[Math.floor(Math.random() * validKeys.length)];

@@ -46,7 +46,7 @@ Why and What's Missing should be concise and specific to each job. Don't give ex
     // console.log("prompt: " + prompt);
 
     const ai = new GoogleGenAI({
-      apiKey: "AIzaSyAyMmTs4nX0r5zPSWsQRkz7p0GrnLFmtZU",
+      apiKey: process.env.GEMINI_API,
     });
     const contents = [
       {
